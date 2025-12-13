@@ -6,10 +6,22 @@ const int FPS = 60;
 const int WindowWidth = 1100;
 const int WindowHeight = 650;
 const int WidthSpacing = 200;   // This is for width of Hint Box
-const int Spacing = 30;    // This is for height of Hint Box
+const int Spacing = 30;    // This is for distance of top and bottom of map and used in the Side
 const int Side = (WindowHeight - 2*Spacing)/12;     // Side length of every squre in map
 int map[25][25];    // Max size for map  
 
+Vector2 Lightcore;
+int nExplorers;
+Vector2 Explorers[3];
+int nShadowCasters;
+Vector2 ShadowCasters[3];
+
+// Load textures
+// Texture2D ShTextureRight;
+// Texture2D ExTextureRight;
+// Texture2D ShTextureLeft;
+// Texture2D ExTextureLeft;
+// Texture2D LiTexture;
 
 void SET_Map_Array(int M[][25], int m, int n)
 {
@@ -45,8 +57,7 @@ Horizontal spacing (WidthSpacing) is subtracted before centering.
     return StartPoint;
 }
 
-// تغییر خانه مربوط به دیوار در آرایه map و بازگشت مختصات آن در آرایه
-void SET_Walls_and_Return(WallPro Wall)
+void SET_Walls(WallPro Wall)
 {
 /*
 Marks the corresponding map cell for a wall and updates its position.
@@ -67,7 +78,6 @@ For vertical walls, the cleared cell is at (2y+1, 2x+2).
     }
 }
 
-// دریافت مختصات دیوار در آرایه و بازگشت مختصات شروع ترسیم ان به تفکیک HorV
 Vector2 GET_Start_Walls_Position_for_Draw(Vector2 StartPoint, WallPro Wall)
 {
 /*
@@ -93,7 +103,6 @@ Returned Vector2 is the top-left draw point.
     }
 }
 
-//تبدیل عدد کاربر به مختصات نقشه و بازگشت آن
 Vector2 Return_Elements_Position(Vector2 Element)
 {
 /*
@@ -106,42 +115,125 @@ Each element maps to (2x+1, 2y+1) in the expanded grid.
     return Result;
 }
 
-// تبدیل مختصات نقشه به مختصات مرکز مربع
-Vector2 GET_Start_Elements_Positin_for_Draw(Vector2 StartPoint, Vector2 Element)
+Vector2 GET_Start_Elements_Position_for_Draw(Vector2 StartPoint, Vector2 Element)
 {
 /*
 Converts a map-grid coordinate to the on-screen center of its tile.
 Screen position = StartPoint + (Element * Side/2).
 */
-        int i = StartPoint.x + (Element.x)*Side/2;
-        int j = StartPoint.y + (Element.y)*Side/2;
+        int i = StartPoint.x + (Element.x-1)*Side/2 + 2;
+        int j = StartPoint.y + (Element.y-1)*Side/2 + 3;
         Vector2 Position = {i, j};
         return Position;
+}
+
+int Direction_of_Explorers(Vector2 Explorer)
+{
+/*
+Determines explorer's facing direction:
+1 (right) if Lightcore x >= explorer x,
+else -1 (left).
+*/
+    if (Lightcore.x>=Explorer.x) return 1;
+    else return -1;
+}
+
+int Direction_of_ShadowCasters(Vector2 ShadowCaster)
+{
+/*
+Determines shadow caster's facing direction: 
+1 (right) if nearest explorer's x >= shadow caster's x, 
+else -1 (left). Nearest by Manhattan distance.
+*/
+    int Distance;
+    int MinDistance = 500, NearExplorer;
+    for (int i=0; i<nExplorers; i++)
+    {
+        if (ShadowCaster.x>Explorers[i].x)
+        {
+            if (ShadowCaster.y>Explorers[i].y) Distance = (ShadowCaster.x - Explorers[i].x) + (ShadowCaster.y - Explorers[i].y);
+            else Distance = (ShadowCaster.x - Explorers[i].x) + (Explorers[i].y - ShadowCaster.y);
+        }
+        else 
+        {
+            if (ShadowCaster.y>Explorers[i].y) Distance = (Explorers[i].x - ShadowCaster.x) + (ShadowCaster.y - Explorers[i].y);
+            else Distance = (Explorers[i].x - ShadowCaster.x) + (Explorers[i].y - ShadowCaster.y);
+        }
+        if (Distance<MinDistance) 
+        {
+            MinDistance = Distance;
+            NearExplorer = i;
+        }
+    }
+    if (Explorers[NearExplorer].x>=ShadowCaster.x) return 1;
+    else return -1;
+}
+
+int Check_Elements(Vector2 E, int numberEx, int numberSh)
+{
+/*
+Checks if position E overlaps with lightcore or existing explorers/shadow casters. 
+Returns 1 if unique, 0 otherwise.
+*/
+    int i;
+    if ((E.x == Lightcore.x) && (E.y == Lightcore.y)) return 0;     // Element is in lightcore
+    for (i=0; i<numberEx; i++)
+    {
+        if ((E.x == Explorers[i].x) && (E.y == Explorers[i].y)) return 0;    // Element is in explorer
+    }
+    for (i=0; i<numberSh; i++)
+    {
+        if ((E.x == ShadowCasters[i].x) && (E.y == ShadowCasters[i].y)) return 0;   // Element is in shadow caster
+    }
+    return 1;
+}
+
+int Check_Walls(WallPro W)
+{
+/*
+Checks if wall can be placed: 
+computes map indices based on position and orientation (H/V), 
+returns 1 if map[j][i] == 1 (valid), 
+else 0.
+*/
+    int i, j;
+    if (W.HorV == 'H' || W.HorV == 'h')
+        {
+            j = 2*W.Position.y + 2;
+            i = 2*W.Position.x + 1;
+        }
+        else
+        {
+            j = 2*W.Position.y + 1;
+            i = 2*W.Position.x + 2;
+        }
+    if (map[j][i] == 1) return 1;
+    else return 0;
 }
 
 void Draw_Map(Vector2 StartPoint, int m, int n)
 {
 /*
-Renders all horizontal and vertical walls of the map.
-Horizontal scan:
-    j = 0..2*m (step 2), i = 1..2*n (step 2)
-    Each (i, j) is drawn as a horizontal segment.
-Vertical scan:
-    i = 0..2*n (step 2), j = 1..2*m (step 2)
-    Each (i, j) is drawn as a vertical segment.
-Color rules:
-    1  → thin preview line
-    0  → active wall (red)
-    -1  → map border (black)
-    other →  wall from explorer (orange)
+Renders the entire game map including walls, lightcore, explorers, and shadow casters.
+
+Map grid structure (internal representation in 'map' array):
+- Horizontal walls: checked at map[j][i] where j even (0..2*m), i odd (1..2*n-1)
+- Vertical walls: checked at map[j][i] where i even (0..2*n), j odd (1..2*m-1)
+
+Wall color and thickness rules based on map[j][i] value:
+    1   → default/open path: thin semi-transparent black line (preview/guide)
+    0   → active wall (user-placed): thick red line
+   -1   → map border (fixed outer walls): thick solid black line
+   other (e.g., 2+) → wall placed by explorer: thick orange line
 */
     int i, j;
     WallPro W;
     Vector2 StartP, EndP;
-    Color O = {255, 161, 0, 255};     // Orange
-    Color R = {230, 41, 55, 255};     // Red
-    Color B = {0, 0, 0, 255*(0.4f)};         // Black
+    Color O = {255, 161, 0, 255};     // Orange - explorer-placed walls
+    Color R = {230, 41, 55, 255};     // Red - user-placed walls
+    Color B = {0, 0, 0, 255*(0.4f)};          // Black - Semi-transparent black - guide lines
 
+    // Draw horizental walls
     for (j=0; j<2*m+1; j+=2)
     {
         for (i=1; i<2*n+1; i+=2)
@@ -156,6 +248,7 @@ Color rules:
         }
     }
 
+// Draw vertical walls
     for (i=0 ; i<2*n+1; i+=2)
     {
         for (j=1 ; j<2*m+1; j+=2)
@@ -168,5 +261,27 @@ Color rules:
             else if(map[j][i] == -1) DrawLineEx(StartP, EndP, WallTh, BLACK);
             else DrawLineEx(StartP, EndP, WallTh, O);
         }
+    }
+
+// Drawing lightcore
+    Vector2 S = GET_Start_Elements_Position_for_Draw(StartPoint, Lightcore);
+    DrawTexture(LiTexture, S.x, S.y, WHITE);
+
+// Draw explorers (facing toward lightcore)
+    for (i=0; i<nExplorers; i++)
+    {
+        Vector2 S = GET_Start_Elements_Position_for_Draw(StartPoint, Explorers[i]);
+        int Direction = Direction_of_Explorers(Explorers[i]);
+        if (Direction == 1) DrawTexture(ExTextureRight, S.x, S.y, WHITE);
+        else DrawTexture(ExTextureLeft, S.x, S.y, WHITE);
+    }
+
+// Draw shadow casters (facing toward nearest explorer)
+    for (i=0; i<nShadowCasters; i++)
+    {
+        Vector2 S = GET_Start_Elements_Position_for_Draw(StartPoint, ShadowCasters[i]);
+        int Direction = Direction_of_ShadowCasters(ShadowCasters[i]);
+        if (Direction == 1) DrawTexture(ShTextureRight, S.x, S.y, WHITE);
+        else DrawTexture(ShTextureLeft, S.x, S.y, WHITE);
     }
 }

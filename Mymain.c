@@ -1,55 +1,69 @@
 // TODO: 
-//  1. write functions for all elements (DrawElement)
-//  2. write MainArr[25][25]
-//  3. relate DrawElement to MainArr
-//  4. write a condition for every scanf for intersecting
+//  1. fix shadow caster direction between two explorer
+//  2. dfs/bfs algorithm
+//  3. random walls
+//  4. more conditions (2 home distance)
 
 #include <stdio.h>
 #include <stdbool.h>
 #include "raylib.h"
 #include "funcs.h"
 
+Texture2D ShTextureRight;
+Texture2D ExTextureRight;
+Texture2D ShTextureLeft;
+Texture2D ExTextureLeft;
+Texture2D LiTexture;
+
+// Enum to represent the different screens or states of the game application.
+// - TitleScreen: The initial screen where the game title is displayed and the user can start the game.
+// - GameScreen: The main gameplay screen where the game logic and interactions occur.
+// - EndScreen: The screen shown at the end of the game, possibly displaying results, scores, or restart options.
 typedef enum {TitleScreen, GameScreen, EndScreen} Screen;
+
+// Enum to represent the levels or phases within the game screen.
+// - GET: Phase for getting initial inputs like map size, positions of elements, and walls.
+// - MoveExs: Phase for moving the explorers (Exs stands for Explorers).
+// - MoveShs: Phase for moving the shadow casters (Shs stands for ShadowCasters).
 typedef enum {GET, MoveExs, MoveShs} Level;
 
-bool ShowTitleNote3 = false;
-bool EndGame = false;
-bool Win = false;
-bool InputAgain;
+bool ShowTitleNote3 = false;    // Flag to show third title note after click, for input prompt.
+bool EndGame = false;   // Flag for game end, transitions to EndScreen.
+bool Win = false;   // Flag for player win, affects EndScreen.
+bool InputAgain;    // Flag for re-input in validation loops.
 
 int main(void)
 {
-// Load textures and the music
-Texture2D ExTexture = LoadTexture("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\explorer_image.png");
-Texture2D ShTexture = LoadTexture("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\shadowcaster_image.png");
-Texture2D LiTexture = LoadTexture("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\lightcore_image.png");
-Music music = LoadMusicStream("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\game_music.mp3");
-
-int m, n;
-Vector2 Light;
-int nExplorers;
-Vector2 Explorers[3];
-int nShadowCasters;
-Vector2 ShadowCasters[3];
-int nWalls;
-Vector2 StartPoint;
-Screen Current = TitleScreen;
-Level State = GET;
-
 InitWindow(WindowWidth, WindowHeight, "The Tale of the Labyrinth");
 InitAudioDevice();
+
+// Load textures
+ShTextureRight = LoadTexture("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\shadow_caster_right_image.png");
+ExTextureRight = LoadTexture("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\explorer_right_image.png");
+ShTextureLeft = LoadTexture("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\shadow_caster_left_image.png");
+ExTextureLeft = LoadTexture("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\explorer_left_image.png");
+LiTexture = LoadTexture("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\lightcore_image.png");
+Music music = LoadMusicStream("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\main_music.ogg");
+
+Screen Current = TitleScreen;   // Current screen, starts at TitleScreen.
+Level State = GET;   // Current level, starts at GET for inputs.
+
 PlayMusicStream(music);
 SetTargetFPS(FPS);
 
-int FPScounter = 3*FPS; //   این برای نمایش متن3 بخش  TitleScreen 
+int m, n;
+int nWalls;
+Vector2 StartPoint;
+
+int FPScounter = 2*FPS; //That is for show TitleNote3
+
 while (!WindowShouldClose())
 {
-UpdateMusicStream(music);
 switch(Current)
 {
     case TitleScreen:
     {
-    // First phase, click on the screen to start the game
+        // First phase, click on the screen to start the game
         Rectangle TitleRec = {(WindowWidth-450)/2, (WindowHeight- 180)/2, 450, 180};
         Color TitleColorNotes = { 112, 31, 126, 255};
         BeginDrawing();
@@ -63,20 +77,23 @@ switch(Current)
         if (CheckCollisionPointRec(Mous, TitleRec) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) ShowTitleNote3 = true;
         if (ShowTitleNote3)
         { 
-            int TitleNote3 = MeasureText("now input game information.", 20);
-            DrawText("now input game information.", TitleRec.x+(TitleRec.width-TitleNote3)/2, TitleRec.y+40+50+100, 20,RED);
-            FPScounter -= 1;
+            PlayMusicStream(music);
+            int TitleNote3 = MeasureText("now input game details.", 20);
+            DrawText("now input game details.", TitleRec.x+(TitleRec.width-TitleNote3)/2, TitleRec.y+40+50+100, 20,RED);
+            FPScounter --;
+            if(FPScounter<0) Current = GameScreen;
         }
+
         EndDrawing();
-        if(FPScounter<0) Current = GameScreen;
         break;
     } 
 
     case GameScreen: 
     {
+    UpdateMusicStream(music);
     switch(State)
     {
-        case GET: 
+         case GET: 
         {
             InputAgain = true;
             do 
@@ -93,23 +110,23 @@ switch(Current)
             WallPro W;    // Gets coordinates of walls and save it as a vector2
             StartPoint = GET_StartPoint(m, n, WidthSpacing);    // The upper-left corner of the map
 
-        // Reads lightcore position. Accepts only coordinates in the range 0..n-1 (x) and 0..m-1 (y).
+            // Reads lightcore position. Accepts only coordinates in the range 0..n-1 (x) and 0..m-1 (y).
             InputAgain = true;
             do 
             {
                 printf("\nEnter lightcore coordinate: ");
                 scanf("%d %d", &tempy, &tempx);
-                if ((tempx>=0 && tempx<=n) && (tempy>=0 && tempy<=m)) 
+                if ((tempx>=0 && tempx<n) && (tempy>=0 && tempy<m)) 
                 {
                     E.x = tempx;
                     E.y = tempy;
-                    Light = Return_Elements_Position(E);
+                    Lightcore = Return_Elements_Position(E);
                     InputAgain = false;
                 }
                 else printf("Pay attention to limits! try again.");
             } while (InputAgain);
 
-        // Reads the number of explorers. Only in the range 1 and 3.
+            // Reads the number of explorers. Only in the range 1 and 3.
             InputAgain = true;
             do
             {
@@ -119,7 +136,9 @@ switch(Current)
                 else printf("Pay attention to limits! try again.");
             } while (InputAgain);
 
-        // Reads every coordinate of explorers. Only int the range 0..n-1 (x) and 0..m-1 (y).
+            // Reads every coordinate of explorers. Only int the range 0..n-1 (x) and 0..m-1 (y).
+            int numberExNow = 0;
+            int numberShNow = 0;
             for (int i=0; i<nExplorers; i++)
             {
                 InputAgain = true;
@@ -127,18 +146,24 @@ switch(Current)
                 {
                     printf("\nEnter coordinate of explorer %d: ", i+1);
                     scanf("%d %d", &tempy, &tempx);
-                    if ((tempx>=0 && tempx<=n) && (tempy>=0 && tempy<=m)) 
+                    if ((tempx>=0 && tempx<n) && (tempy>=0 && tempy<m)) 
                     {
                         E.x = tempx;
                         E.y = tempy;
-                        Explorers[i] = Return_Elements_Position(E);
-                        InputAgain = false;
-                    }
-                    else printf("Pay attention to limits! try again.");
+                        Vector2 EinMap = Return_Elements_Position(E);
+                        int Ch = Check_Elements(EinMap ,numberExNow ,numberShNow);
+                        if (Ch == 1)
+                        {
+                            Explorers[i] = EinMap;
+                            numberExNow++;
+                            InputAgain = false;
+                        } else printf("Pay attention to limits! try again.");   
+                    } else printf("Pay attention to limits! try again.");
+                    
                 } while (InputAgain);
             }
 
-        // Reads the number of shadowcasters. Only in the range 1 and 3.
+            // Reads the number of shadowcasters. Only in the range 1 and 3.
             InputAgain = true;
             do 
             {
@@ -148,7 +173,7 @@ switch(Current)
                 else printf("Pay attention to limits! Try again.");
             } while (InputAgain);
 
-        // Reads every coordinate of shadow caster. Only int the range 0..n-1 (x) and 0..m-1 (y).
+                // Reads every coordinate of shadowcaster. Only int the range 0..n-1 (x) and 0..m-1 (y).
                 for (int i=0; i<nShadowCasters; i++)
                 {
                     InputAgain = true;
@@ -156,18 +181,23 @@ switch(Current)
                     {
                         printf("\nEnter coordinate of shadowcaster %d: ", i+1);
                         scanf("%d %d", &tempy, &tempx);
-                        if ((tempx>=0 && tempx<=n) && (tempy>=0 && tempy<=m)) 
+                        if ((tempx>=0 && tempx<n) && (tempy>=0 && tempy<m)) 
                         {
                             E.x = tempx;
                             E.y = tempy;
-                            ShadowCasters[i] = Return_Elements_Position(E);
-                            InputAgain = false;
-                        }
-                        else printf("Pay attention to limits! Try again.");
+                            Vector2 EinMap = Return_Elements_Position(E);
+                            int Ch = Check_Elements(EinMap, numberExNow, numberShNow);
+                            if (Ch == 1)
+                            {
+                                ShadowCasters[i] = EinMap;
+                                numberShNow++;
+                                InputAgain = false;
+                            } else printf("Pay attention to limits! Try again.");
+                        } else printf("Pay attention to limits! Try again.");
                     } while (InputAgain);
                 }
 
-        // Reads the number of walls. Only int the range 0 and (m-1)*(n-1).
+            // Reads the number of walls. Only int the range 0 and (m-1)*(n-1).
             InputAgain = true;
             do
             {
@@ -177,30 +207,34 @@ switch(Current)
                 else printf("Pay attention to limits! Try again. ");
             } while (InputAgain);
 
-        // Reads every coordinate of walls. Only in the range 0..n-1 (x) and 0..m-1 (y).    
-            InputAgain = true;
+            // Reads every coordinate of walls. Only in the range 0..n-1 (x) and 0..m-1 (y).    
+            if (nWalls>0) printf("FORM: y x z. y should between 0 and %d, x should between 0 and %d, z: H=horizental , V=vertecal.", m-1, n-1);
             for (int i=0; i<nWalls; i++)
             {
+                InputAgain = true;
                 do
                 {
                     printf("\nEnter coordinate of wall %d: ", i+1);
                     scanf("%d %d %c", &tempy, &tempx, &W.HorV);
-                    if (!(W.HorV=='v' || W.HorV=='v' || W.HorV=='h' || W.HorV=='H'))
+                    W.Position.x = tempx;
+                    W.Position.y = tempy;
+                    if (!(W.HorV=='v' || W.HorV=='V' || W.HorV=='h' || W.HorV=='H'))
                     {
                         printf("Pay attention to limits! Try again. ");
-                        printf("FORM: y x z. z: H=horizental , V=vertecal.");
                     } 
-                    else if (!((tempx>=0 && tempx<=n-1) && (tempy>=0 && tempy<=m-1)))
+                    else if (!((tempx>=0 && tempx<n) && (tempy>=0 && tempy<m)))
                     {
                         printf("Pay attention to limits! Try again. "); 
-                        printf("FORM: y x z. y should between 0 and %d. x should between 0 and %d.", m-1, n-1);
                     }
                     else
                     {
-                        W.Position.x = tempx;
-                        W.Position.y = tempy;
-                        SET_Walls_and_Return(W);
-                        InputAgain = false;
+                        int Ch = Check_Walls(W);
+                        if (Ch == 0) printf("Pay attention to limits! Try again. ");
+                        else 
+                        {
+                            SET_Walls(W);
+                            InputAgain = false;
+                        }
                     }
                 } while (InputAgain);
             }
@@ -209,15 +243,15 @@ switch(Current)
             break;
         }
 
-    // Next phase. Move and drawing characters.     
+        // Next phase. Move and drawing characters.     
         case MoveExs: 
         {
-            // منطق عرض های مستطیل بازنگری بشه
-            Rectangle HintGame = {WindowWidth - WidthSpacing, ((2*Spacing)+250)/2, WidthSpacing-Spacing, (WindowHeight-2*Spacing)-250};
+            // Better amend this
+            Rectangle HintGame = {WindowWidth-(WidthSpacing+20), StartPoint.y, WidthSpacing-Spacing+20, (WindowHeight-Spacing)-200};
             BeginDrawing();
-            ClearBackground(RAYWHITE);
+            ClearBackground(WHITE);
             Draw_Map(StartPoint, m, n);
-            DrawRectangleRoundedLinesEx(HintGame, 0.4f, 25, 1.5f, RED);   
+            DrawRectangleRoundedLinesEx(HintGame, 0.1f, 20, 1.0f, RED);   
             EndDrawing();
             break;
         }
@@ -240,12 +274,14 @@ switch(Current)
 }
 }
 
-UnloadTexture(ShTexture);
-UnloadTexture(LiTexture);
-UnloadTexture(ExTexture);
-UnloadMusicStream(music);
 CloseAudioDevice();
 CloseWindow();
+UnloadTexture(LiTexture);
+UnloadTexture(ShTextureRight);
+UnloadTexture(ExTextureRight);
+UnloadTexture(ShTextureLeft);
+UnloadTexture(ExTextureLeft);
+UnloadMusicStream(music);
 
 return 0;
 }
