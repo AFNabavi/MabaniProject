@@ -1,5 +1,5 @@
 // TODO: 
-//  1. fix shadow caster direction between two explorer
+//  1. fix shadow caster direction between two explorer (wall)
 //  2. dfs/bfs algorithm
 //  3. random walls
 //  4. more conditions (2 home distance)
@@ -9,10 +9,10 @@
 #include "raylib.h"
 #include "funcs.h"
 
-Texture2D ShTextureRight;
-Texture2D ExTextureRight;
-Texture2D ShTextureLeft;
-Texture2D ExTextureLeft;
+Texture2D Sh1TextureRight; Texture2D Sh2TextureRight; Texture2D Sh3TextureRight;
+Texture2D Ex1TextureRight; Texture2D Ex2TextureRight; Texture2D Ex3TextureRight;
+Texture2D Sh1TextureLeft; Texture2D Sh2TextureLeft; Texture2D Sh3TextureLeft;
+Texture2D Ex1TextureLeft; Texture2D Ex2TextureLeft; Texture2D Ex3TextureLeft;
 Texture2D LiTexture;
 
 // Enum to represent the different screens or states of the game application.
@@ -38,11 +38,19 @@ InitWindow(WindowWidth, WindowHeight, "The Tale of the Labyrinth");
 InitAudioDevice();
 
 // Load textures
-ShTextureRight = LoadTexture("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\shadow_caster_right_image.png");
-ExTextureRight = LoadTexture("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\explorer_right_image.png");
-ShTextureLeft = LoadTexture("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\shadow_caster_left_image.png");
-ExTextureLeft = LoadTexture("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\explorer_left_image.png");
-LiTexture = LoadTexture("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\lightcore_image.png");
+Sh1TextureRight = LoadTexture("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\shadowcaster1_right_image.png");
+Sh2TextureRight = LoadTexture("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\shadowcaster2_right_image.png");
+Sh3TextureRight = LoadTexture("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\shadowcaster3_right_image.png");
+Ex1TextureRight = LoadTexture("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\explorer1_right_image.png");
+Ex2TextureRight = LoadTexture("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\explorer2_right_image.png");
+Ex3TextureRight = LoadTexture("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\explorer3_right_image.png");
+Sh1TextureLeft = LoadTexture("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\shadowcaster1_left_image.png");
+Sh2TextureLeft = LoadTexture("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\shadowcaster2_left_image.png");
+Sh3TextureLeft = LoadTexture("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\shadowcaster3_left_image.png");
+Ex1TextureLeft = LoadTexture("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\explorer1_left_image.png");
+Ex2TextureLeft = LoadTexture("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\explorer2_left_image.png");
+Ex3TextureLeft = LoadTexture("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\explorer3_left_image.png");
+LiTexture = LoadTexture("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\light_core_image.png");
 Music music = LoadMusicStream("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\main_music.ogg");
 
 Screen Current = TitleScreen;   // Current screen, starts at TitleScreen.
@@ -51,8 +59,7 @@ Level State = GET;   // Current level, starts at GET for inputs.
 PlayMusicStream(music);
 SetTargetFPS(FPS);
 
-int m, n;
-int nWalls;
+int m, n, nWalls;
 Vector2 StartPoint;
 
 int FPScounter = 2*FPS; //That is for show TitleNote3
@@ -136,7 +143,7 @@ switch(Current)
                 else printf("Pay attention to limits! try again.");
             } while (InputAgain);
 
-            // Reads every coordinate of explorers. Only int the range 0..n-1 (x) and 0..m-1 (y).
+            // Reads every coordinate of explorers. Only in the range 0..n-1 (x) and 0..m-1 (y).
             int numberExNow = 0;
             int numberShNow = 0;
             for (int i=0; i<nExplorers; i++)
@@ -208,7 +215,7 @@ switch(Current)
             } while (InputAgain);
 
             // Reads every coordinate of walls. Only in the range 0..n-1 (x) and 0..m-1 (y).    
-            if (nWalls>0) printf("FORM: y x z. y should between 0 and %d, x should between 0 and %d, z: H=horizental , V=vertecal.", m-1, n-1);
+            if (nWalls>0) printf("\nFORM: y x z. y should between 0 and %d, x should between 0 and %d, z: H=horizental , V=vertecal.", m-1, n-1);
             for (int i=0; i<nWalls; i++)
             {
                 InputAgain = true;
@@ -277,10 +284,18 @@ switch(Current)
 CloseAudioDevice();
 CloseWindow();
 UnloadTexture(LiTexture);
-UnloadTexture(ShTextureRight);
-UnloadTexture(ExTextureRight);
-UnloadTexture(ShTextureLeft);
-UnloadTexture(ExTextureLeft);
+UnloadTexture(Sh1TextureRight);
+UnloadTexture(Sh2TextureRight);
+UnloadTexture(Sh3TextureRight);
+UnloadTexture(Ex1TextureRight);
+UnloadTexture(Ex2TextureRight);
+UnloadTexture(Ex3TextureRight);
+UnloadTexture(Sh1TextureLeft);
+UnloadTexture(Sh2TextureLeft);
+UnloadTexture(Sh3TextureLeft);
+UnloadTexture(Ex1TextureLeft);
+UnloadTexture(Ex2TextureLeft);
+UnloadTexture(Ex3TextureLeft);
 UnloadMusicStream(music);
 
 return 0;

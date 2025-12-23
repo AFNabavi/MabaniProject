@@ -18,10 +18,18 @@ extern Vector2 Explorers[3];
 extern int nShadowCasters;
 extern Vector2 ShadowCasters[3];
 
-extern Texture2D ShTextureRight;
-extern Texture2D ExTextureRight;
-extern Texture2D ShTextureLeft;
-extern Texture2D ExTextureLeft;
+extern Texture2D Sh1TextureRight;
+extern Texture2D Sh2TextureRight;
+extern Texture2D Sh3TextureRight;
+extern Texture2D Ex1TextureRight;
+extern Texture2D Ex2TextureRight;
+extern Texture2D Ex3TextureRight;
+extern Texture2D Sh1TextureLeft;
+extern Texture2D Sh2TextureLeft;
+extern Texture2D Sh3TextureLeft;
+extern Texture2D Ex1TextureLeft;
+extern Texture2D Ex2TextureLeft;
+extern Texture2D Ex3TextureLeft;
 extern Texture2D LiTexture;
 
 typedef struct WallProperty {

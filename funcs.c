@@ -271,17 +271,57 @@ Wall color and thickness rules based on map[j][i] value:
     for (i=0; i<nExplorers; i++)
     {
         Vector2 S = GET_Start_Elements_Position_for_Draw(StartPoint, Explorers[i]);
+        if (i==0)
+        {
         int Direction = Direction_of_Explorers(Explorers[i]);
-        if (Direction == 1) DrawTexture(ExTextureRight, S.x, S.y, WHITE);
-        else DrawTexture(ExTextureLeft, S.x, S.y, WHITE);
+        if (Direction == 1) DrawTexture(Ex1TextureRight, S.x, S.y, WHITE);
+        else DrawTexture(Ex1TextureLeft, S.x, S.y, WHITE);
+        }
+        else if (i==1)
+        {
+        int Direction = Direction_of_Explorers(Explorers[i]);
+        if (Direction == 1) DrawTexture(Ex2TextureRight, S.x, S.y, WHITE);
+        else DrawTexture(Ex2TextureLeft, S.x, S.y, WHITE);
+        }
+        else if (i==2)
+        {
+        int Direction = Direction_of_Explorers(Explorers[i]);
+        if (Direction == 1) DrawTexture(Ex3TextureRight, S.x, S.y, WHITE);
+        else DrawTexture(Ex3TextureLeft, S.x, S.y, WHITE);
+        }
     }
 
 // Draw shadow casters (facing toward nearest explorer)
     for (i=0; i<nShadowCasters; i++)
     {
         Vector2 S = GET_Start_Elements_Position_for_Draw(StartPoint, ShadowCasters[i]);
+        if (i==0)
+        {
         int Direction = Direction_of_ShadowCasters(ShadowCasters[i]);
-        if (Direction == 1) DrawTexture(ShTextureRight, S.x, S.y, WHITE);
-        else DrawTexture(ShTextureLeft, S.x, S.y, WHITE);
+        if (Direction == 1) DrawTexture(Sh1TextureRight, S.x, S.y, WHITE);
+        else DrawTexture(Sh1TextureLeft, S.x, S.y, WHITE);
+        }
+        else if (i==1)
+        {
+        int Direction = Direction_of_ShadowCasters(ShadowCasters[i]);
+        if (Direction == 1) DrawTexture(Sh2TextureRight, S.x, S.y, WHITE);
+        else DrawTexture(Sh2TextureLeft, S.x, S.y, WHITE);
+        }
+        else if (i==2)
+        {
+        int Direction = Direction_of_ShadowCasters(ShadowCasters[i]);
+        if (Direction == 1) DrawTexture(Sh3TextureRight, S.x, S.y, WHITE);
+        else DrawTexture(Sh3TextureLeft, S.x, S.y, WHITE);
+        }
     }
+}
+
+int Distance_Check(Vector2 v1, Vector2 v2)
+{
+/*
+Computes distance of v1 and v2
+*/
+    int x = v1.x - v2.x, y = v1.y - v2.y;
+    if (x*x + y*y > 2500) return 1;
+    else return 0;
 }
