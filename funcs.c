@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "raylib.h"
 #include "funcs.h"
 
@@ -316,12 +317,34 @@ Wall color and thickness rules based on map[j][i] value:
     }
 }
 
-int Distance_Check(Vector2 v1, Vector2 v2)
+int Distance_Check(Vector2 v1, Vector2 v2, Vector2 arr1[], int arr1c, Vector2 arr2[], int arr2c)
 {
 /*
-Computes distance of v1 and v2
+Computes distance between v1 and v2
 */
-    int x = v1.x - v2.x, y = v1.y - v2.y;
-    if (x*x + y*y > 2500) return 1;
-    else return 0;
+    float dx, dy;
+
+    // check v2
+    dx = v1.x - v2.x;
+    dy = v1.y - v2.y;
+    if (dx*dx + dy*dy < 16.0f) return 0;
+
+    // check arr1
+    for (int i = 0; i < arr1c; i++)
+    {
+        dx = v1.x - arr1[i].x;
+        dy = v1.y - arr1[i].y;
+        if (dx*dx + dy*dy < 16.0f) return 0;
+    }
+
+    // check arr2
+    for (int i = 0; i < arr2c; i++)
+    {
+        dx = v1.x - arr2[i].x;
+        dy = v1.y - arr2[i].y;
+        if (dx*dx + dy*dy < 16.0f) return 0;
+    }
+
+    return 1;
 }
+
