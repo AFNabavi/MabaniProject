@@ -49,5 +49,6 @@ int Check_Elements(Vector2 E, int numberExNow, int numberShNow);
 int Check_Walls(WallPro W);
 void Draw_Map(Vector2 StartPoint, int m, int n);
 int Distance_Check(Vector2 v1, Vector2 v2, Vector2 arr1[], int arr1c, Vector2 arr2[], int arr2c);
+WallPro Put_Wall(int m, int n);
 
 #endif

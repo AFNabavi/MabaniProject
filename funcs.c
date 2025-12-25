@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "raylib.h"
 #include "funcs.h"
 
@@ -320,31 +321,54 @@ Wall color and thickness rules based on map[j][i] value:
 int Distance_Check(Vector2 v1, Vector2 v2, Vector2 arr1[], int arr1c, Vector2 arr2[], int arr2c)
 {
 /*
-Computes distance between v1 and v2
+Computes distance between v1 and v2 and return 1 if it is valid otherwise, 0.
 */
     float dx, dy;
 
     // check v2
-    dx = v1.x - v2.x;
-    dy = v1.y - v2.y;
+    dx = 2*v1.x+1 - v2.x;
+    dy = 2*v1.y+1 - v2.y;
     if (dx*dx + dy*dy < 16.0f) return 0;
+    // printf("\nE&light dx=%.1f dy=%.1f", dx, dy);
 
     // check arr1
     for (int i = 0; i < arr1c; i++)
     {
-        dx = v1.x - arr1[i].x;
-        dy = v1.y - arr1[i].y;
+        dx = 2*v1.x+1 - arr1[i].x;
+        dy = 2*v1.y+1 - arr1[i].y;
         if (dx*dx + dy*dy < 16.0f) return 0;
+    // else printf("\nE&ex dx=%.1f dy=%.1f", dx, dy);
     }
 
     // check arr2
     for (int i = 0; i < arr2c; i++)
     {
-        dx = v1.x - arr2[i].x;
-        dy = v1.y - arr2[i].y;
+        dx = 2*v1.x+1 - arr2[i].x;
+        dy = 2*v1.y+1 - arr2[i].y;
         if (dx*dx + dy*dy < 16.0f) return 0;
+    // else printf("\nE&sh dx=%.1f dy=%.1f", dx, dy);
     }
 
     return 1;
 }
 
+WallPro Put_Wall(int m, int n)
+{
+/*
+Generates a random wall within map bounds.
+Randomly selects a cell (x, y) and wall orientation.
+*/
+    int x, y, HorV;
+    x = rand()%n;
+    y = rand()%m;
+    HorV = rand()%2; // 0=horizental  and  1=vertical
+    if (HorV==0) HorV = 'H';
+    else HorV = 'V';
+    
+    WallPro w;
+    w.Position.x = x;
+    w.Position.y = y;
+    w.HorV = HorV;
+
+    return w;
+}

@@ -1,8 +1,8 @@
 // TODO: 
 //  1. fix shadow caster direction between two explorer (wall)
 //  2. dfs/bfs algorithm
-//  3. random (distance between explorer and lightcore >= 2, shdaowcaster and lightcore >= 2, explorer and shadowcaster >= 2)
-//  4. more conditions (2 home distance)
+//  3. random (distance between explorer and lightcore >= 2, shdaowcaster and lightcore >= 2, explorer and shadowcaster >= 2) -> AF did it
+//  4. more conditions (2 home distance) -> AF did it 
 
 #include <stdio.h>
 #include <stdbool.h>
@@ -144,7 +144,6 @@ switch(Current)
         // Reads lightcore position. Accepts only coordinates in the range 0..n-1 (x) and 0..m-1 (y).
             E.x = rand()%n; E.y = rand()%m;
             Lightcore = Return_Elements_Position(E);
-            printf("\nLightcore Pos: %.1f %.1f\n\n", E.x, E.y);
 
         // Reads every coordinate of explorers. Only in the range 0..n-1 (x) and 0..m-1 (y).
             for (int i=0; i<nExplorers; i++)
@@ -153,8 +152,7 @@ switch(Current)
                 do
                 {
                     E.x = rand()%n; E.y = rand()%m;
-                    printf("Explorer %d Pos: %.1f %.1f\n", i, E.x, E.y);
-                    if (Distance_Check(E, Lightcore, Explorers, numberExNow, ShadowCasters, numberShNow)) 
+                    if (Check_Elements(E, numberExNow, numberShNow) && Distance_Check(E, Lightcore, Explorers, numberExNow, ShadowCasters, numberShNow)) 
                     {
                         InputAgain = false;
                         Explorers[i] = Return_Elements_Position(E);
@@ -162,7 +160,6 @@ switch(Current)
                     }
                 } while (InputAgain);
             }
-            printf("\n");
 
         // Reads every coordinate of shadowcaster. Only int the range 0..n-1 (x) and 0..m-1 (y).
             for (int i=0; i<nShadowCasters; i++)
@@ -171,8 +168,7 @@ switch(Current)
                 do
                 {
                     E.x = rand()%n; E.y = rand()%m;
-                    printf("Shadowcaster %d Pos: %.1f %.1f\n", i, E.x, E.y);
-                    if (Distance_Check(E, Lightcore, Explorers, numberExNow, ShadowCasters, numberShNow)) 
+                    if (Check_Elements(E, numberExNow, numberShNow) && Distance_Check(E, Lightcore, Explorers, numberExNow, ShadowCasters, numberShNow)) 
                     {
                         InputAgain = false;
                         ShadowCasters[i] = Return_Elements_Position(E);
@@ -183,47 +179,24 @@ switch(Current)
 
 // printf("\n%.1f %.1f\n%.1f %.1f, %.1f %.1f, %.1f %.1f\n%.1f %.1f, %.1f %.1f, %.1f %.1f\n", Lightcore.x, Lightcore.y, Explorers[0].x, Explorers[0].y, Explorers[1].x, Explorers[1].y, Explorers[2].x, Explorers[2].y, ShadowCasters[0].x, ShadowCasters[0].y, ShadowCasters[1].x, ShadowCasters[1].y, ShadowCasters[2].x, ShadowCasters[2].y);
             
-            // // Reads the number of walls. Only int the range 0 and (m-1)*(n-1).
-            // InputAgain = true;
-            // do
-            // {
-            //     printf("\nEnter wall(s) number (between 0 and %d): ", (m-1)*(n-1));
-            //     scanf("%d", &nWalls);
-            //     if (nWalls>=0 && nWalls<=((m-1)*(n-1))) InputAgain = false;
-            //     else printf("Pay attention to limits! Try again. ");
-            // } while (InputAgain);
+            // Reads the number of walls. Only int the range 0 and (m-1)*(n-1).
+            InputAgain = true;
+            do
+            {
+                printf("\nEnter wall(s) number (between 0 and %d): ", (m-1)*(n-1));
+                scanf("%d", &nWalls);
+                if (nWalls>=0 && nWalls<=((m-1)*(n-1))) InputAgain = false;
+                else printf("Pay attention to limits! Try again. ");
+            } while (InputAgain);
 
-            // // Reads every coordinate of walls. Only in the range 0..n-1 (x) and 0..m-1 (y).    
-            // if (nWalls>0) printf("\nFORM: y x z. y should between 0 and %d, x should between 0 and %d, z: H=horizental , V=vertecal.", m-1, n-1);
-            // for (int i=0; i<nWalls; i++)
-            // {
-            //     InputAgain = true;
-            //     do
-            //     {
-            //         printf("\nEnter coordinate of wall %d: ", i+1);
-            //         scanf("%d %d %c", &tempy, &tempx, &W.HorV);
-            //         W.Position.x = tempx;
-            //         W.Position.y = tempy;
-            //         if (!(W.HorV=='v' || W.HorV=='V' || W.HorV=='h' || W.HorV=='H'))
-            //         {
-            //             printf("Pay attention to limits! Try again. ");
-            //         } 
-            //         else if (!((tempx>=0 && tempx<n) && (tempy>=0 && tempy<m)))
-            //         {
-            //             printf("Pay attention to limits! Try again. "); 
-            //         }
-            //         else
-            //         {
-            //             int Ch = Check_Walls(W);
-            //             if (Ch == 0) printf("Pay attention to limits! Try again. ");
-            //             else 
-            //             {
-            //                 SET_Walls(W);
-            //                 InputAgain = false;
-            //             }
-            //         }
-            //     } while (InputAgain);
-            // }
+        // Reads every coordinate of walls. Only in the range 0..n-1 (x) and 0..m-1 (y).   
+            WallPro wall;
+            for (int i=0; i<nWalls; i++)
+            {
+                wall = Put_Wall(m, n);    
+                if (Check_Walls(wall) != 0) SET_Walls(wall);
+                else i--;
+            }
 
             State = MoveExs;
             break;
@@ -235,7 +208,7 @@ switch(Current)
             // Better amend this
             Rectangle HintGame = {WindowWidth-(WidthSpacing+20), StartPoint.y, WidthSpacing-Spacing+20, (WindowHeight-Spacing)-200};
             BeginDrawing();
-            ClearBackground(WHITE);
+            ClearBackground(RAYWHITE);
             Draw_Map(StartPoint, m, n);
             DrawRectangleRoundedLinesEx(HintGame, 0.1f, 20, 1.0f, RED);   
             EndDrawing();
