@@ -1,7 +1,6 @@
 // TODO: 
 //  1. fix shadow caster based on the closest explorer in direction of sh func (wall)
-//  2. dfs/bfs algorithm
-//  3. amend hint box
+//  2. amend hint box
 
 #include <stdio.h>
 #include <stdbool.h>
@@ -181,9 +180,7 @@ switch(Current)
                 Init_FadeSh = false;
             }
 
-            // printf("\n%.1f %.1f\n%.1f %.1f, %.1f %.1f, %.1f %.1f\n%.1f %.1f, %.1f %.1f, %.1f %.1f\n", Lightcore.x, Lightcore.y, Explorers[0].x, Explorers[0].y, Explorers[1].x, Explorers[1].y, Explorers[2].x, Explorers[2].y, ShadowCasters[0].x, ShadowCasters[0].y, ShadowCasters[1].x, ShadowCasters[1].y, ShadowCasters[2].x, ShadowCasters[2].y);
-            
-            // Reads the number of walls. Only int the range 0 and (m-1)*(n-1).
+        // Reads the number of walls. Only int the range 0 and (m-1)*(n-1).
             InputAgain = true;
             do
             {
@@ -193,15 +190,8 @@ switch(Current)
                 else printf("Pay attention to limits! Try again. ");
             } while (InputAgain);
 
-        // Reads every coordinate of walls. Only in the range 0..n-1 (x) and 0..m-1 (y).   
+        // Randomly places valid walls while preserving full map connectivity (BFS-validated)
             WallPro Wall;
-            // for (int i=0; i<nWalls; i++)
-            // {
-            //     Wall = Put_Wall(m, n);    
-            //     if (Check_Walls(Wall)) SET_Walls(Wall);
-            //     else i--;
-            // }
-            
             bool InputWall;
             for (int i=0; i<nWalls; i++)
             {
@@ -227,7 +217,6 @@ switch(Current)
                     BlocksA[0][0] = 1; BlocksA[0][1] = 1;
                     int Checked = 1;
                     BFS_Check('A', BlocksA, ACount, BlocksB, BCount, &Checked);
-                    printf("Checked=%d\n", Checked);
                     if (Checked == m*n)
                     {
                         InputAgain = false;
@@ -244,10 +233,9 @@ switch(Current)
             break;
         }
 
-        // Next phase. Move and drawing characters.     
+    // Next phase. Move and drawing characters.     
         case MoveExs: 
         {
-            // Better amend this
             Rectangle HintGame = {WindowWidth-WidthSpace, Space, WidthSpace-Space, (WindowHeight-2*Space)};
             BeginDrawing();
             ClearBackground(RAYWHITE);

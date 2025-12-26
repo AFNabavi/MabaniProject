@@ -3,7 +3,7 @@
 #include "raylib.h"
 #include "funcs.h"
 
-const float WallTh = 2.5;   // Thick of walls
+const float WallTh = 3;   // Thick of walls
 const int FadeCo = 7;
 int swF[3] = {1, 1, 1};
 const int FPS = 60;
@@ -386,40 +386,50 @@ Randomly selects a cell (x, y) and wall orientation.
     return w;
 }
 
+void BFS_Check(char sw, int BlocksA[][2], int ACount, int BlocksB[][2], int BCount, int *Checked) 
+{
+/*
+Performs a BFS-based connectivity check on the map grid.
+Expands reachable cells alternately using two block lists (A and B),
+marking visited cells and counting total reachable blocks via `Checked`.
+*/
 
 // m and n must be declared
-void BFS_Check(char sw, int BlocksA[][2], int ACount, int BlocksB[][2], int BCount, int *Checked) {
-
     if (sw=='A' && ACount==0) return;
     if (sw=='B' && BCount==0) return;
     if (sw=='A') {
         int k;
         int i, j;
-        for(k=0; k<ACount; k++) {
+        for(k=0; k<ACount; k++) 
+        {
             int j = BlocksA[k][0];
             int i = BlocksA[k][1];
-            if(map[j-1][i]==1 && map[j-2][i]==1) {
+            if(map[j-1][i]==1 && map[j-2][i]==1) 
+            {
                 map[j-2][i] = 0;
                 (*Checked)++;
                 BlocksB[BCount][0] = j-2;
                 BlocksB[BCount][1] = i;
                 BCount++;
             }
-            if(map[j][i+1]==1 && map[j][i+2]==1) {
+            if(map[j][i+1]==1 && map[j][i+2]==1) 
+            {
                 map[j][i+2] = 0;
                 (*Checked)++;
                 BlocksB[BCount][0] = j;
                 BlocksB[BCount][1] = i+2;
                 BCount++;
             }
-            if(map[j+1][i]==1 && map[j+2][i]==1) {
+            if(map[j+1][i]==1 && map[j+2][i]==1) 
+            {
                 map[j+2][i] = 0;
                 (*Checked)++;
                 BlocksB[BCount][0] = j+2;
                 BlocksB[BCount][1] = i;
                 BCount++;
             }
-            if(map[j][i-1]==1 && map[j][i-2]==1) {
+            if(map[j][i-1]==1 && map[j][i-2]==1) 
+            {
                 map[j][i-2] = 0;
                 (*Checked)++;
                 BlocksB[BCount][0] = j;
@@ -432,31 +442,36 @@ void BFS_Check(char sw, int BlocksA[][2], int ACount, int BlocksB[][2], int BCou
     } else {
         int k;
         int i, j;
-        for(k=0; k<BCount; k++) {
+        for(k=0; k<BCount; k++) 
+        {
             j = BlocksB[k][0];
             i = BlocksB[k][1];
-            if(map[j-1][i]==1 && map[j-2][i]==1) {
+            if(map[j-1][i]==1 && map[j-2][i]==1) 
+            {
                 map[j-2][i] = 0;
                 (*Checked)++;
                 BlocksA[ACount][0] = j-2;
                 BlocksA[ACount][1] = i;
                 ACount++;
             }
-            if(map[j][i+1]==1 && map[j][i+2]==1) {
+            if(map[j][i+1]==1 && map[j][i+2]==1) 
+            {
                 map[j][i+2] = 0;
                 (*Checked)++;
                 BlocksA[ACount][0] = j;
                 BlocksA[ACount][1] = i+2;
                 ACount++;
             }
-            if(map[j+1][i]==1 && map[j+2][i]==1) {
+            if(map[j+1][i]==1 && map[j+2][i]==1) 
+            {
                 map[j+2][i] = 0;
                 (*Checked)++;
                 BlocksA[ACount][0] = j+2;
                 BlocksA[ACount][1] = i;
                 ACount++;
             }
-            if(map[j][i-1]==1 && map[j][i-2]==1) {
+            if(map[j][i-1]==1 && map[j][i-2]==1) 
+            {
                 map[j][i-2] = 0;
                 (*Checked)++;
                 BlocksA[ACount][0] = j;
@@ -472,6 +487,10 @@ void BFS_Check(char sw, int BlocksA[][2], int ACount, int BlocksB[][2], int BCou
 
 void Reset_Map_Blocks(int m, int n)
 {
+/*
+Resets all logical map blocks to unvisited state.
+Sets inner block cells to 1 and marks the start cell (1,1) as visited.
+*/
     int i, j;
     for (j=1; j<2*m+1; j+=2)
     {
@@ -485,6 +504,10 @@ void Reset_Map_Blocks(int m, int n)
 
 void Initializing_FadeSh()
 {
+/*
+Initializes fade intensity values for shadow casters.
+Each caster receives an increasing fade offset based on FadeCo.
+*/
     int i, j;
     i=FadeCo*2;
     for (j=0; j<nShadowCasters; j++)
@@ -497,6 +520,10 @@ void Initializing_FadeSh()
 
 void Fade_ShadowCasters()
 {
+/*
+Updates fade values of shadow casters to create a pulsating effect.
+Fade direction switches at predefined min and max thresholds.
+*/
     int j;
     for (j=0; j<nShadowCasters; j++)
     {
