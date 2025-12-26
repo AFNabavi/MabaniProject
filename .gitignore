@@ -6,3 +6,5 @@ source/music1.mp3
 .vscode/settings.json
 .vscode/tasks.json
 The Tale of the Labyrinth.pdf
+opengl32.dll
+compile.bat

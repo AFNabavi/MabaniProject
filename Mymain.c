@@ -1,8 +1,7 @@
 // TODO: 
-//  1. fix shadow caster direction between two explorer (wall)
+//  1. fix shadow caster based on the closest explorer in direction of sh func (wall)
 //  2. dfs/bfs algorithm
-//  3. random (distance between explorer and lightcore >= 2, shdaowcaster and lightcore >= 2, explorer and shadowcaster >= 2) -> AF did it
-//  4. more conditions (2 home distance) -> AF did it 
+//  3. amend hint box
 
 #include <stdio.h>
 #include <stdbool.h>
@@ -32,7 +31,7 @@ typedef enum {GET, MoveExs, MoveShs} Level;
 bool ShowTitleNote3 = false;    // Flag to show third title note after click, for input prompt.
 bool EndGame = false;   // Flag for game end, transitions to EndScreen.
 bool Win = false;   // Flag for player win, affects EndScreen.
-bool InputAgain;    // Flag for re-input in validation loops.
+bool Init_FadeSh = true;
 
 int main(void)
 {
@@ -41,20 +40,20 @@ InitAudioDevice();
 srand(time(NULL));    // randomize choices
 
 // Load textures
-Sh1TextureRight = LoadTexture("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\shadowcaster1_right_image.png");
-Sh2TextureRight = LoadTexture("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\shadowcaster2_right_image.png");
-Sh3TextureRight = LoadTexture("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\shadowcaster3_right_image.png");
-Ex1TextureRight = LoadTexture("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\explorer1_right_image.png");
-Ex2TextureRight = LoadTexture("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\explorer2_right_image.png");
-Ex3TextureRight = LoadTexture("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\explorer3_right_image.png");
-Sh1TextureLeft = LoadTexture("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\shadowcaster1_left_image.png");
-Sh2TextureLeft = LoadTexture("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\shadowcaster2_left_image.png");
-Sh3TextureLeft = LoadTexture("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\shadowcaster3_left_image.png");
-Ex1TextureLeft = LoadTexture("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\explorer1_left_image.png");
-Ex2TextureLeft = LoadTexture("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\explorer2_left_image.png");
-Ex3TextureLeft = LoadTexture("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\explorer3_left_image.png");
-LiTexture = LoadTexture("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\light_core_image.png");
-Music music = LoadMusicStream("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\source\\main_music.ogg");
+Sh1TextureRight = LoadTexture("source\\shadowcaster1_right_image.png");
+Sh2TextureRight = LoadTexture("source\\shadowcaster2_right_image.png");
+Sh3TextureRight = LoadTexture("source\\shadowcaster3_right_image.png");
+Ex1TextureRight = LoadTexture("source\\explorer1_right_image.png");
+Ex2TextureRight = LoadTexture("source\\explorer2_right_image.png");
+Ex3TextureRight = LoadTexture("source\\explorer3_right_image.png");
+Sh1TextureLeft = LoadTexture("source\\shadowcaster1_left_image.png");
+Sh2TextureLeft = LoadTexture("source\\shadowcaster2_left_image.png");
+Sh3TextureLeft = LoadTexture("source\\shadowcaster3_left_image.png");
+Ex1TextureLeft = LoadTexture("source\\explorer1_left_image.png");
+Ex2TextureLeft = LoadTexture("source\\explorer2_left_image.png");
+Ex3TextureLeft = LoadTexture("source\\explorer3_left_image.png");
+LiTexture = LoadTexture("source\\light_core_image.png");
+Music music = LoadMusicStream("source\\main_music.ogg");
 
 Screen Current = TitleScreen;   // Current screen, starts at TitleScreen.
 Level State = GET;   // Current level, starts at GET for inputs.
@@ -89,7 +88,7 @@ switch(Current)
         { 
             PlayMusicStream(music);
             int TitleNote3 = MeasureText("now input game details.", 20);
-            DrawText("now input game details.", TitleRec.x+(TitleRec.width-TitleNote3)/2, TitleRec.y+40+50+100, 20,RED);
+            DrawText("now input game details.", TitleRec.x+(TitleRec.width-TitleNote3)/2, TitleRec.y+40+50+100, 20, RED);
             FPScounter --;
             if(FPScounter<0) Current = GameScreen;
         }
@@ -106,7 +105,7 @@ switch(Current)
         case GET: 
         {
         // Reads height and width of the map of game
-            InputAgain = true;
+            bool InputAgain = true;    // Flag for re-input in validation loops.
             do 
             {
                 printf("\nEnter width and height of map (between 5 and 12): ");
@@ -118,9 +117,8 @@ switch(Current)
             
             Vector2 E;    // Gets coordinates of elements and save it as a vector2
             WallPro W;    // Gets coordinates of walls and save it as a vector2
-            StartPoint = GET_StartPoint(m, n, WidthSpacing);    // The upper-left corner of the map
+            StartPoint = GET_StartPoint(m, n, WidthSpace);    // The upper-left corner of the map
 
-            int numberExNow = 0, numberShNow = 0;
         // Reads the number of explorers. Only in the range 1 and 3.
             InputAgain = true;
             do
@@ -145,6 +143,7 @@ switch(Current)
             E.x = rand()%n; E.y = rand()%m;
             Lightcore = Return_Elements_Position(E);
 
+            int numberExNow = 0, numberShNow = 0;
         // Reads every coordinate of explorers. Only in the range 0..n-1 (x) and 0..m-1 (y).
             for (int i=0; i<nExplorers; i++)
             {
@@ -176,8 +175,13 @@ switch(Current)
                     }
                 } while (InputAgain);
             }
+            if (Init_FadeSh)
+            {
+                Initializing_FadeSh();
+                Init_FadeSh = false;
+            }
 
-// printf("\n%.1f %.1f\n%.1f %.1f, %.1f %.1f, %.1f %.1f\n%.1f %.1f, %.1f %.1f, %.1f %.1f\n", Lightcore.x, Lightcore.y, Explorers[0].x, Explorers[0].y, Explorers[1].x, Explorers[1].y, Explorers[2].x, Explorers[2].y, ShadowCasters[0].x, ShadowCasters[0].y, ShadowCasters[1].x, ShadowCasters[1].y, ShadowCasters[2].x, ShadowCasters[2].y);
+            // printf("\n%.1f %.1f\n%.1f %.1f, %.1f %.1f, %.1f %.1f\n%.1f %.1f, %.1f %.1f, %.1f %.1f\n", Lightcore.x, Lightcore.y, Explorers[0].x, Explorers[0].y, Explorers[1].x, Explorers[1].y, Explorers[2].x, Explorers[2].y, ShadowCasters[0].x, ShadowCasters[0].y, ShadowCasters[1].x, ShadowCasters[1].y, ShadowCasters[2].x, ShadowCasters[2].y);
             
             // Reads the number of walls. Only int the range 0 and (m-1)*(n-1).
             InputAgain = true;
@@ -190,13 +194,51 @@ switch(Current)
             } while (InputAgain);
 
         // Reads every coordinate of walls. Only in the range 0..n-1 (x) and 0..m-1 (y).   
-            WallPro wall;
+            WallPro Wall;
+            // for (int i=0; i<nWalls; i++)
+            // {
+            //     Wall = Put_Wall(m, n);    
+            //     if (Check_Walls(Wall)) SET_Walls(Wall);
+            //     else i--;
+            // }
+            
+            bool InputWall;
             for (int i=0; i<nWalls; i++)
             {
-                wall = Put_Wall(m, n);    
-                if (Check_Walls(wall) != 0) SET_Walls(wall);
-                else i--;
+                InputAgain = true;
+                do
+                {
+                    Vector2 W;
+                    InputWall = true;
+                    do
+                    {
+                        Wall = Put_Wall(m, n);
+                        if (Check_Walls(Wall))
+                        {
+                            W = SET_Walls(Wall);
+                            InputWall = false;
+                        }
+                    } while (InputWall);
+                    Reset_Map_Blocks(m, n);
+                    int BlocksA[3*n][2];
+                    int BlocksB[3*n][2];
+                    int ACount = 1;
+                    int BCount = 0;
+                    BlocksA[0][0] = 1; BlocksA[0][1] = 1;
+                    int Checked = 1;
+                    BFS_Check('A', BlocksA, ACount, BlocksB, BCount, &Checked);
+                    printf("Checked=%d\n", Checked);
+                    if (Checked == m*n)
+                    {
+                        InputAgain = false;
+                    }
+                    else 
+                    {
+                        map[(int)W.y][(int)W.x] = 1;
+                    }
+                } while (InputAgain);
             }
+            Reset_Map_Blocks(m, n);
 
             State = MoveExs;
             break;
@@ -206,7 +248,7 @@ switch(Current)
         case MoveExs: 
         {
             // Better amend this
-            Rectangle HintGame = {WindowWidth-(WidthSpacing+20), StartPoint.y, WidthSpacing-Spacing+20, (WindowHeight-Spacing)-200};
+            Rectangle HintGame = {WindowWidth-WidthSpace, Space, WidthSpace-Space, (WindowHeight-2*Space)};
             BeginDrawing();
             ClearBackground(RAYWHITE);
             Draw_Map(StartPoint, m, n);
@@ -231,6 +273,7 @@ switch(Current)
         break;
     }
 }
+if (Current == GameScreen && State != GET) Fade_ShadowCasters();
 }
 
 CloseAudioDevice(); CloseWindow();

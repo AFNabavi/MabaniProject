@@ -3,13 +3,15 @@
 #include "raylib.h"
 #include "funcs.h"
 
-const int WallTh = 3;   // Thick of walls
+const float WallTh = 2.5;   // Thick of walls
+const int FadeCo = 7;
+int swF[3] = {1, 1, 1};
 const int FPS = 60;
 const int WindowWidth = 1100;
 const int WindowHeight = 650;
-const int WidthSpacing = 200;   // This is for width of Hint Box
-const int Spacing = 30;    // This is for distance of top and bottom of map and used in the Side
-const int Side = (WindowHeight - 2*Spacing)/12;     // Side length of every squre in map
+const int WidthSpace = 200;   // This is for width of Hint Box
+const int Space = 30;    // This is for distance of top and bottom of map and used in the Side
+const int Side = (WindowHeight - 2*Space)/12;     // Side length of every squre in map
 int map[25][25];    // Max size for map  
 
 Vector2 Lightcore;
@@ -17,6 +19,7 @@ int nExplorers;
 Vector2 Explorers[3];
 int nShadowCasters;
 Vector2 ShadowCasters[3];
+int FadeSh[3];
 
 // Load textures
 // Texture2D ShTextureRight;
@@ -33,7 +36,7 @@ Inner cells (non-border) are set to 1.
 Border cells are set to -1.
 Grid size: (2*n + 1) × (2*m + 1).
 */
-int i, j;
+    int i, j;
     for (i=0; i<2*n+1; i++)
     {
         for (j=0; j<2*m+1; j++)
@@ -42,24 +45,25 @@ int i, j;
             else M[j][i] = -1;
         }
     }
+    map[1][1] = 0;
 }
 
-Vector2 GET_StartPoint(int m, int n, int WidthSpacing)
+Vector2 GET_StartPoint(int m, int n, int WidthSpace)
 {
 /*
 Calculates the top-left starting position for centering the map on screen.
 MapSize is derived from (m, n) and tile size.
-Horizontal spacing (WidthSpacing) is subtracted before centering.
+Horizontal Space (WidthSpace) is subtracted before centering.
 */
     Vector2 MapSize, StartPoint;
     MapSize.x = n*Side;
     MapSize.y = m*Side;
-    StartPoint.x = ((WindowWidth - WidthSpacing) - MapSize.x)/2;
+    StartPoint.x = ((WindowWidth - WidthSpace) - MapSize.x)/2;
     StartPoint.y = ((WindowHeight) - MapSize.y)/2;
     return StartPoint;
 }
 
-void SET_Walls(WallPro Wall)
+Vector2 SET_Walls(WallPro Wall)
 {
 /*
 Marks the corresponding map cell for a wall and updates its position.
@@ -68,15 +72,23 @@ For vertical walls, the cleared cell is at (2y+1, 2x+2).
 */
     if(Wall.HorV == 'H' || Wall.HorV == 'h')
     {
+        Vector2 Coordinate;
         int j = 2*Wall.Position.y + 2;
         int i = 2*Wall.Position.x + 1;
         map[j][i] = 0;
+        Coordinate.x = i;
+        Coordinate.y = j;
+        return Coordinate;
     }
     else
     {
+        Vector2 Coordinate;
         int j = 2*Wall.Position.y + 1;
         int i = 2*Wall.Position.x + 2;
         map[j][i] = 0;
+        Coordinate.x = i;
+        Coordinate.y = j;
+        return Coordinate;
     }
 }
 
@@ -240,9 +252,9 @@ Wall color and thickness rules based on map[j][i] value:
     {
         for (i=1; i<2*n+1; i+=2)
         {
-            W.Position.x = i, W.Position.y = j, W.HorV = 'H';
+            W.Position.x = i; W.Position.y = j; W.HorV = 'H';
             StartP = GET_Start_Walls_Position_for_Draw(StartPoint, W);
-            EndP.x = StartP.x + Side, EndP.y = StartP.y;
+            EndP.x = StartP.x + Side; EndP.y = StartP.y;
             if (map[j][i] == 1) DrawLineEx(StartP, EndP, 1, B);
             else if (map[j][i] == 0) DrawLineEx(StartP, EndP, WallTh, R);
             else if(map[j][i] == -1) DrawLineEx(StartP, EndP, WallTh, BLACK);
@@ -255,9 +267,9 @@ Wall color and thickness rules based on map[j][i] value:
     {
         for (j=1 ; j<2*m+1; j+=2)
         {
-            W.Position.x = i, W.Position.y = j, W.HorV = 'V';
+            W.Position.x = i; W.Position.y = j; W.HorV = 'V';
             StartP = GET_Start_Walls_Position_for_Draw(StartPoint, W);
-            EndP.x = StartP.x, EndP.y = StartP.y + Side;
+            EndP.x = StartP.x; EndP.y = StartP.y + Side;
             if (map[j][i] == 1) DrawLineEx(StartP, EndP, 1, B);
             else if(map[j][i] == 0) DrawLineEx(StartP, EndP, WallTh, R);
             else if(map[j][i] == -1) DrawLineEx(StartP, EndP, WallTh, BLACK);
@@ -296,24 +308,25 @@ Wall color and thickness rules based on map[j][i] value:
 // Draw shadow casters (facing toward nearest explorer)
     for (i=0; i<nShadowCasters; i++)
     {
+        Color ColorSh = {255, 255, 255, ((float)FadeSh[i]/(10.0f*FadeCo))*255};
         Vector2 S = GET_Start_Elements_Position_for_Draw(StartPoint, ShadowCasters[i]);
         if (i==0)
         {
         int Direction = Direction_of_ShadowCasters(ShadowCasters[i]);
-        if (Direction == 1) DrawTexture(Sh1TextureRight, S.x, S.y, WHITE);
-        else DrawTexture(Sh1TextureLeft, S.x, S.y, WHITE);
+        if (Direction == 1) DrawTexture(Sh1TextureRight, S.x, S.y, ColorSh);
+        else DrawTexture(Sh1TextureLeft, S.x, S.y, ColorSh);
         }
         else if (i==1)
         {
         int Direction = Direction_of_ShadowCasters(ShadowCasters[i]);
-        if (Direction == 1) DrawTexture(Sh2TextureRight, S.x, S.y, WHITE);
-        else DrawTexture(Sh2TextureLeft, S.x, S.y, WHITE);
+        if (Direction == 1) DrawTexture(Sh2TextureRight, S.x, S.y, ColorSh);
+        else DrawTexture(Sh2TextureLeft, S.x, S.y, ColorSh);
         }
         else if (i==2)
         {
         int Direction = Direction_of_ShadowCasters(ShadowCasters[i]);
-        if (Direction == 1) DrawTexture(Sh3TextureRight, S.x, S.y, WHITE);
-        else DrawTexture(Sh3TextureLeft, S.x, S.y, WHITE);
+        if (Direction == 1) DrawTexture(Sh3TextureRight, S.x, S.y, ColorSh);
+        else DrawTexture(Sh3TextureLeft, S.x, S.y, ColorSh);
         }
     }
 }
@@ -371,4 +384,126 @@ Randomly selects a cell (x, y) and wall orientation.
     w.HorV = HorV;
 
     return w;
+}
+
+
+// m and n must be declared
+void BFS_Check(char sw, int BlocksA[][2], int ACount, int BlocksB[][2], int BCount, int *Checked) {
+
+    if (sw=='A' && ACount==0) return;
+    if (sw=='B' && BCount==0) return;
+    if (sw=='A') {
+        int k;
+        int i, j;
+        for(k=0; k<ACount; k++) {
+            int j = BlocksA[k][0];
+            int i = BlocksA[k][1];
+            if(map[j-1][i]==1 && map[j-2][i]==1) {
+                map[j-2][i] = 0;
+                (*Checked)++;
+                BlocksB[BCount][0] = j-2;
+                BlocksB[BCount][1] = i;
+                BCount++;
+            }
+            if(map[j][i+1]==1 && map[j][i+2]==1) {
+                map[j][i+2] = 0;
+                (*Checked)++;
+                BlocksB[BCount][0] = j;
+                BlocksB[BCount][1] = i+2;
+                BCount++;
+            }
+            if(map[j+1][i]==1 && map[j+2][i]==1) {
+                map[j+2][i] = 0;
+                (*Checked)++;
+                BlocksB[BCount][0] = j+2;
+                BlocksB[BCount][1] = i;
+                BCount++;
+            }
+            if(map[j][i-1]==1 && map[j][i-2]==1) {
+                map[j][i-2] = 0;
+                (*Checked)++;
+                BlocksB[BCount][0] = j;
+                BlocksB[BCount][1] = i-2;
+                BCount++;
+            }
+        }
+        ACount = 0;
+        BFS_Check('B', BlocksA, ACount, BlocksB, BCount, Checked);
+    } else {
+        int k;
+        int i, j;
+        for(k=0; k<BCount; k++) {
+            j = BlocksB[k][0];
+            i = BlocksB[k][1];
+            if(map[j-1][i]==1 && map[j-2][i]==1) {
+                map[j-2][i] = 0;
+                (*Checked)++;
+                BlocksA[ACount][0] = j-2;
+                BlocksA[ACount][1] = i;
+                ACount++;
+            }
+            if(map[j][i+1]==1 && map[j][i+2]==1) {
+                map[j][i+2] = 0;
+                (*Checked)++;
+                BlocksA[ACount][0] = j;
+                BlocksA[ACount][1] = i+2;
+                ACount++;
+            }
+            if(map[j+1][i]==1 && map[j+2][i]==1) {
+                map[j+2][i] = 0;
+                (*Checked)++;
+                BlocksA[ACount][0] = j+2;
+                BlocksA[ACount][1] = i;
+                ACount++;
+            }
+            if(map[j][i-1]==1 && map[j][i-2]==1) {
+                map[j][i-2] = 0;
+                (*Checked)++;
+                BlocksA[ACount][0] = j;
+                BlocksA[ACount][1] = i-2;
+                ACount++;
+            }
+        }
+        BCount = 0;
+        BFS_Check('A', BlocksA, ACount, BlocksB, BCount, Checked);
+    }
+
+}
+
+void Reset_Map_Blocks(int m, int n)
+{
+    int i, j;
+    for (j=1; j<2*m+1; j+=2)
+    {
+        for (i=1; i<2*n+1; i+=2)
+        {
+            map[j][i] = 1;
+        }
+    }
+    map[1][1] = 0;
+}
+
+void Initializing_FadeSh()
+{
+    int i, j;
+    i=FadeCo*2;
+    for (j=0; j<nShadowCasters; j++)
+    {
+        if (i>(FadeCo*10)) i = FadeCo*3;
+        FadeSh[j] = i; 
+        i += (FadeCo*3);
+    }
+}
+
+void Fade_ShadowCasters()
+{
+    int j;
+    for (j=0; j<nShadowCasters; j++)
+    {
+        if (FadeSh[j]==FadeCo*10) swF[j] = -1;
+        if (FadeSh[j]==FadeCo*3) swF[j] = 1;
+        if (swF[j]==1) FadeSh[j]++;
+        else FadeSh[j]--;
+    }
+
 }

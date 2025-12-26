@@ -5,11 +5,13 @@
 
 extern const int Side;
 extern const int FPS;
-extern const int WallTh;
+extern int swF[3];
+extern const int FadeCo;
+extern const float WallTh;
 extern const int WindowWidth;
 extern const int WindowHeight;
-extern const int WidthSpacing;
-extern const int Spacing;
+extern const int WidthSpace;
+extern const int Space;
 
 extern int map[25][25];
 extern Vector2 Lightcore;
@@ -17,6 +19,7 @@ extern int nExplorers;
 extern Vector2 Explorers[3];
 extern int nShadowCasters;
 extern Vector2 ShadowCasters[3];
+extern int FadeSh[3];
 
 extern Texture2D Sh1TextureRight;
 extern Texture2D Sh2TextureRight;
@@ -38,8 +41,8 @@ typedef struct WallProperty {
 } WallPro;
 
 void SET_Map_Array(int M[][25], int m, int n);
-Vector2 GET_StartPoint(int m, int n, int WidthSpacing);
-void SET_Walls(WallPro Wall);
+Vector2 GET_StartPoint(int m, int n, int WidthSpace);
+Vector2 SET_Walls(WallPro Wall);
 Vector2 GET_Start_Walls_Position_for_Draw(Vector2 StartPoint, WallPro Wall);
 Vector2 Return_Elements_Position(Vector2 Element);
 Vector2 GET_Start_Elements_Position_for_Draw(Vector2 StartPoint, Vector2 Element);
@@ -50,5 +53,9 @@ int Check_Walls(WallPro W);
 void Draw_Map(Vector2 StartPoint, int m, int n);
 int Distance_Check(Vector2 v1, Vector2 v2, Vector2 arr1[], int arr1c, Vector2 arr2[], int arr2c);
 WallPro Put_Wall(int m, int n);
+void BFS_Check(char sw, int BlocksA[][2], int ACount, int BlocksB[][2], int BCount, int *Checked);
+void Reset_Map_Blocks(int m, int n);
+void Fade_ShadowCasters();
+void Initializing_FadeSh();
 
 #endif
