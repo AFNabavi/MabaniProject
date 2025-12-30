@@ -241,20 +241,22 @@ switch(Current)
     // Next phase. Move and drawing characters. 
         char ExTextureDir = 'R';  // L = left  ,  R = right
         char ExMoveDir;
+        double t0;
+        bool ShouldShowError = false;
         case MoveExs: 
         {
-            // UPDATE:
+            // UPDATE
         // --------------------------------------------------------------------------------------------------------------------------
             Rectangle HintGame = {WindowWidth-WidthSpace, Space, WidthSpace-Space, (WindowHeight-2*Space)};
             Vector2 NewPos = GET_Start_Elements_Position_for_Draw(StartPoint, Explorers[0]);
             bool ShouldMove = false;
-            if (IsKeyPressed(KEY_W))   {ExMoveDir = 'W'; ShouldMove = true;}
-            if (IsKeyPressed(KEY_S))    {ExMoveDir = 'S'; ShouldMove = true;}
-            if (IsKeyPressed(KEY_A))    {ExMoveDir = 'A'; ExTextureDir = 'L'; ShouldMove = true;}
-            if (IsKeyPressed(KEY_D))    {ExMoveDir = 'D'; ExTextureDir = 'R'; ShouldMove = true;}
+            if (IsKeyPressed(KEY_W))   {ExMoveDir = 'W'; ShouldMove = true; ShouldShowError = false; t0 = GetTime();}
+            if (IsKeyPressed(KEY_S))    {ExMoveDir = 'S'; ShouldMove = true; ShouldShowError = false; t0 = GetTime();}
+            if (IsKeyPressed(KEY_A))    {ExMoveDir = 'A'; ExTextureDir = 'L'; ShouldMove = true; ShouldShowError = false; t0 = GetTime();}
+            if (IsKeyPressed(KEY_D))    {ExMoveDir = 'D'; ExTextureDir = 'R'; ShouldMove = true; ShouldShowError = false; t0 = GetTime();}
             
             if (ShouldMove && Can_Ex_Move(Explorers[0], ExMoveDir)) Explorers[0] = Move_Element(Explorers[0], ExMoveDir);
-            else if (ShouldMove && !(Can_Ex_Move(Explorers[0], ExMoveDir))) DrawText("\nYou can't go there. Pay attention to walls!", 300, 50, 24, RED);
+            else if (ShouldMove && !(Can_Ex_Move(Explorers[0], ExMoveDir))) {ShouldShowError = true;}
 
         // --------------------------------------------------------------------------------------------------------------------------
             
@@ -263,8 +265,12 @@ switch(Current)
             BeginDrawing();
             ClearBackground(RAYWHITE);
             Draw_Map(StartPoint, m, n);
+
             if (ExTextureDir == 'R') DrawTexture(Ex1TextureRight, NewPos.x, NewPos.y, WHITE);
             else DrawTexture(Ex1TextureLeft, NewPos.x, NewPos.y, WHITE);
+
+            if (ShouldShowError) if (GetTime() - t0 <= 1.0) DrawText("\nYou can't go there. Pay attention to walls!", 300, 50, 24, RED);
+            
             DrawRectangleRoundedLinesEx(HintGame, 0.1f, 20, 1.0f, RED);   
             EndDrawing();
         // --------------------------------------------------------------------------------------------------------------------------
