@@ -1,5 +1,5 @@
 // TODO: 
-// 0. fix Return_Element_Position for charachter pos.
+// 0. write a function for Explorer moving (line 240 to 260).
 //  1. fix shadow caster based on the closest explorer in direction of sh func (wall)
 //  2. amend hint box
 
@@ -30,7 +30,6 @@ typedef enum {TitleScreen, GameScreen, EndScreen} Screen;
 typedef enum {GET, MoveExs, MoveShs} Level;
 
 bool ShowTitleNote3 = false;    // Flag to show third title note after click, for input prompt.
-bool EndGame = false;   // Flag for game end, transitions to EndScreen.
 bool Win = false;   // Flag for player win, affects EndScreen.
 bool Init_FadeSh = true;
 
@@ -55,6 +54,8 @@ Ex2TextureLeft = LoadTexture("source\\explorer2_left_image.png");
 Ex3TextureLeft = LoadTexture("source\\explorer3_left_image.png");
 LiTexture = LoadTexture("source\\light_core_image.png");
 Music music = LoadMusicStream("source\\main_music.ogg");
+Sound VictorySound = LoadSound("source\\victory_sound.wav");
+Sound GameOverSound = LoadSound("source\\game_over_sound.wav");
 
 Screen Current = TitleScreen;   // Current screen, starts at TitleScreen.
 Level State = GET;   // Current level, starts at GET for inputs.
@@ -132,15 +133,16 @@ switch(Current)
         
             nExplorers = 1; 
             
-        // Reads the number of shadowcasters. Only in the range 1 and 3.
-            InputAgain = true;
-            do 
-            {
-                printf("\nEnter shadowcaster(s) number (between 1 and 3): ");
-                scanf("%d", &nShadowCasters);
-                if (nShadowCasters>=1 && nShadowCasters<=3) InputAgain = false;
-                else printf("Pay attention to limits! Try again.");
-            } while (InputAgain);
+        // // Reads the number of shadowcasters. Only in the range 1 and 3.
+        //     InputAgain = true;
+        //     do 
+        //     {
+        //         printf("\nEnter shadowcaster(s) number (between 1 and 3): ");
+        //         scanf("%d", &nShadowCasters);
+        //         if (nShadowCasters>=1 && nShadowCasters<=3) InputAgain = false;
+        //         else printf("Pay attention to limits! Try again.");
+        //     } while (InputAgain);
+            nShadowCasters = 1;
 
         // Reads lightcore position. Accepts only coordinates in the range 0..n-1 (x) and 0..m-1 (y).
             Lightcore.x = (float) (rand()%n); Lightcore.y = (float) (rand()%m);
@@ -255,9 +257,15 @@ switch(Current)
             if (IsKeyPressed(KEY_A))    {ExMoveDir = 'A'; ExTextureDir = 'L'; ShouldMove = true; ShouldShowError = false; t0 = GetTime();}
             if (IsKeyPressed(KEY_D))    {ExMoveDir = 'D'; ExTextureDir = 'R'; ShouldMove = true; ShouldShowError = false; t0 = GetTime();}
             
-            if (ShouldMove && Can_Ex_Move(Explorers[0], ExMoveDir)) Explorers[0] = Move_Element(Explorers[0], ExMoveDir);
-            else if (ShouldMove && !(Can_Ex_Move(Explorers[0], ExMoveDir))) {ShouldShowError = true;}
+            if (ShouldMove && Can_Ex_Move_for_Walls(Explorers[0], ExMoveDir)) 
+                Explorers[0] = Move_Element(Explorers[0], ExMoveDir);
+            else if (ShouldMove && !(Can_Ex_Move_for_Walls(Explorers[0], ExMoveDir))) 
+                ShouldShowError = true;
 
+            if (ShouldMove && !Win_or_Lose(Explorers[0], ShadowCasters, nShadowCasters, Lightcore)) 
+                {Current = EndScreen; Win = false; break;}
+            else if (ShouldMove && Win_or_Lose(Explorers[0], ShadowCasters, nShadowCasters, Lightcore) == 1)
+                {Current = EndScreen; Win = true; break;}
         // --------------------------------------------------------------------------------------------------------------------------
             
             // DRAWING
@@ -270,7 +278,7 @@ switch(Current)
             else DrawTexture(Ex1TextureLeft, NewPos.x, NewPos.y, WHITE);
 
             if (ShouldShowError) if (GetTime() - t0 <= 1.0) DrawText("\nYou can't go there. Pay attention to walls!", 300, 50, 24, RED);
-            
+
             DrawRectangleRoundedLinesEx(HintGame, 0.1f, 20, 1.0f, RED);   
             EndDrawing();
         // --------------------------------------------------------------------------------------------------------------------------
@@ -288,9 +296,14 @@ switch(Current)
     break;
     }
 
+    bool HasBeenPlayed = false;
     case EndScreen: 
     {
-
+        BeginDrawing();
+        ClearBackground(RAYWHITE);
+        if (Win == false) {DrawText("GAME OVER!", 442, 305, 40, RED); if (!HasBeenPlayed) {PlaySound(GameOverSound); HasBeenPlayed = true;}}
+        else {DrawText("VICTORY!", 466, 305, 40, RED); if (!HasBeenPlayed) {PlaySound(VictorySound); HasBeenPlayed = true;}}
+        EndDrawing();
         break;
     }
 }
@@ -303,7 +316,7 @@ UnloadTexture(Sh1TextureRight); UnloadTexture(Sh2TextureRight); UnloadTexture(Sh
 UnloadTexture(Ex1TextureRight); UnloadTexture(Ex2TextureRight); UnloadTexture(Ex3TextureRight);
 UnloadTexture(Sh1TextureLeft); UnloadTexture(Sh2TextureLeft); UnloadTexture(Sh3TextureLeft);
 UnloadTexture(Ex1TextureLeft); UnloadTexture(Ex2TextureLeft); UnloadTexture(Ex3TextureLeft);
-UnloadMusicStream(music);
+UnloadMusicStream(music); UnloadSound(GameOverSound); UnloadSound(VictorySound);
 
 return 0;
 }

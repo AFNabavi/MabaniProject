@@ -58,6 +58,7 @@ void Reset_Map_Blocks(int m, int n);
 void Fade_ShadowCasters();
 void Initializing_FadeSh();
 Vector2 Move_Element(Vector2 E, char Dir);
-int Can_Ex_Move(Vector2 E, char Dir);
+int Can_Ex_Move_for_Walls(Vector2 E, char Dir);
+int Win_or_Lose(Vector2 E, Vector2 Sh[], int nSh, Vector2 L);
 
 #endif

@@ -538,13 +538,27 @@ draws an element when it is moving with a constant speed.
     return v;
 }
 
-int Can_Ex_Move(Vector2 E, char Dir)
+int Can_Ex_Move_for_Walls(Vector2 E, char Dir)
 {
     int x = E.x, y = E.y;
-           if (Dir == 'W') {if (map[y-1][x] == 0  || map[y-1][x] == -1) return 0;}
+    if (Dir == 'W') {if (map[y-1][x] == 0  || map[y-1][x] == -1) return 0;}
     else if (Dir == 'S') {if (map[y+1] [x] == 0  ||  map[y+1][x] == -1) return 0;}
     else if (Dir == 'A') {if (map[y][x-1] == 0  ||  map[y][x-1] == -1) return 0;}
     else if (Dir == 'D') {if (map[y][x+1] == 0  ||  map[y][x+1] == -1) return 0;}
     
     return  1;
 }
+
+int Win_or_Lose(Vector2 E, Vector2 Sh[], int nSh, Vector2 L)
+{
+    int Exx = E.x, Exy = E.y, Lx = L.x, Ly = L.y;
+    int Shx, Shy;
+    for (int i=0; i<nSh; i++)
+    {
+        Shx = Sh[i].x; Shy = Sh[i].y;
+        if (Exx == Shx  &&  Exy == Shy) return 0;
+    }
+    if (Exx == Lx  &&  Exy == Ly) return 1;
+    return -1;
+}
+
