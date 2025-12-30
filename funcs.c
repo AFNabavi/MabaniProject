@@ -14,19 +14,12 @@ const int Space = 30;    // This is for distance of top and bottom of map and us
 const int Side = (WindowHeight - 2*Space)/12;     // Side length of every squre in map
 int map[25][25];    // Max size for map  
 
-Vector2 Lightcore;
+Vector2 Lightcore = {0.0f};
 int nExplorers;
-Vector2 Explorers[3];
+Vector2 Explorers[3] = {0.0f};
 int nShadowCasters;
-Vector2 ShadowCasters[3];
+Vector2 ShadowCasters[3] = {0.0f};
 int FadeSh[3];
-
-// Load textures
-// Texture2D ShTextureRight;
-// Texture2D ExTextureRight;
-// Texture2D ShTextureLeft;
-// Texture2D ExTextureLeft;
-// Texture2D LiTexture;
 
 void SET_Map_Array(int M[][25], int m, int n)
 {
@@ -56,10 +49,10 @@ MapSize is derived from (m, n) and tile size.
 Horizontal Space (WidthSpace) is subtracted before centering.
 */
     Vector2 MapSize, StartPoint;
-    MapSize.x = n*Side;
-    MapSize.y = m*Side;
-    StartPoint.x = ((WindowWidth - WidthSpace) - MapSize.x)/2;
-    StartPoint.y = ((WindowHeight) - MapSize.y)/2;
+    MapSize.x = (float)n*Side;
+    MapSize.y = (float)m*Side;
+    StartPoint.x = ((WindowWidth - WidthSpace) - MapSize.x)/2.0;
+    StartPoint.y = ((WindowHeight) - MapSize.y)/2.0;
     return StartPoint;
 }
 
@@ -105,14 +98,14 @@ Returned Vector2 is the top-left draw point.
     Vector2 S;
     if(Wall.HorV == 'H' || Wall.HorV == 'h')
     {
-        S.y = StartPoint.y + ((Wall.Position.y)/2)*Side;
-        S.x = StartPoint.x + ((Wall.Position.x - 1)/2)*Side;
+        S.y = StartPoint.y + ((Wall.Position.y)/2.0)*Side;
+        S.x = StartPoint.x + ((Wall.Position.x - 1)/2.0)*Side;
         return S;
     }
     else 
     {
-        S.y = StartPoint.y + ((Wall.Position.y - 1)/2)*Side;
-        S.x = StartPoint.x + ((Wall.Position.x)/2)*Side;
+        S.y = StartPoint.y + ((Wall.Position.y - 1)/2.0)*Side;
+        S.x = StartPoint.x + ((Wall.Position.x)/2.0)*Side;
         return S;
     }
 }
@@ -123,8 +116,8 @@ Vector2 Return_Elements_Position(Vector2 Element)
 Converts a logical element position to its corresponding map-grid index.
 Each element maps to (2x+1, 2y+1) in the expanded grid.
 */
-    int i = 2*Element.x + 1;
-    int j = 2*Element.y + 1;
+    float i = 2*Element.x + 1.0;
+    float j = 2*Element.y + 1.0;
     Vector2 Result; Result.x = i; Result.y = j;
     return Result;
 }
@@ -135,8 +128,8 @@ Vector2 GET_Start_Elements_Position_for_Draw(Vector2 StartPoint, Vector2 Element
 Converts a map-grid coordinate to the on-screen center of its tile.
 Screen position = StartPoint + (Element * Side/2).
 */
-        int i = StartPoint.x + (Element.x-1)*Side/2 + 2;
-        int j = StartPoint.y + (Element.y-1)*Side/2 + 3;
+        float i = StartPoint.x + (Element.x-1.0f)*Side/2 + 2.0f;
+        float j = StartPoint.y + (Element.y-1.0f)*Side/2 + 3.0f;
         Vector2 Position = {i, j};
         return Position;
 }
@@ -252,7 +245,7 @@ Wall color and thickness rules based on map[j][i] value:
     {
         for (i=1; i<2*n+1; i+=2)
         {
-            W.Position.x = i; W.Position.y = j; W.HorV = 'H';
+            W.Position.x = (float)i; W.Position.y = (float)j; W.HorV = 'H';
             StartP = GET_Start_Walls_Position_for_Draw(StartPoint, W);
             EndP.x = StartP.x + Side; EndP.y = StartP.y;
             if (map[j][i] == 1) DrawLineEx(StartP, EndP, 1, B);
@@ -267,7 +260,7 @@ Wall color and thickness rules based on map[j][i] value:
     {
         for (j=1 ; j<2*m+1; j+=2)
         {
-            W.Position.x = i; W.Position.y = j; W.HorV = 'V';
+            W.Position.x = (float)i; W.Position.y = (float)j; W.HorV = 'V';
             StartP = GET_Start_Walls_Position_for_Draw(StartPoint, W);
             EndP.x = StartP.x; EndP.y = StartP.y + Side;
             if (map[j][i] == 1) DrawLineEx(StartP, EndP, 1, B);
@@ -281,29 +274,29 @@ Wall color and thickness rules based on map[j][i] value:
     Vector2 S = GET_Start_Elements_Position_for_Draw(StartPoint, Lightcore);
     DrawTexture(LiTexture, S.x, S.y, WHITE);
 
-// Draw explorers (facing toward lightcore)
-    for (i=0; i<nExplorers; i++)
-    {
-        Vector2 S = GET_Start_Elements_Position_for_Draw(StartPoint, Explorers[i]);
-        if (i==0)
-        {
-        int Direction = Direction_of_Explorers(Explorers[i]);
-        if (Direction == 1) DrawTexture(Ex1TextureRight, S.x, S.y, WHITE);
-        else DrawTexture(Ex1TextureLeft, S.x, S.y, WHITE);
-        }
-        else if (i==1)
-        {
-        int Direction = Direction_of_Explorers(Explorers[i]);
-        if (Direction == 1) DrawTexture(Ex2TextureRight, S.x, S.y, WHITE);
-        else DrawTexture(Ex2TextureLeft, S.x, S.y, WHITE);
-        }
-        else if (i==2)
-        {
-        int Direction = Direction_of_Explorers(Explorers[i]);
-        if (Direction == 1) DrawTexture(Ex3TextureRight, S.x, S.y, WHITE);
-        else DrawTexture(Ex3TextureLeft, S.x, S.y, WHITE);
-        }
-    }
+// // Draw explorers (facing toward lightcore)
+//     for (i=0; i<nExplorers; i++)
+//     {
+//         Vector2 S = GET_Start_Elements_Position_for_Draw(StartPoint, Explorers[i]);
+//         if (i==0)
+//         {
+//         int Direction = Direction_of_Explorers(Explorers[i]);
+//         if (Direction == 1) DrawTexture(Ex1TextureRight, S.x, S.y, WHITE);
+//         else DrawTexture(Ex1TextureLeft, S.x, S.y, WHITE);
+//         }
+//         else if (i==1)
+//         {
+//         int Direction = Direction_of_Explorers(Explorers[i]);
+//         if (Direction == 1) DrawTexture(Ex2TextureRight, S.x, S.y, WHITE);
+//         else DrawTexture(Ex2TextureLeft, S.x, S.y, WHITE);
+//         }
+//         else if (i==2)
+//         {
+//         int Direction = Direction_of_Explorers(Explorers[i]);
+//         if (Direction == 1) DrawTexture(Ex3TextureRight, S.x, S.y, WHITE);
+//         else DrawTexture(Ex3TextureLeft, S.x, S.y, WHITE);
+//         }
+//     }
 
 // Draw shadow casters (facing toward nearest explorer)
     for (i=0; i<nShadowCasters; i++)
@@ -339,27 +332,24 @@ Computes distance between v1 and v2 and return 1 if it is valid otherwise, 0.
     float dx, dy;
 
     // check v2
-    dx = 2*v1.x+1 - v2.x;
-    dy = 2*v1.y+1 - v2.y;
+    dx = 2*v1.x+1.0f - v2.x;
+    dy = 2*v1.y+1.0f - v2.y;
     if (dx*dx + dy*dy < 16.0f) return 0;
-    // printf("\nE&light dx=%.1f dy=%.1f", dx, dy);
 
     // check arr1
     for (int i = 0; i < arr1c; i++)
     {
-        dx = 2*v1.x+1 - arr1[i].x;
-        dy = 2*v1.y+1 - arr1[i].y;
+        dx = 2*v1.x+1.0f - arr1[i].x;
+        dy = 2*v1.y+1.0f - arr1[i].y;
         if (dx*dx + dy*dy < 16.0f) return 0;
-    // else printf("\nE&ex dx=%.1f dy=%.1f", dx, dy);
     }
 
     // check arr2
     for (int i = 0; i < arr2c; i++)
     {
-        dx = 2*v1.x+1 - arr2[i].x;
-        dy = 2*v1.y+1 - arr2[i].y;
+        dx = 2*v1.x+1.0f - arr2[i].x;
+        dy = 2*v1.y+1.0f - arr2[i].y;
         if (dx*dx + dy*dy < 16.0f) return 0;
-    // else printf("\nE&sh dx=%.1f dy=%.1f", dx, dy);
     }
 
     return 1;
@@ -379,8 +369,8 @@ Randomly selects a cell (x, y) and wall orientation.
     else HorV = 'V';
     
     WallPro w;
-    w.Position.x = x;
-    w.Position.y = y;
+    w.Position.x = (float)x;
+    w.Position.y = (float)y;
     w.HorV = HorV;
 
     return w;
@@ -532,5 +522,29 @@ Fade direction switches at predefined min and max thresholds.
         if (swF[j]==1) FadeSh[j]++;
         else FadeSh[j]--;
     }
+}
 
+Vector2 Move_Element(Vector2 E, char Dir)
+{
+/*
+draws an element when it is moving with a constant speed.
+*/
+    const float ElementSpeed = 2.0;
+    Vector2 v = E;
+    if (Dir == 'D') v.x += ElementSpeed;
+    else if (Dir == 'W') v.y -= ElementSpeed;
+    else if (Dir == 'A') v.x -= ElementSpeed;
+    else if (Dir == 'S') v.y += ElementSpeed;
+    return v;
+}
+
+int Can_Ex_Move(Vector2 E, char Dir)
+{
+    int x = E.x, y = E.y;
+           if (Dir == 'W') {if (map[y-1][x] == 0  || map[y-1][x] == -1) return 0;}
+    else if (Dir == 'S') {if (map[y+1] [x] == 0  ||  map[y+1][x] == -1) return 0;}
+    else if (Dir == 'A') {if (map[y][x-1] == 0  ||  map[y][x-1] == -1) return 0;}
+    else if (Dir == 'D') {if (map[y][x+1] == 0  ||  map[y][x+1] == -1) return 0;}
+    
+    return  1;
 }

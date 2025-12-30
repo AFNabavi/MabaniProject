@@ -57,5 +57,7 @@ void BFS_Check(char sw, int BlocksA[][2], int ACount, int BlocksB[][2], int BCou
 void Reset_Map_Blocks(int m, int n);
 void Fade_ShadowCasters();
 void Initializing_FadeSh();
+Vector2 Move_Element(Vector2 E, char Dir);
+int Can_Ex_Move(Vector2 E, char Dir);
 
 #endif

@@ -1,4 +1,5 @@
 // TODO: 
+// 0. fix Return_Element_Position for charachter pos.
 //  1. fix shadow caster based on the closest explorer in direction of sh func (wall)
 //  2. amend hint box
 
@@ -7,6 +8,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include "raylib.h"
+#include "raymath.h"
 #include "funcs.h"
 
 Texture2D Sh1TextureRight; Texture2D Sh2TextureRight; Texture2D Sh3TextureRight;
@@ -96,7 +98,7 @@ switch(Current)
         break;
     }
 
-    case GameScreen: 
+    case GameScreen:
     {
     UpdateMusicStream(music);
     switch(State)
@@ -118,16 +120,18 @@ switch(Current)
             WallPro W;    // Gets coordinates of walls and save it as a vector2
             StartPoint = GET_StartPoint(m, n, WidthSpace);    // The upper-left corner of the map
 
-        // Reads the number of explorers. Only in the range 1 and 3.
-            InputAgain = true;
-            do
-            {
-                printf("\nEnter explorer(s) number (between 1 and 3): ");
-                scanf("%d", &nExplorers);
-                if (nExplorers>=1 && nExplorers<=3) InputAgain = false;
-                else printf("Pay attention to limits! try again.");
-            } while (InputAgain);
-
+        // // Reads the number of explorers. Only in the range 1 and 3.
+        //     InputAgain = true;
+        //     do
+        //     {
+        //         printf("\nEnter explorer(s) number (between 1 and 3): ");
+        //         scanf("%d", &nExplorers);
+        //         if (nExplorers>=1 && nExplorers<=3) InputAgain = false;
+        //         else printf("Pay attention to limits! try again.");
+        //     } while (InputAgain);
+        
+            nExplorers = 1; 
+            
         // Reads the number of shadowcasters. Only in the range 1 and 3.
             InputAgain = true;
             do 
@@ -139,8 +143,8 @@ switch(Current)
             } while (InputAgain);
 
         // Reads lightcore position. Accepts only coordinates in the range 0..n-1 (x) and 0..m-1 (y).
-            E.x = rand()%n; E.y = rand()%m;
-            Lightcore = Return_Elements_Position(E);
+            Lightcore.x = (float) (rand()%n); Lightcore.y = (float) (rand()%m);
+            Lightcore = Return_Elements_Position(Lightcore);
 
             int numberExNow = 0, numberShNow = 0;
         // Reads every coordinate of explorers. Only in the range 0..n-1 (x) and 0..m-1 (y).
@@ -149,12 +153,12 @@ switch(Current)
                 InputAgain = true;
                 do
                 {
-                    E.x = rand()%n; E.y = rand()%m;
+                    E.x = (float) (rand()%n); E.y = (float) (rand()%m); 
                     if (Check_Elements(E, numberExNow, numberShNow) && Distance_Check(E, Lightcore, Explorers, numberExNow, ShadowCasters, numberShNow)) 
                     {
                         InputAgain = false;
                         Explorers[i] = Return_Elements_Position(E);
-                        numberExNow ++;
+                        numberExNow ++; 
                     }
                 } while (InputAgain);
             }
@@ -165,7 +169,7 @@ switch(Current)
                 InputAgain = true;
                 do
                 {
-                    E.x = rand()%n; E.y = rand()%m;
+                    E.x = (float) (rand()%n); E.y = (float) (rand()%m);
                     if (Check_Elements(E, numberExNow, numberShNow) && Distance_Check(E, Lightcore, Explorers, numberExNow, ShadowCasters, numberShNow)) 
                     {
                         InputAgain = false;
@@ -229,19 +233,42 @@ switch(Current)
             }
             Reset_Map_Blocks(m, n);
 
+            for (int i=0; i<2*m+1; i++) {for (int j=0; j<2*n+1; j++) printf("%d ", map[i][j]); printf("\n");}
             State = MoveExs;
             break;
         }
 
-    // Next phase. Move and drawing characters.     
+    // Next phase. Move and drawing characters. 
+        char ExTextureDir = 'R';  // L = left  ,  R = right
+        char ExMoveDir;
         case MoveExs: 
         {
+            // UPDATE:
+        // --------------------------------------------------------------------------------------------------------------------------
             Rectangle HintGame = {WindowWidth-WidthSpace, Space, WidthSpace-Space, (WindowHeight-2*Space)};
+            Vector2 NewPos = GET_Start_Elements_Position_for_Draw(StartPoint, Explorers[0]);
+            bool ShouldMove = false;
+            if (IsKeyPressed(KEY_W))   {ExMoveDir = 'W'; ShouldMove = true;}
+            if (IsKeyPressed(KEY_S))    {ExMoveDir = 'S'; ShouldMove = true;}
+            if (IsKeyPressed(KEY_A))    {ExMoveDir = 'A'; ExTextureDir = 'L'; ShouldMove = true;}
+            if (IsKeyPressed(KEY_D))    {ExMoveDir = 'D'; ExTextureDir = 'R'; ShouldMove = true;}
+            
+            if (ShouldMove && Can_Ex_Move(Explorers[0], ExMoveDir)) Explorers[0] = Move_Element(Explorers[0], ExMoveDir);
+            else if (ShouldMove && !(Can_Ex_Move(Explorers[0], ExMoveDir))) DrawText("\nYou can't go there. Pay attention to walls!", 300, 50, 24, RED);
+
+        // --------------------------------------------------------------------------------------------------------------------------
+            
+            // DRAWING
+        // --------------------------------------------------------------------------------------------------------------------------
             BeginDrawing();
             ClearBackground(RAYWHITE);
             Draw_Map(StartPoint, m, n);
+            if (ExTextureDir == 'R') DrawTexture(Ex1TextureRight, NewPos.x, NewPos.y, WHITE);
+            else DrawTexture(Ex1TextureLeft, NewPos.x, NewPos.y, WHITE);
             DrawRectangleRoundedLinesEx(HintGame, 0.1f, 20, 1.0f, RED);   
             EndDrawing();
+        // --------------------------------------------------------------------------------------------------------------------------
+            
             break;
         }
 
