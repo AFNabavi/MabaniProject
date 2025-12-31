@@ -132,7 +132,7 @@ switch(Current)
         //     } while (InputAgain);
         
             nExplorers = 1; 
-            
+
         // // Reads the number of shadowcasters. Only in the range 1 and 3.
         //     InputAgain = true;
         //     do 
@@ -235,65 +235,83 @@ switch(Current)
             }
             Reset_Map_Blocks(m, n);
 
-            for (int i=0; i<2*m+1; i++) {for (int j=0; j<2*n+1; j++) printf("%d ", map[i][j]); printf("\n");}
             State = MoveExs;
             break;
         }
 
-    // Next phase. Move and drawing characters. 
-        char ExTextureDir = 'R';  // L = left  ,  R = right
-        char ExMoveDir;
-        double t0;
-        bool ShouldShowError = false;
-        case MoveExs: 
-        {
-            // UPDATE
-        // --------------------------------------------------------------------------------------------------------------------------
-            Rectangle HintGame = {WindowWidth-WidthSpace, Space, WidthSpace-Space, (WindowHeight-2*Space)};
-            Vector2 NewPos = GET_Start_Elements_Position_for_Draw(StartPoint, Explorers[0]);
-            bool ShouldMove = false;
-            if (IsKeyPressed(KEY_W))   {ExMoveDir = 'W'; ShouldMove = true; ShouldShowError = false; t0 = GetTime();}
-            if (IsKeyPressed(KEY_S))    {ExMoveDir = 'S'; ShouldMove = true; ShouldShowError = false; t0 = GetTime();}
-            if (IsKeyPressed(KEY_A))    {ExMoveDir = 'A'; ExTextureDir = 'L'; ShouldMove = true; ShouldShowError = false; t0 = GetTime();}
-            if (IsKeyPressed(KEY_D))    {ExMoveDir = 'D'; ExTextureDir = 'R'; ShouldMove = true; ShouldShowError = false; t0 = GetTime();}
-            
-            if (ShouldMove && Can_Ex_Move_for_Walls(Explorers[0], ExMoveDir)) 
-                Explorers[0] = Move_Element(Explorers[0], ExMoveDir);
-            else if (ShouldMove && !(Can_Ex_Move_for_Walls(Explorers[0], ExMoveDir))) 
-                ShouldShowError = true;
+// //----------------------------------------------------------------------------------------------------------------------------
+//     // UPDATE   
+//         // width of map:
+//         InfInputs = GetKeyPressed();
+//         InfInputs = strtol()
+//         if (InfInputs > 0 && InfInputs <= 12) n = InfInputs;
 
-            if (ShouldMove && !Win_or_Lose(Explorers[0], ShadowCasters, nShadowCasters, Lightcore)) 
-                {Current = EndScreen; Win = false; break;}
-            else if (ShouldMove && Win_or_Lose(Explorers[0], ShadowCasters, nShadowCasters, Lightcore) == 1)
-                {Current = EndScreen; Win = true; break;}
-        // --------------------------------------------------------------------------------------------------------------------------
-            
-            // DRAWING
-        // --------------------------------------------------------------------------------------------------------------------------
-            BeginDrawing();
-            ClearBackground(RAYWHITE);
-            Draw_Map(StartPoint, m, n);
+//         // height of map:
+//         if (InfInputs > 0 && InfInputs <= 12) m = InfInputs;
 
-            if (ExTextureDir == 'R') DrawTexture(Ex1TextureRight, NewPos.x, NewPos.y, WHITE);
-            else DrawTexture(Ex1TextureLeft, NewPos.x, NewPos.y, WHITE);
+//         // walls count:
+//         if (InfInputs >= 0 && InfInputs <= (n-1)*(m-1)) nWalls = InfInputs;
 
-            if (ShouldShowError) if (GetTime() - t0 <= 1.0) DrawText("\nYou can't go there. Pay attention to walls!", 300, 50, 24, RED);
+// //----------------------------------------------------------------------------------------------------------------------------
+//     // DRAWING  
+//         BeginDrawing();
+//         ClearBackground(RAYWHITE);
+//         DrawRectangleRec(PopupRec, YELLOW);
+//         EndDrawing();
 
-            DrawRectangleRoundedLinesEx(HintGame, 0.1f, 20, 1.0f, RED);   
-            EndDrawing();
-        // --------------------------------------------------------------------------------------------------------------------------
-            
-            break;
+        // Next phase. Move and drawing characters.         
+            char ExTextureDir = 'R';  // L = left  ,  R = right
+            char ExMoveDir;
+            double t0;
+            bool ShouldShowError = false;
+            case MoveExs: 
+            {
+                // UPDATE
+            // --------------------------------------------------------------------------------------------------------------------------
+                Rectangle HintGame = {WindowWidth-WidthSpace, Space, WidthSpace-Space, (WindowHeight-2*Space)};
+                Vector2 NewPos = GET_Start_Elements_Position_for_Draw(StartPoint, Explorers[0]);
+                bool ShouldMove = false;
+                if (IsKeyPressed(KEY_W))   {ExMoveDir = 'W'; ShouldMove = true; ShouldShowError = false; t0 = GetTime();}
+                if (IsKeyPressed(KEY_S))    {ExMoveDir = 'S'; ShouldMove = true; ShouldShowError = false; t0 = GetTime();}
+                if (IsKeyPressed(KEY_A))    {ExMoveDir = 'A'; ExTextureDir = 'L'; ShouldMove = true; ShouldShowError = false; t0 = GetTime();}
+                if (IsKeyPressed(KEY_D))    {ExMoveDir = 'D'; ExTextureDir = 'R'; ShouldMove = true; ShouldShowError = false; t0 = GetTime();}
+
+                if (ShouldMove && Can_Ex_Move_for_Walls(Explorers[0], ExMoveDir)) 
+                    Explorers[0] = Move_Element(Explorers[0], ExMoveDir);
+                else if (ShouldMove && !(Can_Ex_Move_for_Walls(Explorers[0], ExMoveDir))) 
+                    ShouldShowError = true;
+
+                if (ShouldMove && !Win_or_Lose(Explorers[0], ShadowCasters, nShadowCasters, Lightcore)) 
+                    {Current = EndScreen; Win = false; break;}
+                else if (ShouldMove && Win_or_Lose(Explorers[0], ShadowCasters, nShadowCasters, Lightcore) == 1)
+                    {Current = EndScreen; Win = true; break;}
+            // --------------------------------------------------------------------------------------------------------------------------
+
+                // DRAWING
+            // --------------------------------------------------------------------------------------------------------------------------
+                BeginDrawing();
+                ClearBackground(RAYWHITE);
+                Draw_Map(StartPoint, m, n);
+
+                if (ExTextureDir == 'R') DrawTexture(Ex1TextureRight, NewPos.x, NewPos.y, WHITE);
+                else DrawTexture(Ex1TextureLeft, NewPos.x, NewPos.y, WHITE);
+
+                if (ShouldShowError) if (GetTime() - t0 <= 1.0) DrawText("\nYou can't go there. Pay attention to walls!", 300, 50, 24, RED);
+
+                DrawRectangleRoundedLinesEx(HintGame, 0.1f, 20, 1.0f, RED);   
+                EndDrawing();
+            // --------------------------------------------------------------------------------------------------------------------------
+
+                break;
+            }
+
+            case MoveShs: 
+            {
+                break;
+            }
+
         }
-
-        case MoveShs: 
-        {
-            break;
-        }
-
-        
-    }
-    break;
+        break;
     }
 
     bool HasBeenPlayed = false;
