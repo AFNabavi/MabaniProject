@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
 #include "raylib.h"
 #include "raymath.h"
 #include "funcs.h"
@@ -63,7 +64,7 @@ Level State = GET;   // Current level, starts at GET for inputs.
 PlayMusicStream(music);
 SetTargetFPS(FPS);
 
-int m, n, nWalls;
+int m=-1, n=-1, nWalls;
 Vector2 StartPoint;
 
 int FPScounter = 2*FPS; //That is for show TitleNote3
@@ -104,17 +105,34 @@ switch(Current)
     UpdateMusicStream(music);
     switch(State)
     {
+        bool InputAgain;
         case GET: 
         {
-        // Reads height and width of the map of game
-            bool InputAgain = true;    // Flag for re-input in validation loops.
-            do 
-            {
-                printf("\nEnter width and height of map (between 5 and 12): ");
-                scanf("%d %d", &m, &n);    // m: height map, n: width map
-                if ((m<=12 && m>=5) && (n<=12 && n>=5)) InputAgain = false; 
-                else printf("Pay attention to limits! try again.");
-            } while (InputAgain);
+        while(!WindowShouldClose())
+        {
+            BeginDrawing();
+            ClearBackground(RAYWHITE);
+            Draw_Map_Infs();
+            if (n == -1) DrawText("Click width of map", 400, 170, 30, RED);
+            else DrawText("Click height of map", 390, 170, 30, RED);
+            
+            int click = Get_Map_Infs();
+            if (click != -1) {if (n == -1) n = click; else if (m == -1) m = click;}
+            
+            EndDrawing();
+
+            if (m != -1 && n != -1) break;
+        }
+        // printf("%d %d\n", m, n);
+            // Reads height and width of the map of game
+            // InputAgain = true;    // Flag for re-input in validation loops.
+            // do 
+            // {
+            //     printf("\nEnter width and height of map (between 5 and 12): ");
+            //     scanf("%d %d", &m, &n);    // m: height map, n: width map
+            //     if ((m<=12 && m>=5) && (n<=12 && n>=5)) InputAgain = false; 
+            //     else printf("Pay attention to limits! try again.");
+            // } while (InputAgain);
             SET_Map_Array(map, m, n);
             
             Vector2 E;    // Gets coordinates of elements and save it as a vector2
@@ -185,16 +203,30 @@ switch(Current)
                 Initializing_FadeSh();
                 Init_FadeSh = false;
             }
+            
 
-        // Reads the number of walls. Only int the range 0 and (m-1)*(n-1).
-            InputAgain = true;
-            do
+        // // Reads the number of walls. Only int the range 0 and (m-1)*(n-1).
+        //     InputAgain = true;
+        //     do
+        //     {
+        //         printf("\nEnter wall(s) number (between 0 and %d): ", (m-1)*(n-1));
+        //         scanf("%d", &nWalls);
+        //         if (nWalls>=0 && nWalls<=((m-1)*(n-1))) InputAgain = false;
+        //         else printf("Pay attention to limits! Try again. ");
+        //     } while (InputAgain);
+
+        char s[5] = {'\0'};
+        while (!WindowShouldClose())
             {
-                printf("\nEnter wall(s) number (between 0 and %d): ", (m-1)*(n-1));
-                scanf("%d", &nWalls);
-                if (nWalls>=0 && nWalls<=((m-1)*(n-1))) InputAgain = false;
-                else printf("Pay attention to limits! Try again. ");
-            } while (InputAgain);
+                BeginDrawing();
+                ClearBackground(RAYWHITE);
+                Draw_Walls_Infs(s);
+    
+                char inp = GetKeyPressed();
+                if ((inp>='0' && inp<='9') || inp == ' ') Print_Number_In_String(s, inp, strlen(s));
+
+                EndDrawing();
+            }
 
         // Randomly places valid walls while preserving full map connectivity (BFS-validated)
             WallPro Wall;

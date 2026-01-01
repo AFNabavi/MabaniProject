@@ -60,5 +60,10 @@ void Initializing_FadeSh();
 Vector2 Move_Element(Vector2 E, char Dir);
 int Can_Ex_Move_for_Walls(Vector2 E, char Dir);
 int Win_or_Lose(Vector2 E, Vector2 Sh[], int nSh, Vector2 L);
+int Get_Map_Infs();
+void Draw_Map_Infs();
+void Draw_Walls_Infs(char s[]);
+char Print_Number_In_String(char s[], char ch, int len);
+
 
 #endif

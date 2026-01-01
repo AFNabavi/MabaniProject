@@ -562,3 +562,70 @@ int Win_or_Lose(Vector2 E, Vector2 Sh[], int nSh, Vector2 L)
     return -1;
 }
 
+void Draw_Map_Infs()
+{
+    const int VerMargin=220, HorMargin=225, RecHeight=100, RecWidth=130, Distance=30;
+    int n=5, m=9;
+    char nn[3], mm[3];
+    for (int i=0; i<4; i++)
+    {
+        DrawRectangleGradientV(HorMargin+i*(Distance+RecWidth), VerMargin, RecWidth, RecHeight, GOLD, YELLOW);
+        // Rectangle UpRecs = {HorMargin+i*(Distance+RecWidth), VerMargin, RecWidth, RecHeight};
+        // DrawRectangleRounded(UpRecs, 2.0f, 1.0f, YELLOW);
+        itoa(n+i, nn, 10);
+        DrawText(nn, HorMargin+i*(Distance+RecWidth)+60, VerMargin+35, 30, BLACK);
+        DrawRectangleGradientH(HorMargin+i*(Distance+RecWidth), (VerMargin+Distance+RecHeight), RecWidth, RecHeight, YELLOW, GOLD);
+        // Rectangle DownRecs = {HorMargin+i*(Distance+RecWidth), (VerMargin+Distance+RecHeight), RecWidth, RecHeight};
+        // DrawRectangleRounded(DownRecs, 2.0f, 1.0f, YELLOW);
+        itoa(m+i, mm, 10);
+        DrawText(mm, HorMargin+i*(Distance+RecWidth)+60, VerMargin+Distance+RecHeight+35, 30, BLACK);
+    }
+    
+}
+
+int Get_Map_Infs()
+{
+    const int VerMargin=220, HorMargin=225, RecHeight=100, RecWidth=130, Distance=30;
+
+    Vector2 MousePos = GetMousePosition();
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+        for (int i=0; i<4; i++)
+        {
+        if (MousePos.y >= VerMargin && MousePos.y <= (VerMargin+RecHeight)) 
+            if (MousePos.x >= (HorMargin+i*(Distance+RecWidth)) && MousePos.x <= (HorMargin+i*(Distance+RecWidth)+RecWidth)) return (i+5);
+
+        if (MousePos.y >= VerMargin+Distance+RecHeight && MousePos.y <= VerMargin+Distance+RecHeight+RecHeight)
+            if (MousePos.x >= (HorMargin+i*(Distance+RecWidth)) && MousePos.x <= (HorMargin+i*(Distance+RecWidth)+RecWidth)) return (i+9);
+        }  
+    return -1;
+}
+
+void Draw_Walls_Infs(char s[])
+{
+    Rectangle OutRecLines = {200, 150, 700, 350};
+    Rectangle InpShower = {460, 350, 85, 50};
+    Rectangle SubmitButton = {550, 350, 85, 50};
+    Color color = {195, 226, 245, 255};
+
+    DrawRectangleRounded(OutRecLines, 0.3, 2.0, color);
+    DrawRectangleRoundedLines(InpShower, 0.5, 4.0, GRAY);
+    DrawRectangleRoundedLines(SubmitButton, 0.5, 4.0, GRAY);    
+    DrawText("Enter the number of walls you want:", OutRecLines.x+75, OutRecLines.y+50, 30, RED);
+    DrawText(s, InpShower.x+25, InpShower.y+15, 20, BLACK);
+    DrawText("SUBMIT", SubmitButton.x+8, SubmitButton.y+15, 19, DARKGRAY);
+}
+
+char Print_Number_In_String(char s[], char ch, int len)
+{
+    if (len<4)
+    {
+        s[len] = ch;
+        s[len+1] = '\0';
+    }
+    if (ch == ' ') 
+    {
+        s[len-1] = '\0';
+    }
+    return '\0';
+}
+
