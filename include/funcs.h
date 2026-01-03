@@ -21,6 +21,17 @@ extern int nShadowCasters;
 extern Vector2 ShadowCasters[3];
 extern int FadeSh[3];
 
+extern int minlength;
+extern char FirstMove;
+extern char SecondMove;
+typedef struct{
+    int Length;
+    char FM;
+    char SM;
+    int indexEx;
+}ShcMoveData;
+
+
 extern Texture2D Sh1TextureRight;
 extern Texture2D Sh2TextureRight;
 extern Texture2D Sh3TextureRight;
@@ -54,7 +65,7 @@ void Draw_Map(Vector2 StartPoint, int m, int n);
 int Distance_Check(Vector2 v1, Vector2 v2, Vector2 arr1[], int arr1c, Vector2 arr2[], int arr2c);
 WallPro Put_Wall(int m, int n);
 void BFS_Check(char sw, int BlocksA[][2], int ACount, int BlocksB[][2], int BCount, int *Checked);
-void Reset_Map_Blocks(int m, int n);
+void Reset_Map_Blocks_for_BFS(int m, int n);
 void Fade_ShadowCasters();
 void Initializing_FadeSh();
 Vector2 Move_Element(Vector2 E, char Dir);
@@ -64,6 +75,9 @@ int Get_Map_Infs();
 void Draw_Map_Infs();
 void Draw_Walls_Infs(char s[]);
 char Print_Number_In_String(char s[], char ch, int len);
+void Reset_Map_Blocks_for_Move_Elements(int m, int n); 
+void Move_Shcs(Vector2 Ex, int j, int i, int Len, char FMove, char SMove);
+void Set_Move_of_Sh_in_Map(ShcMoveData ShM, int index);
 
 
 #endif

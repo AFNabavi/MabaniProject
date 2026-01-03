@@ -21,6 +21,10 @@ int nShadowCasters;
 Vector2 ShadowCasters[3] = {0.0f};
 int FadeSh[3];
 
+int minlength;
+char FirstMove;
+char SecondMove;
+
 void SET_Map_Array(int M[][25], int m, int n)
 {
 /*
@@ -475,7 +479,7 @@ marking visited cells and counting total reachable blocks via `Checked`.
 
 }
 
-void Reset_Map_Blocks(int m, int n)
+void Reset_Map_Blocks_for_BFS(int m, int n)
 {
 /*
 Resets all logical map blocks to unvisited state.
@@ -490,6 +494,22 @@ Sets inner block cells to 1 and marks the start cell (1,1) as visited.
         }
     }
     map[1][1] = 0;
+}
+
+void Reset_Map_Blocks_for_Move_Elements(int m, int n) {
+    int i, j;
+    for (j=1; j<2*m+1; j+=2) {
+        for (i=1; i<2*n+1; i+=2) {
+            map[j][i] = 1;
+        }
+    }
+    map[(int)Lightcore.y][(int)Lightcore.x] = 3;
+    for(i=0; i<nShadowCasters; i++) {
+        map[(int)ShadowCasters[i].y][(int)ShadowCasters[i].x] = -1;
+    }
+    for(i=0; i<nExplorers; i++) {
+        map[(int)Explorers[i].y][(int)Explorers[i].x] = 2;
+    }
 }
 
 void Initializing_FadeSh()
@@ -627,5 +647,121 @@ char Print_Number_In_String(char s[], char ch, int len)
         s[len-1] = '\0';
     }
     return '\0';
+}
+
+
+void Move_Shcs(Vector2 Ex, int j, int i, int Len, char FMove, char SMove) {
+    if(j == Ex.y && i == Ex.x) {
+        if(Len<minlength) {
+            minlength = Len;
+            FirstMove = FMove;
+            SecondMove = SMove;
+        }    
+        return;
+    }
+    map[i][j] = 0; //so important
+    if(map[j-1][i]==1 && map[j-2][i]==1) {
+        if(Len==0) FMove = 'U';
+        if(Len==1) SMove = 'U';
+        Move_Shcs(Ex, j-2, i, Len+1, FMove, SMove);
+    }
+    if(map[j][i+1]==1 && map[j][i+2]==1) {
+        if(Len==0) FMove = 'R';
+        if(Len==1) SMove = 'R';
+        Move_Shcs(Ex, j, i+2, Len+1, FMove, SMove);
+    }
+    if(map[j+1][i]==1 && map[j+2][i]==1) {
+        if(Len==0) FMove = 'D';
+        if(Len==1) SMove = 'D';
+        Move_Shcs(Ex, j+2, i, Len+1, FMove, SMove);
+    }
+    if(map[j][i-1]==1 && map[j][i-2]==1) {
+        if(Len==0) FMove = 'L';
+        if(Len==1) SMove = 'L';
+        Move_Shcs(Ex, j, i-2, Len+1, FMove, SMove);
+    }
+    map[j][i] = 1;
+}
+
+void Set_Move_of_Sh_in_Map(ShcMoveData ShM, int index) {
+    map[(int)ShadowCasters[index].y][(int)ShadowCasters[index].x] = 1;
+    if (ShM.FM == 'U') {
+        int j = ShadowCasters[index].y - 2;
+        int i = ShadowCasters[index].x;
+        if (ShM.SM == 'U') { 
+            map[j-2][i] = -1;
+            ShadowCasters[index].x = i; 
+            ShadowCasters[index].y = j-2;
+        }
+    
+        else if (ShM.SM == 'R') {
+            map[j][i+2] = -1;
+            ShadowCasters[index].x = i+2; 
+            ShadowCasters[index].y = j;
+        }
+    
+        else if (ShM.SM == 'L') {
+            map[j][i-2] = -1;
+            ShadowCasters[index].x = i-2; 
+            ShadowCasters[index].y = j;
+        }
+    }
+    else if (ShM.FM == 'R') {
+        int j = ShadowCasters[index].y;
+        int i = ShadowCasters[index].x + 2;
+        if (ShM.SM == 'U') {
+            map[j-2][i] = -1;
+            ShadowCasters[index].x = i; 
+            ShadowCasters[index].y = j-2;
+        }
+        else if (ShM.SM == 'R') {
+            map[j][i+2] = -1;
+            ShadowCasters[index].x = i+2; 
+            ShadowCasters[index].y = j;
+        }
+        else if (ShM.SM == 'D') {
+            map[j+2][i] = -1;
+            ShadowCasters[index].x = i; 
+            ShadowCasters[index].y = j+2;
+        }
+    } 
+    else if (ShM.FM == 'D') {
+        int j = ShadowCasters[index].y + 2;
+        int i = ShadowCasters[index].x;
+        if (ShM.SM == 'D') {
+            map[j+2][i] = -1;
+            ShadowCasters[index].x = i; 
+            ShadowCasters[index].y = j+2;
+        }
+        else if (ShM.SM == 'R') {
+            map[j][i+2] = -1;
+            ShadowCasters[index].x = i+2; 
+            ShadowCasters[index].y = j;
+        }
+        else if (ShM.SM == 'L') {
+            map[j][i-2] = -1;
+            ShadowCasters[index].x = i-2; 
+            ShadowCasters[index].y = j;
+        }
+    }
+    else if (ShM.FM == 'L') {
+        int j = ShadowCasters[index].y;
+        int i = ShadowCasters[index].x - 2;
+        if (ShM.SM == 'U') {
+            map[j-2][i] = -1;
+            ShadowCasters[index].x = i; 
+            ShadowCasters[index].y = j-2;
+        }
+        else if (ShM.SM == 'D') {
+            map[j+2][i] = -1;
+            ShadowCasters[index].x = i; 
+            ShadowCasters[index].y = j+2;
+        }
+        else if (ShM.SM == 'L') {
+            map[j][i-2] = -1; 
+            ShadowCasters[index].x = i-2; 
+            ShadowCasters[index].y = j;
+        }
+    }
 }
 

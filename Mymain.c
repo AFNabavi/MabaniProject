@@ -247,7 +247,7 @@ switch(Current)
                             InputWall = false;
                         }
                     } while (InputWall);
-                    Reset_Map_Blocks(m, n);
+                    Reset_Map_Blocks_for_BFS(m, n);
                     int BlocksA[3*n][2];
                     int BlocksB[3*n][2];
                     int ACount = 1;
@@ -265,7 +265,6 @@ switch(Current)
                     }
                 } while (InputAgain);
             }
-            Reset_Map_Blocks(m, n);
 
             State = MoveExs;
             break;
@@ -337,8 +336,28 @@ switch(Current)
                 break;
             }
 
-            case MoveShs: 
-            {
+            case MoveShs: {
+                
+                ShcMoveData ShM[nShadowCasters];
+                int i;
+                for (i=0; i<nShadowCasters; i++) {
+                    ShM[i].Length = 200;
+                    int j;
+                    for (j=0; j<nExplorers; j++) {
+                        Reset_Map_Blocks_for_Move_Elements(m, n);
+                        Move_Shcs(Explorers[j], Explorers[j].y, Explorers[j].x, 0, '\0', '\0');
+                        if(minlength<ShM[i].Length) {
+                            ShM[i].Length = minlength;
+                            ShM[i].FM = FirstMove;
+                            ShM[i].SM = SecondMove;
+                            ShM[i].indexEx = j;
+                        }
+                    }
+                    Set_Move_of_Sh_in_Map(ShM[i], i);
+                }
+
+                int delay = 2*FPS;
+                
                 break;
             }
 
