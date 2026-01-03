@@ -675,6 +675,7 @@ int Submit_Button(int n, int m, char inp[], int inpLen)
              MousePos.y >= SubmitButton.y &&
              MousePos.y <= (SubmitButton.y+SubmitButton.height)) 
                 if (InpNumber>0 && InpNumber<=((n-1)*(m-1)))
+                    return 1;
     return 0;
 }
 
