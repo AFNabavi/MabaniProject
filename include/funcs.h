@@ -62,8 +62,11 @@ int Can_Ex_Move_for_Walls(Vector2 E, char Dir);
 int Win_or_Lose(Vector2 E, Vector2 Sh[], int nSh, Vector2 L);
 int Get_Map_Infs();
 void Draw_Map_Infs();
-void Draw_Walls_Infs(char s[]);
+void Draw_Walls_Infs(char s[], int n, int m);
 char Print_Number_In_String(char s[], char ch, int len);
+void ItoS(char *str, int n);
+int StoI(char s[], int sLen);
+int Submit_Button(int n, int m, char inp[], int inpLen);
 
 
 #endif

@@ -215,16 +215,18 @@ switch(Current)
         //         else printf("Pay attention to limits! Try again. ");
         //     } while (InputAgain);
 
-        char s[5] = {'\0'};
+        char s[5];
+        int tempN;
         while (!WindowShouldClose())
             {
                 BeginDrawing();
                 ClearBackground(RAYWHITE);
-                Draw_Walls_Infs(s);
+                Draw_Walls_Infs(s, n, m);
     
                 char inp = GetKeyPressed();
-                if ((inp>='0' && inp<='9') || inp == ' ') Print_Number_In_String(s, inp, strlen(s));
-
+                if ((inp>='0' && inp<='9') || inp == 'r' || inp == 'R') {Print_Number_In_String(s, inp, strlen(s));}
+                tempN = StoI(s, strlen(s));
+                if (Submit_Button(n, m, s, strlen(s))) {printf("\n%d",tempN); nWalls = tempN; break;}
                 EndDrawing();
             }
 

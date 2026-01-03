@@ -600,17 +600,51 @@ int Get_Map_Infs()
     return -1;
 }
 
-void Draw_Walls_Infs(char s[])
+void ItoS(char *str, int n) {
+    char *start;
+    start = str;
+    for (int i=0; n; i++) {
+        *str = (n%10) + '0';
+        str ++;
+        n /= 10;
+    }
+    *str = '\0';
+    str --;
+    for(; start<=str; str--, start++) {
+        char temp = *str;
+        *str = *start;
+        *start = temp;
+    }
+}
+
+int StoI(char s[], int sLen) {
+    int InpNumber = 0;
+    for (int i=0; i<sLen; i++) {InpNumber += (s[i] - '0'); InpNumber*=10;} InpNumber /= 10;
+    return InpNumber;
+}
+
+void Draw_Walls_Infs(char s[], int n, int m)
 {
     Rectangle OutRecLines = {200, 150, 700, 350};
     Rectangle InpShower = {460, 350, 85, 50};
     Rectangle SubmitButton = {550, 350, 85, 50};
     Color color = {195, 226, 245, 255};
+    int nm = (n-1)*(m-1), i, j, k;
+    char str1[5] = {'\0'};
+    ItoS(str1, nm);
+    char str0[] = "Enter the number of walls\nyou want (between 0 and ";
+    char str2[] = "):\n";
+    char str[70];
+    for (i=0; str0[i]; i++) str[i] = str0[i]; 
+    for (j=0; str1[j]; j++) str[i+j] = str1[j];
+    for (k=0; str2[k]; k++) str[i+j+k] = str2[k];
+    str[i+j+k] = '\0';
 
     DrawRectangleRounded(OutRecLines, 0.3, 2.0, color);
     DrawRectangleRoundedLines(InpShower, 0.5, 4.0, GRAY);
     DrawRectangleRoundedLines(SubmitButton, 0.5, 4.0, GRAY);    
-    DrawText("Enter the number of walls you want:", OutRecLines.x+75, OutRecLines.y+50, 30, RED);
+    DrawText(str, OutRecLines.x+105, OutRecLines.y+50, 30, RED);
+    DrawText("(press R to remove your input.)", OutRecLines.x+155, OutRecLines.y+120, 20, RED);
     DrawText(s, InpShower.x+25, InpShower.y+15, 20, BLACK);
     DrawText("SUBMIT", SubmitButton.x+8, SubmitButton.y+15, 19, DARKGRAY);
 }
@@ -622,10 +656,26 @@ char Print_Number_In_String(char s[], char ch, int len)
         s[len] = ch;
         s[len+1] = '\0';
     }
-    if (ch == ' ') 
+    if (ch == 'r' || ch == 'R') 
     {
         s[len-1] = '\0';
     }
     return '\0';
+}
+
+int Submit_Button(int n, int m, char inp[], int inpLen)
+{   
+    Rectangle SubmitButton = {550, 350, 85, 50};
+    Vector2 MousePos = GetMousePosition();
+    int InpNumber = StoI(inp, inpLen);
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) 
+        // if (CheckCollisionPointRec(GetMousePosition(), SubmitButton))
+        if (MousePos.x >= SubmitButton.x &&
+             MousePos.x <= (SubmitButton.x+SubmitButton.width) &&
+             MousePos.y >= SubmitButton.y &&
+             MousePos.y <= (SubmitButton.y+SubmitButton.height)) 
+            if (InpNumber>0 && InpNumber<=((n-1)*(m-1))) 
+                return 1;
+    return 0;
 }
 
