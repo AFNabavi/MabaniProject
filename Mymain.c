@@ -331,6 +331,7 @@ switch(Current)
 
                 DrawRectangleRoundedLinesEx(HintGame, 0.1f, 20, 1.0f, RED);   
                 EndDrawing();
+                State = MoveShs;
             // --------------------------------------------------------------------------------------------------------------------------
 
                 break;
@@ -355,9 +356,10 @@ switch(Current)
                     }
                     Set_Move_of_Sh_in_Map(ShM[i], i);
                 }
+                Draw_Map(StartPoint, m, n);
 
                 int delay = 2*FPS;
-                
+                State = MoveExs;
                 break;
             }
 
