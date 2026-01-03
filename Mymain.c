@@ -226,7 +226,7 @@ switch(Current)
                 char inp = GetKeyPressed();
                 if ((inp>='0' && inp<='9') || inp == 'r' || inp == 'R') {Print_Number_In_String(s, inp, strlen(s));}
                 tempN = StoI(s, strlen(s));
-                if (Submit_Button(n, m, s, strlen(s))) {printf("\n%d",tempN); nWalls = tempN; break;}
+                if (Submit_Button(n, m, s, strlen(s))) {nWalls = tempN; break;}
                 EndDrawing();
             }
 
