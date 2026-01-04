@@ -310,7 +310,7 @@ switch(Current)
                 if (IsKeyPressed(KEY_D))    {ExMoveDir = 'D'; ExTextureDir = 'R'; ShouldMove = true; ShouldShowError = false; t0 = GetTime();}
 
                 if (ShouldMove && Can_Ex_Move_for_Walls(Explorers[0], ExMoveDir)) 
-                    Explorers[0] = Move_Element(Explorers[0], ExMoveDir);
+                    {Explorers[0] = Move_Element(Explorers[0], ExMoveDir); State = MoveShs;}
                 else if (ShouldMove && !(Can_Ex_Move_for_Walls(Explorers[0], ExMoveDir))) 
                     ShouldShowError = true;
 
@@ -329,12 +329,11 @@ switch(Current)
                 if (ExTextureDir == 'R') DrawTexture(Ex1TextureRight, NewPos.x, NewPos.y, WHITE);
                 else DrawTexture(Ex1TextureLeft, NewPos.x, NewPos.y, WHITE);
 
-                if (ShouldShowError) if (GetTime() - t0 <= 1.0) DrawText("\nYou can't go there. Pay attention to walls!", 300, 50, 24, RED);
+                if (ShouldShowError) if (GetTime() - t0 <= 1.8) DrawText("\nYou can't go there. Pay attention to walls!", 300, 50, 24, RED);
 
                 DrawRectangleRoundedLinesEx(HintGame, 0.1f, 20, 1.0f, RED);   
                 EndDrawing();
             // --------------------------------------------------------------------------------------------------------------------------
-
                 break;
             }
 
@@ -343,23 +342,27 @@ switch(Current)
                 ShcMoveData ShM[nShadowCasters];
                 int i;
                 for (i=0; i<nShadowCasters; i++) {
-                    ShM[i].Length = 200;
+                    ShM[i].Length = 200; ShM[i].FM = '\0'; ShM[i].SM = '\0';
                     int j;
                     for (j=0; j<nExplorers; j++) {
                         Reset_Map_Blocks_for_Move_Elements(m, n);
-                        Move_Shcs(Explorers[j], Explorers[j].y, Explorers[j].x, 0, '\0', '\0');
+                        minlength = 200;
+                        map[(int)Explorers[j].y][(int)Explorers[j].x] = 1;
+                        Move_Shcs(Explorers[j], ShadowCasters[i].y, ShadowCasters[i].x, 0, '\0', '\0');
+                        printf(" Ex: %.0f %.0f\nMinLenght: %d  ", Explorers[j].x, Explorers[j].y, minlength);
                         if(minlength<ShM[i].Length) {
                             ShM[i].Length = minlength;
                             ShM[i].FM = FirstMove;
                             ShM[i].SM = SecondMove;
                             ShM[i].indexEx = j;
                         }
-                    }
+                    }map[(int)Explorers[j].y][(int)Explorers[j].x] = 2;
                     Set_Move_of_Sh_in_Map(ShM[i], i);
+                              if (!Win_or_Lose(Explorers[0], ShadowCasters, nShadowCasters, Lightcore)) 
+                    {Current = EndScreen; Win = false; break;}
                 }
-
-                int delay = 2*FPS;
-                
+                // int delay = 2*FPS;
+                State = MoveExs;
                 break;
             }
 

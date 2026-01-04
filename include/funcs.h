@@ -79,7 +79,7 @@ void ItoS(char *str, int n);
 int StoI(char s[], int sLen);
 int Submit_Button(int n, int m, char inp[], int inpLen);
 void Reset_Map_Blocks_for_Move_Elements(int m, int n); 
-void Move_Shcs(Vector2 Ex, int j, int i, int Len, char FMove, char SMove);
+void Move_Shcs(Vector2 Ex, float j, float i, int Len, char FMove, char SMove);
 void Set_Move_of_Sh_in_Map(ShcMoveData ShM, int index);
 
 

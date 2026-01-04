@@ -699,7 +699,8 @@ int Submit_Button(int n, int m, char inp[], int inpLen)
     return 0;
 }
 
-void Move_Shcs(Vector2 Ex, int j, int i, int Len, char FMove, char SMove) {
+void Move_Shcs(Vector2 Ex, float j, float i, int Len, char FMove, char SMove) {
+    printf("\nLEN: %d   i: %.0f  j: %0.f", Len, i, j);
     if(j == Ex.y && i == Ex.x) {
         if(Len<minlength) {
             minlength = Len;
@@ -707,36 +708,37 @@ void Move_Shcs(Vector2 Ex, int j, int i, int Len, char FMove, char SMove) {
             SecondMove = SMove;
         }    
         return;
-    }
-    map[i][j] = 0; //so important
-    if(map[j-1][i]==1 && map[j-2][i]==1) {
+    }if (minlength<10) return;
+
+    map[(int)j][(int)i] = 0; //so important
+    if(map[(int)j-1][(int)i]==1 && map[(int)j-2][(int)i]==1) {
         if(Len==0) FMove = 'U';
         if(Len==1) SMove = 'U';
         Move_Shcs(Ex, j-2, i, Len+1, FMove, SMove);
     }
-    if(map[j][i+1]==1 && map[j][i+2]==1) {
+    if(map[(int)j][(int)i+1]==1 && map[(int)j][(int)i+2]==1) {
         if(Len==0) FMove = 'R';
         if(Len==1) SMove = 'R';
         Move_Shcs(Ex, j, i+2, Len+1, FMove, SMove);
     }
-    if(map[j+1][i]==1 && map[j+2][i]==1) {
+    if(map[(int)j+1][(int)i]==1 && map[(int)j+2][(int)i]==1) {
         if(Len==0) FMove = 'D';
         if(Len==1) SMove = 'D';
         Move_Shcs(Ex, j+2, i, Len+1, FMove, SMove);
     }
-    if(map[j][i-1]==1 && map[j][i-2]==1) {
+    if(map[(int)j][(int)i-1]==1 && map[(int)j][(int)i-2]==1) {
         if(Len==0) FMove = 'L';
         if(Len==1) SMove = 'L';
         Move_Shcs(Ex, j, i-2, Len+1, FMove, SMove);
     }
-    map[j][i] = 1;
+    map[(int)j][(int)i] = 1;
 }
 
 void Set_Move_of_Sh_in_Map(ShcMoveData ShM, int index) {
     map[(int)ShadowCasters[index].y][(int)ShadowCasters[index].x] = 1;
     if (ShM.FM == 'U') {
-        int j = ShadowCasters[index].y - 2;
-        int i = ShadowCasters[index].x;
+        int j = (int)ShadowCasters[index].y - 2;
+        int i = (int)ShadowCasters[index].x;
         if (ShM.SM == 'U') { 
             map[j-2][i] = -1;
             ShadowCasters[index].x = i; 
