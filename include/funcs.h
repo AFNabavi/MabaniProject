@@ -31,6 +31,11 @@ typedef struct{
     int indexEx;
 }ShcMoveData;
 
+typedef struct {
+    int x;
+    int y; 
+    struct vector* parent;
+} vector;
 
 extern Texture2D Sh1TextureRight;
 extern Texture2D Sh2TextureRight;
@@ -81,6 +86,8 @@ int Submit_Button(int n, int m, char inp[], int inpLen);
 void Reset_Map_Blocks_for_Move_Elements(int m, int n); 
 void Move_Shcs(Vector2 Ex, float j, float i, int Len, char FMove, char SMove);
 void Set_Move_of_Sh_in_Map(ShcMoveData ShM, int index);
+void *BFS_for_Way(vector begining, vector end);
+void Draw_Hint_Box();
 
 
 #endif

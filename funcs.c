@@ -816,3 +816,12 @@ void Set_Move_of_Sh_in_Map(ShcMoveData ShM, int index) {
     }
 }
 
+void Draw_Hint_Box() {
+    Rectangle rec = {WindowWidth-WidthSpace, Space, WidthSpace-Space, (WindowHeight-2*Space)};
+    DrawRectangleRoundedLinesEx(rec, 0.1f, 20, 1.0f, RED);   
+    DrawText("Move up: 'W'\n",WindowWidth-WidthSpace+24, Space+15, 20, RED);
+    DrawText("Move right: 'D'\n",WindowWidth-WidthSpace+12, Space+40, 20, RED);
+    DrawText("Move down: 'S'\n",WindowWidth-WidthSpace+12, Space+65, 20, RED);
+    DrawText("Move left: 'A'\n",WindowWidth-WidthSpace+18, Space+90, 20, RED);
+    DrawText("-----------------\n",WindowWidth-WidthSpace+0.5, Space+115, 20, RED);
+}
