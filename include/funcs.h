@@ -3,35 +3,65 @@
 
 #include "raylib.h"
 
+typedef struct SidesAroundRectangle {
+    char U;
+    char R;
+    char D;
+    char L;
+} SidesAR;
+typedef struct {
+    int y;
+    int x;
+    char beg;
+} Vector;
+typedef struct WallProperty {
+    Vector2 Position; //بهتر بود int باشه
+    char HorV;
+} WallPro;
+typedef struct {
+    int y;
+    int x;
+    int life;
+} InterimWalls;
+typedef struct Explorer {
+    bool isAlive;
+    int age;
+    Vector2 mapPos;   // coordinate in map array
+    Vector2 winPos;    // coordinate in window
+    int wallCount;
+    char direction;
+    Texture2D avatar[2];    // 0 = left texture & 1 = right texture
+} Explorer;
+
 extern const int Side;
 extern const int FPS;
-extern int swF[3];
 extern const int FadeCo;
 extern const float WallTh;
 extern const int WindowWidth;
 extern const int WindowHeight;
-extern const int WidthSpace;
-extern const int Space;
+extern const int WidthHintBox;
+extern const int MarginSpace;
 
 extern int map[25][25];
 extern Vector2 Lightcore;
 extern int nExplorers;
-extern Vector2 Explorers[3];
+extern Explorer Explorers[3];
+// extern Vector2 ExplorersP[3];
+// extern char ExplorersDir[3];
+// extern int nInterimWalls[3];
+extern int nInWalls; 
+extern InterimWalls InWalls[30];
+
 extern int nShadowCasters;
 extern Vector2 ShadowCasters[3];
+extern Vector2 ShadowCastersP[3];
+extern int ShadowCastersDir[3];
 extern int FadeSh[3];
+extern int swF[3];
 
-extern int minlength;
-extern char FirstMove;
-extern char SecondMove;
-typedef struct{
-    int Length;
-    char FM;
-    char SM;
-    int indexEx;
-}ShcMoveData;
-
-
+extern Texture2D Ex1Image;
+extern Texture2D Ex2Image;
+extern Texture2D Ex3Image;
 extern Texture2D Sh1TextureRight;
 extern Texture2D Sh2TextureRight;
 extern Texture2D Sh3TextureRight;
@@ -46,11 +76,6 @@ extern Texture2D Ex2TextureLeft;
 extern Texture2D Ex3TextureLeft;
 extern Texture2D LiTexture;
 
-typedef struct WallProperty {
-    Vector2 Position;
-    char HorV;
-} WallPro;
-
 void SET_Map_Array(int M[][25], int m, int n);
 Vector2 GET_StartPoint(int m, int n, int WidthSpace);
 Vector2 SET_Walls(WallPro Wall);
@@ -61,8 +86,8 @@ int Direction_of_Explorers(Vector2 Explorer);
 int Direction_of_ShadowCasters(Vector2 ShadowCaster);
 int Check_Elements(Vector2 E, int numberExNow, int numberShNow);
 int Check_Walls(WallPro W);
-void Draw_Map(Vector2 StartPoint, int m, int n);
-int Distance_Check(Vector2 v1, Vector2 v2, Vector2 arr1[], int arr1c, Vector2 arr2[], int arr2c);
+void Draw_Map(Vector2 StartPoint, int m, int n, int Round, int ExRound);
+int Distance_Check(Vector2 v1, Vector2 v2, Explorer arr1[], int arr1c, Vector2 arr2[], int arr2c);
 WallPro Put_Wall(int m, int n);
 void BFS_Check(char sw, int BlocksA[][2], int ACount, int BlocksB[][2], int BCount, int *Checked);
 void Reset_Map_Blocks_for_BFS(int m, int n);
@@ -79,8 +104,29 @@ void ItoS(char *str, int n);
 int StoI(char s[], int sLen);
 int Submit_Button(int n, int m, char inp[], int inpLen);
 void Reset_Map_Blocks_for_Move_Elements(int m, int n); 
-void Move_Shcs(Vector2 Ex, float j, float i, int Len, char FMove, char SMove);
-void Set_Move_of_Sh_in_Map(ShcMoveData ShM, int index);
+int BFS_Way(Vector *start, Vector *end, int *ACount, int *resCount, Vector *result);
+int Find_Way(Vector *end, const int ACount, int resCount, Vector *Alist, Vector *result);
+void Draw_Way(Vector *Way, Vector2 StartPoint, const int resCount);
+void Rec_for_Choose(float x, float y, SidesAR A, Rectangle R[]);
+SidesAR CheckSides(int j, int i);
+void Shcs_Animation(const char beg, Vector2 *ShcP, const Vector2 EndP, float Speed, const float SIncrease, Vector2 StartPoint, int m, int n, int i, int Round, Music music);
+void Exs_Animation(const char Mdir, const char Tdir, Vector2 *ExsP, const Vector2 EndP, float Speed, const float SIncrease, Vector2 StartPoint, int m, int n, int i, int ExRound, Music music);
+int Lock_in_Rectangle(Rectangle R, Rectangle RBack, Rectangle RecsforCh[], int j, int i, int Exindex, Vector2 Mous);
+int Show_Allowable_Walls(Rectangle R, Rectangle BackR, Rectangle Recs[], Vector2 Mous);
+void Check_Life_of_Interim_Walls();
+void Pointer_To_Player(int index, Vector2 StartPoint);
+int Get_Explorer_Count_UI(int MaxPlayer);
+int Get_Explorer_Count();
+// void Choose_Players_Texture_UI(int PlayersCount, int Player);
+// Texture2D Choose_Players_Texture();
+void Show_Invalid_Move_Error(Vector2 StartPoint, int m, int n, int Round, int ExRound);
+void Show_Ended_Walls_Error(Vector2 StartPoint, int m, int n, int Round, int ExRound);
+void Dead_Explorer(int l, Sound DieSound, int Round);
+void Win_Explorer(int l, Sound WinSound, int Round);
+int Are_All_Players_Have_Won();
+int Are_All_Players_Dead();
+int Calculate_Max_Interim_Wall(int m, int n);
+int Show_End_Screen();
 
 
 #endif
