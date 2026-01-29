@@ -1,7 +1,6 @@
 // TODO:
 // 1 : Modify replay after EndScreen
 // 2: Modify GetWallCount
-// 3: Modify Pointer_To_Player
 // 4: 
 
 #include <stdio.h>
@@ -605,7 +604,7 @@ switch(Current)
         showResult = true;
         if (showResult) {
             int x = Show_End_Screen();
-            if (x) {Current = GameScreen; State = GET; m=-1; n=-1;}
+            if (x) {Current = GameScreen; State = GET; m=-1; n=-1;} // restart game
         }  
         break;
     }

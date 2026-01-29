@@ -371,14 +371,18 @@ Wall color and thickness rules based on map[j][i] value:
     DrawText("-----------------", HintGame.x+1, HintGame.y+175, 20, MyRed);
     DrawRectangleRoundedLinesEx(HintGame, 0.1f, 20, 1.0f, MyRed);
 
-    DrawText("-----------------", 901, 520, 20, MyRed);
+    DrawText("-----------------", 901, 490, 20, MyRed);
     char s[3];
     ItoS(s, Round);
     DrawText("Round: ", 945, 580, 20, MyRed);
     DrawText(s, 1018, 580, 20, MyRed);
     ItoS(s, ExRound+1);
-    DrawText("Player: ", 942, 550, 20, MyRed);
-    DrawText(s, 1020, 550, 20, MyRed);
+    DrawText("Player: ", 942, 520, 20, MyRed);
+    DrawText(s, 1020, 520, 20, MyRed);
+    ItoS(s, Explorers[ExRound].wallCount);
+    DrawText("Wall count: ", 922, 550, 20, MyRed);
+    if (Explorers[ExRound].wallCount == 0) DrawText("0", 1041, 550, 20, MyRed);
+    else DrawText(s, 1041, 550, 20, MyRed);
 }
 
 int Distance_Check(Vector2 v1, Vector2 v2, Explorer arr1[], int arr1c, Vector2 arr2[], int arr2c)
@@ -660,13 +664,9 @@ void Draw_Map_Infs()
     for (int i=0; i<4; i++)
     {
         DrawRectangleGradientV(HorMargin+i*(Distance+RecWidth), VerMargin, RecWidth, RecHeight, GOLD, YELLOW);
-        // Rectangle UpRecs = {HorMargin+i*(Distance+RecWidth), VerMargin, RecWidth, RecHeight};
-        // DrawRectangleRounded(UpRecs, 2.0f, 1.0f, YELLOW);
         itoa(n+i, nn, 10);
         DrawText(nn, HorMargin+i*(Distance+RecWidth)+60, VerMargin+35, 30, BLACK);
         DrawRectangleGradientH(HorMargin+i*(Distance+RecWidth), (VerMargin+Distance+RecHeight), RecWidth, RecHeight, YELLOW, GOLD);
-        // Rectangle DownRecs = {HorMargin+i*(Distance+RecWidth), (VerMargin+Distance+RecHeight), RecWidth, RecHeight};
-        // DrawRectangleRounded(DownRecs, 2.0f, 1.0f, YELLOW);
         itoa(m+i, mm, 10);
         DrawText(mm, HorMargin+i*(Distance+RecWidth)+60, VerMargin+Distance+RecHeight+35, 30, BLACK);
     }
@@ -746,7 +746,7 @@ char Print_Number_In_String(char s[], char ch, int len)
         s[len] = ch;
         s[len+1] = '\0';
     }
-    if (ch == 'r' || ch == 'R') 
+    if (ch == 'r' || ch == 'R')
     {
         s[len-1] = '\0';
     }
@@ -759,7 +759,6 @@ int Submit_Button(int n, int m, char inp[], int inpLen)
     Vector2 MousePos = GetMousePosition();
     int InpNumber = StoI(inp, inpLen);
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) 
-        // if (CheckCollisionPointRec(GetMousePosition(), SubmitButton))
         if (MousePos.x >= SubmitButton.x &&
              MousePos.x <= (SubmitButton.x+SubmitButton.width) &&
              MousePos.y >= SubmitButton.y &&
@@ -977,7 +976,7 @@ void Shcs_Animation(const char beg, Vector2 *ShcP, const Vector2 EndP, float Spe
         UpdateMusicStream(music);
         BeginDrawing();
         ClearBackground(RAYWHITE);
-        Draw_Map(StartPoint, m, n, Round, i); 
+        Draw_Map(StartPoint, m, n, Round, nExplorers-1); 
         EndDrawing();                                        
 
         if (beg == 'U') {
@@ -1095,7 +1094,10 @@ int Lock_in_Rectangle(Rectangle R, Rectangle RBack, Rectangle RecsforCh[], int j
 
 int Show_Allowable_Walls(Rectangle R, Rectangle BackR, Rectangle Recs[], Vector2 Mouse) {
     Color Yellow = {253, 249, 0, 150};
-    Color Red = {230, 41, 55, 150};
+    Color Red = {230, 41, 55, 150};    
+    Color RedText = {205, 50, 0, 255};
+
+    DrawText("To quit choosing\n  wall state: 'Q'", 901, 235, 20, RedText);
     if (CheckCollisionPointRec(Mouse, R)) {
         DrawRectangleRec(BackR, Yellow);
         if (Recs[0].x != 1.0) {
@@ -1147,7 +1149,7 @@ void Pointer_To_Player(int index, Vector2 StartPoint) {
     Color Blue = {50, 100, 255, 200};
     Vector2 v1 = GET_Start_Elements_Position_for_Draw(StartPoint, Explorers[index].mapPos);
     v1.x += 21; v1.y -= 12;
-    DrawPoly(v1, 3, h, 90, Blue);
+    if (!(v1.x==StartPoint.x && v1.y==StartPoint.y) && Explorers[index].isAlive) DrawPoly(v1, 3, h, 90, Blue); 
 }
 
 int Get_Explorer_Count_UI(int MaxPlayer) {
@@ -1290,7 +1292,7 @@ int Show_End_Screen() {
             ItoS(ExAge, Explorers[i].age);
             DrawText("Player", 220, 210+40*(WinnerCount+1), 30, RED);
             DrawText(who, 330, 210+40*(WinnerCount+1), 30, RED);
-            DrawText(":", 345, 210+40*(WinnerCount+1), 30, RED);
+            DrawText(":", 348, 210+40*(WinnerCount+1), 30, RED);
             DrawText(ExAge, 355, 210+40*(WinnerCount+1), 30, RED);
             WinnerCount ++;
         }
@@ -1299,7 +1301,7 @@ int Show_End_Screen() {
             ItoS(ExAge, Explorers[i].age);
             DrawText("Player", 720, 210+40*(LoserCount+1), 30, RED);
             DrawText(who, 830, 210+40*(LoserCount+1), 30, RED);
-            DrawText(":", 845, 210+40*(LoserCount+1), 30, RED);
+            DrawText(":", 848, 210+40*(LoserCount+1), 30, RED);
             DrawText(ExAge, 855, 210+40*(LoserCount+1), 30, RED);
             LoserCount ++;
         }
