@@ -3,6 +3,45 @@
 
 #include "raylib.h"
 
+<<<<<<< Updated upstream
+=======
+typedef struct SidesAroundRectangle {
+    char U;
+    char R;
+    char D;
+    char L;
+} SidesAR;
+typedef struct {
+    int y;
+    int x;
+    char beg;
+} Vector;
+typedef struct WallProperty {
+    Vector2 Position; //بهتر بود int باشه
+    char HorV;
+} WallPro;
+typedef struct {
+    int y;
+    int x;
+    int life;
+} InterimWalls;
+typedef struct Explorer {
+    bool isAlive;
+    int age;
+    Vector2 mapPos;   // coordinate in map array
+    Vector2 winPos;    // coordinate in window
+    int wallCount;
+    char direction;
+    Texture2D avatar[2];    // 0 = left texture & 1 = right texture
+} Explorer;
+typedef struct Present {
+    bool isGotten;
+    Vector2 mapPos;    // coordinate in map array
+    Vector2 winPos;     // coordinate in window
+    Gift type;
+}
+
+>>>>>>> Stashed changes
 extern const int Side;
 extern const int FPS;
 extern int swF[3];

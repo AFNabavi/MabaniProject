@@ -1,7 +1,19 @@
+<<<<<<< Updated upstream
 // TODO: 
 // 0. write a function for Explorer moving (line 240 to 260).
 //  1. fix shadow caster based on the closest explorer in direction of sh func (wall)
 //  2. amend hint box
+=======
+// TODO:
+// 1 : Modify replay after EndScreen
+// 2: Modify GetWallCount
+// 3: UI of get gift (AF)
+// 4: ReplayGift function (AF)
+// 5: InWallIncrease function (AF)
+// 6: Draw gift texture in window (MSadegh)
+// 7: Earthquake function (MSadegh)
+// 8: ForceEnemy function (MSadegh) 
+>>>>>>> Stashed changes
 
 #include <stdio.h>
 #include <stdbool.h>
@@ -16,7 +28,7 @@ Texture2D Sh1TextureRight; Texture2D Sh2TextureRight; Texture2D Sh3TextureRight;
 Texture2D Ex1TextureRight; Texture2D Ex2TextureRight; Texture2D Ex3TextureRight;
 Texture2D Sh1TextureLeft; Texture2D Sh2TextureLeft; Texture2D Sh3TextureLeft;
 Texture2D Ex1TextureLeft; Texture2D Ex2TextureLeft; Texture2D Ex3TextureLeft;
-Texture2D LiTexture;
+Texture2D LiTexture; Texture2D PresentTexture;
 
 // Enum to represent the different screens or states of the game application.
 // - TitleScreen: The initial screen where the game title is displayed and the user can start the game.
@@ -29,6 +41,12 @@ typedef enum {TitleScreen, GameScreen, EndScreen} Screen;
 // - MoveExs: Phase for moving the explorers (Exs stands for Explorers).
 // - MoveShs: Phase for moving the shadow casters (Shs stands for ShadowCasters).
 typedef enum {GET, MoveExs, MoveShs} Level;
+
+// Replay: Player plays his round again.
+// InWallIncrease: Player got 2 interim wall.
+// Earthquake: Every charachter in map, moves to a near block.
+// ForceEnemy: Player can force an enemy to a near block. 
+typedef enum {Replay, InWallIncrease, Earthquake, ForceEnemy} Gift;
 
 bool ShowTitleNote3 = false;    // Flag to show third title note after click, for input prompt.
 bool Win = false;   // Flag for player win, affects EndScreen.
@@ -54,7 +72,16 @@ Ex1TextureLeft = LoadTexture("source\\explorer1_left_image.png");
 Ex2TextureLeft = LoadTexture("source\\explorer2_left_image.png");
 Ex3TextureLeft = LoadTexture("source\\explorer3_left_image.png");
 LiTexture = LoadTexture("source\\light_core_image.png");
+<<<<<<< Updated upstream
 Music music = LoadMusicStream("source\\main_music.ogg");
+=======
+PresentTexture = LoadTexture("source\\present_image.png");
+Music music1 = LoadMusicStream("source\\music1.ogg");
+Music music2 = LoadMusicStream("source\\music2.ogg");
+Music music3 = LoadMusicStream("source\\music3.ogg");
+Music music4 = LoadMusicStream("source\\music4.ogg");
+Music musics[4] = {music1, music2, music3, music4};
+>>>>>>> Stashed changes
 Sound VictorySound = LoadSound("source\\victory_sound.wav");
 Sound GameOverSound = LoadSound("source\\game_over_sound.wav");
 
@@ -385,12 +412,22 @@ if (Current == GameScreen && State != GET) Fade_ShadowCasters();
 }
 
 CloseAudioDevice(); CloseWindow();
+<<<<<<< Updated upstream
 UnloadTexture(LiTexture);
+=======
+UnloadTexture(Ex1Image); UnloadTexture(Ex3Image); UnloadTexture(Ex3Image);
+>>>>>>> Stashed changes
 UnloadTexture(Sh1TextureRight); UnloadTexture(Sh2TextureRight); UnloadTexture(Sh3TextureRight);
 UnloadTexture(Ex1TextureRight); UnloadTexture(Ex2TextureRight); UnloadTexture(Ex3TextureRight);
 UnloadTexture(Sh1TextureLeft); UnloadTexture(Sh2TextureLeft); UnloadTexture(Sh3TextureLeft);
 UnloadTexture(Ex1TextureLeft); UnloadTexture(Ex2TextureLeft); UnloadTexture(Ex3TextureLeft);
+<<<<<<< Updated upstream
 UnloadMusicStream(music); UnloadSound(GameOverSound); UnloadSound(VictorySound);
+=======
+UnloadTexture(LiTexture); UnloadTexture (PresentTexture);
+UnloadMusicStream(GameMusic); UnloadMusicStream(music1); UnloadMusicStream(music2); UnloadMusicStream(music3);
+UnloadSound(DieSound); UnloadSound(VictorySound);
+>>>>>>> Stashed changes
 
 return 0;
 }
