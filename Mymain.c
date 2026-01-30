@@ -17,6 +17,7 @@
 #include "raymath.h"
 #include "funcs.h"
 
+Texture2D Ex1Image; Texture2D Ex2Image; Texture2D Ex3Image;
 Texture2D Sh1TextureRight; Texture2D Sh2TextureRight; Texture2D Sh3TextureRight;
 Texture2D Ex1TextureRight; Texture2D Ex2TextureRight; Texture2D Ex3TextureRight;
 Texture2D Sh1TextureLeft; Texture2D Sh2TextureLeft; Texture2D Sh3TextureLeft;
@@ -35,32 +36,27 @@ typedef enum {TitleScreen, GameScreen, EndScreen} Screen;
 // - MoveShs: Phase for moving the shadow casters (Shs stands for ShadowCasters).
 typedef enum {GET, MoveExs, MoveShs} Level;
 
-// Replay: Player plays his round again.
-// InWallIncrease: Player got 2 interim wall.
-// Earthquake: Every charachter in map, moves to a near block.
-// ForceEnemy: Player can force an enemy to a near block. 
-typedef enum {Replay, InWallIncrease, Earthquake, ForceEnemy} Gift;
-
 bool ShowTitleNote3 = false;    // Flag to show third title note after click, for input prompt.
 bool Win = false;   // Flag for player win, affects EndScreen.
 bool Init_FadeSh = true;
 
-int main(void)
-{
+int main() {
 InitWindow(WindowWidth, WindowHeight, "The Tale of the Labyrinth");
 InitAudioDevice();
 srand(time(NULL));    // randomize choices
-
-// Load textures
+// Load files
+Ex1Image = LoadTexture("source\\explorer1_bigimage.png");
+Ex2Image = LoadTexture("source\\explorer2_bigimage.png");
+Ex3Image = LoadTexture("source\\explorer3_bigimage.png");
 Sh1TextureRight = LoadTexture("source\\shadowcaster1_right_image.png");
 Sh2TextureRight = LoadTexture("source\\shadowcaster2_right_image.png");
 Sh3TextureRight = LoadTexture("source\\shadowcaster3_right_image.png");
-Ex1TextureRight = LoadTexture("source\\explorer1_right_image.png");
-Ex2TextureRight = LoadTexture("source\\explorer2_right_image.png");
-Ex3TextureRight = LoadTexture("source\\explorer3_right_image.png");
 Sh1TextureLeft = LoadTexture("source\\shadowcaster1_left_image.png");
 Sh2TextureLeft = LoadTexture("source\\shadowcaster2_left_image.png");
 Sh3TextureLeft = LoadTexture("source\\shadowcaster3_left_image.png");
+Ex1TextureRight = LoadTexture("source\\explorer1_right_image.png");
+Ex2TextureRight = LoadTexture("source\\explorer2_right_image.png");
+Ex3TextureRight = LoadTexture("source\\explorer3_right_image.png");
 Ex1TextureLeft = LoadTexture("source\\explorer1_left_image.png");
 Ex2TextureLeft = LoadTexture("source\\explorer2_left_image.png");
 Ex3TextureLeft = LoadTexture("source\\explorer3_left_image.png");
@@ -72,18 +68,27 @@ Music music3 = LoadMusicStream("source\\music3.ogg");
 Music music4 = LoadMusicStream("source\\music4.ogg");
 Music musics[4] = {music1, music2, music3, music4};
 Sound VictorySound = LoadSound("source\\victory_sound.wav");
-Sound GameOverSound = LoadSound("source\\game_over_sound.wav");
+Sound DieSound = LoadSound("source\\game_over_sound.wav");
 
-Screen Current = TitleScreen;   // Current screen, starts at TitleScreen.
+Screen Current = GameScreen;   // Current screen, starts at TitleScreen.
 Level State = GET;   // Current level, starts at GET for inputs.
 
-PlayMusicStream(music);
+Texture2D ExTextures[3][2] = {{Ex1TextureLeft, Ex1TextureRight}, 
+                                                  {Ex2TextureLeft, Ex2TextureRight},
+                                                  {Ex3TextureLeft, Ex3TextureRight}} ;
+Music GameMusic = musics[rand()%4];
+PlayMusicStream(GameMusic);
 SetTargetFPS(FPS);
 
 int m=-1, n=-1, nWalls;
 Vector2 StartPoint;
 
 int FPScounter = 2*FPS; //That is for show TitleNote3
+int l=0; 
+int Round = 1;
+
+bool allAreDied = false;
+double timeEnding;
 
 while (!WindowShouldClose())
 {
@@ -105,78 +110,70 @@ switch(Current)
         if (CheckCollisionPointRec(Mous, TitleRec) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) ShowTitleNote3 = true;
         if (ShowTitleNote3)
         { 
-            PlayMusicStream(music);
+            PlayMusicStream(GameMusic);
             int TitleNote3 = MeasureText("now input game details.", 20);
             DrawText("now input game details.", TitleRec.x+(TitleRec.width-TitleNote3)/2, TitleRec.y+40+50+100, 20, RED);
             FPScounter --;
             if(FPScounter<0) Current = GameScreen;
         }
-
         EndDrawing();
         break;
     }
 
     case GameScreen:
     {
-    UpdateMusicStream(music);
+    UpdateMusicStream(GameMusic);
     switch(State)
     {
         bool InputAgain;
         case GET: 
         {
-        while(!WindowShouldClose())
-        {
-            BeginDrawing();
-            ClearBackground(RAYWHITE);
-            Draw_Map_Infs();
-            if (n == -1) DrawText("Click width of map", 400, 170, 30, RED);
-            else DrawText("Click height of map", 390, 170, 30, RED);
-            
-            int click = Get_Map_Infs();
-            if (click != -1) {if (n == -1) n = click; else if (m == -1) m = click;}
-            
-            EndDrawing();
+            while(!WindowShouldClose())
+            {
+                BeginDrawing();
+                ClearBackground(RAYWHITE);
+                Draw_Map_Infs();
+                if (n == -1) DrawText("Click width of map", 400, 170, 30, RED);
+                else DrawText("Click height of map", 390, 170, 30, RED);
 
-            if (m != -1 && n != -1) break;
-        }
-        // printf("%d %d\n", m, n);
-            // Reads height and width of the map of game
-            // InputAgain = true;    // Flag for re-input in validation loops.
-            // do 
-            // {
-            //     printf("\nEnter width and height of map (between 5 and 12): ");
-            //     scanf("%d %d", &m, &n);    // m: height map, n: width map
-            //     if ((m<=12 && m>=5) && (n<=12 && n>=5)) InputAgain = false; 
-            //     else printf("Pay attention to limits! try again.");
-            // } while (InputAgain);
+                int click = Get_Map_Infs();
+                if (click != -1) {if (n == -1) n = click; else if (m == -1) m = click;}
+    
+                EndDrawing();
+
+                if (m != -1 && n != -1) break;
+            }
             SET_Map_Array(map, m, n);
             
-            Vector2 E;    // Gets coordinates of elements and save it as a vector2
+            Vector2 E;     // Gets coordinates of elements and save it as a vector2
             WallPro W;    // Gets coordinates of walls and save it as a vector2
-            StartPoint = GET_StartPoint(m, n, WidthSpace);    // The upper-left corner of the map
+            StartPoint = GET_StartPoint(m, n, WidthHintBox);    // The upper-left corner of the map
 
-        // // Reads the number of explorers. Only in the range 1 and 3.
-        //     InputAgain = true;
-        //     do
-        //     {
-        //         printf("\nEnter explorer(s) number (between 1 and 3): ");
-        //         scanf("%d", &nExplorers);
-        //         if (nExplorers>=1 && nExplorers<=3) InputAgain = false;
-        //         else printf("Pay attention to limits! try again.");
-        //     } while (InputAgain);
-        
-            nExplorers = 1; 
+        // Reads the number of charcters.
+            int MaxPlayer = 0;
+            if (m*n < 42) MaxPlayer = 1;
+            else if (m*n < 90) MaxPlayer = 2;
+            else if (m*n <145) MaxPlayer = 3;
+            while (nExplorers==0) {
+                Get_Explorer_Count_UI(MaxPlayer);
+                nExplorers = Get_Explorer_Count();  // default = 0
+            }
+            int MaxInterimWall = Calculate_Max_Interim_Wall(m, n);
+            for (int i=0; i<nExplorers; i++) 
+                Explorers[i] = (Explorer) {true, 1, (Vector2){0,0}, (Vector2){0,0}, MaxInterimWall, '\0', {ExTextures[i][0], ExTextures[i][1]}}; // initial explorers
+            nShadowCasters = MaxPlayer;
 
-        // // Reads the number of shadowcasters. Only in the range 1 and 3.
-        //     InputAgain = true;
-        //     do 
-        //     {
-        //         printf("\nEnter shadowcaster(s) number (between 1 and 3): ");
-        //         scanf("%d", &nShadowCasters);
-        //         if (nShadowCasters>=1 && nShadowCasters<=3) InputAgain = false;
-        //         else printf("Pay attention to limits! Try again.");
-        //     } while (InputAgain);
-            nShadowCasters = 1;
+        // // Reads texture of every player.
+        //     for (int i=1; i<=MaxPlayer; i++)
+        //         while (!WindowShouldClose()) {
+        //             Choose_Players_Texture_UI(MaxPlayer, i);
+        //             Texture2D x = Choose_Players_Texture();
+        //             if (x) {
+        //                 printf("d  ");
+        //                 Explorers[i-1].picture =  
+        //                 break;
+        //             } 
+        //         }
 
         // Reads lightcore position. Accepts only coordinates in the range 0..n-1 (x) and 0..m-1 (y).
             Lightcore.x = (float) (rand()%n); Lightcore.y = (float) (rand()%m);
@@ -193,8 +190,9 @@ switch(Current)
                     if (Check_Elements(E, numberExNow, numberShNow) && Distance_Check(E, Lightcore, Explorers, numberExNow, ShadowCasters, numberShNow)) 
                     {
                         InputAgain = false;
-                        Explorers[i] = Return_Elements_Position(E);
-                        numberExNow ++; 
+                        Explorers[i].mapPos = Return_Elements_Position(E);
+                        Explorers[i].winPos = GET_Start_Elements_Position_for_Draw(StartPoint, Explorers[i].mapPos);
+                        numberExNow ++;
                     }
                 } while (InputAgain);
             }
@@ -210,6 +208,7 @@ switch(Current)
                     {
                         InputAgain = false;
                         ShadowCasters[i] = Return_Elements_Position(E);
+                        ShadowCastersP[i] = GET_Start_Elements_Position_for_Draw(StartPoint, ShadowCasters[i]);
                         numberShNow ++;
                     }
                 } while (InputAgain);
@@ -220,17 +219,6 @@ switch(Current)
                 Init_FadeSh = false;
             }
             
-
-        // // Reads the number of walls. Only int the range 0 and (m-1)*(n-1).
-        //     InputAgain = true;
-        //     do
-        //     {
-        //         printf("\nEnter wall(s) number (between 0 and %d): ", (m-1)*(n-1));
-        //         scanf("%d", &nWalls);
-        //         if (nWalls>=0 && nWalls<=((m-1)*(n-1))) InputAgain = false;
-        //         else printf("Pay attention to limits! Try again. ");
-        //     } while (InputAgain);
-
         char s[5];
         int tempN;
         while (!WindowShouldClose())
@@ -238,7 +226,6 @@ switch(Current)
                 BeginDrawing();
                 ClearBackground(RAYWHITE);
                 Draw_Walls_Infs(s, n, m);
-    
                 char inp = GetKeyPressed();
                 if ((inp>='0' && inp<='9') || inp == 'r' || inp == 'R') {Print_Number_In_String(s, inp, strlen(s));}
                 tempN = StoI(s, strlen(s));
@@ -283,101 +270,329 @@ switch(Current)
                     }
                 } while (InputAgain);
             }
+            Reset_Map_Blocks_for_Move_Elements(m, n);   //بسیار مهم برای قسمت MoveShs
 
             State = MoveExs;
             break;
         }
 
-// //----------------------------------------------------------------------------------------------------------------------------
-//     // UPDATE   
-//         // width of map:
-//         InfInputs = GetKeyPressed();
-//         InfInputs = strtol()
-//         if (InfInputs > 0 && InfInputs <= 12) n = InfInputs;
-
-//         // height of map:
-//         if (InfInputs > 0 && InfInputs <= 12) m = InfInputs;
-
-//         // walls count:
-//         if (InfInputs >= 0 && InfInputs <= (n-1)*(m-1)) nWalls = InfInputs;
-
-// //----------------------------------------------------------------------------------------------------------------------------
-//     // DRAWING  
-//         BeginDrawing();
-//         ClearBackground(RAYWHITE);
-//         DrawRectangleRec(PopupRec, YELLOW);
-//         EndDrawing();
-
         // Next phase. Move and drawing characters.         
-            char ExTextureDir = 'R';  // L = left  ,  R = right
-            char ExMoveDir;
-            double t0;
-            bool ShouldShowError = false;
-            case MoveExs: 
-            {
-                // UPDATE
-            // --------------------------------------------------------------------------------------------------------------------------
-                Rectangle HintGame = {WindowWidth-WidthSpace, Space, WidthSpace-Space, (WindowHeight-2*Space)};
-                Vector2 NewPos = GET_Start_Elements_Position_for_Draw(StartPoint, Explorers[0]);
-                bool ShouldMove = false;
-                if (IsKeyPressed(KEY_W))   {ExMoveDir = 'W'; ShouldMove = true; ShouldShowError = false; t0 = GetTime();}
-                if (IsKeyPressed(KEY_S))    {ExMoveDir = 'S'; ShouldMove = true; ShouldShowError = false; t0 = GetTime();}
-                if (IsKeyPressed(KEY_A))    {ExMoveDir = 'A'; ExTextureDir = 'L'; ShouldMove = true; ShouldShowError = false; t0 = GetTime();}
-                if (IsKeyPressed(KEY_D))    {ExMoveDir = 'D'; ExTextureDir = 'R'; ShouldMove = true; ShouldShowError = false; t0 = GetTime();}
+            case MoveExs: {
+                Check_Life_of_Interim_Walls();
+                bool notChoosed = true;
 
-                if (ShouldMove && Can_Ex_Move_for_Walls(Explorers[0], ExMoveDir)) 
-                    {Explorers[0] = Move_Element(Explorers[0], ExMoveDir); State = MoveShs;}
-                else if (ShouldMove && !(Can_Ex_Move_for_Walls(Explorers[0], ExMoveDir))) 
-                    ShouldShowError = true;
-
-                if (ShouldMove && !Win_or_Lose(Explorers[0], ShadowCasters, nShadowCasters, Lightcore)) 
-                    {Current = EndScreen; Win = false; break;}
-                else if (ShouldMove && Win_or_Lose(Explorers[0], ShadowCasters, nShadowCasters, Lightcore) == 1)
-                    {Current = EndScreen; Win = true; break;}
-            // --------------------------------------------------------------------------------------------------------------------------
-
-                // DRAWING
-            // --------------------------------------------------------------------------------------------------------------------------
-                BeginDrawing();
-                ClearBackground(RAYWHITE);
-                Draw_Map(StartPoint, m, n);
-
-                if (ExTextureDir == 'R') DrawTexture(Ex1TextureRight, NewPos.x, NewPos.y, WHITE);
-                else DrawTexture(Ex1TextureLeft, NewPos.x, NewPos.y, WHITE);
-
-                if (ShouldShowError) if (GetTime() - t0 <= 1.8) DrawText("\nYou can't go there. Pay attention to walls!", 300, 50, 24, RED);
-
-                DrawRectangleRoundedLinesEx(HintGame, 0.1f, 20, 1.0f, RED);   
-                EndDrawing();
-            // --------------------------------------------------------------------------------------------------------------------------
-                break;
-            }
-
-            case MoveShs: {
+            //for "get wall"
+                bool GWall = false;                
+                int  LockinRec = 0;
                 
-                ShcMoveData ShM[nShadowCasters];
+            //for "move"
+                bool Move = false;
+                char ExTextureDir;
+                char ExMoveDir;
+                double t0;
+                bool ShouldShowError = false;
+                bool ShouldMove = false;
+                
+                bool WitchRound = true;
+                // bool isPlayed = false;
+                int l=0;
+                if (!Are_All_Players_Dead())
+                while (!WindowShouldClose() && l<nExplorers) {
+                    // isPlayed = true;
+                    if (WitchRound) WitchRound = false;   // اگر با روال فشردن کلید بروم، فقط برای یک فریم اجرا می‌شود
+                   
+                    if (notChoosed) {
+                        if (!Explorers[l].isAlive) {l ++; continue;}
+                        UpdateMusicStream(GameMusic);
+                        BeginDrawing();
+
+                        if (IsKeyPressed(KEY_E)) {
+                            if (Explorers[l].wallCount == 0) {
+                                double t = GetTime();
+                                while (!WindowShouldClose() && GetTime()-t <= 2.2 && !IsKeyPressed(KEY_W)
+                                        && !IsKeyPressed(KEY_D) && !IsKeyPressed(KEY_S) && !IsKeyPressed(KEY_A)) {
+                                    UpdateMusicStream(GameMusic);
+                                    Show_Ended_Walls_Error(StartPoint, m, n, Round, l);
+                                }
+                            } else {
+                                LockinRec = 0;
+                                GWall = true;
+                                notChoosed = false;
+                            }
+                        }
+                        if (IsKeyPressed(KEY_W)) {
+                            ExMoveDir = 'W';
+                            ShouldMove = true; 
+                            t0 = GetTime(); 
+                            ShouldShowError = false;
+                            notChoosed = false;
+                        }      
+                        if (IsKeyPressed(KEY_D)) { 
+                            ExMoveDir = 'D'; 
+                            ExTextureDir = 'R'; 
+                            ShouldMove = true; 
+                            t0 = GetTime(); 
+                            ShouldShowError = false;
+                            notChoosed = false;
+                        }    
+                        if (IsKeyPressed(KEY_S)) { 
+                            ExMoveDir = 'S'; 
+                            ShouldMove = true; 
+                            t0 = GetTime(); 
+                            ShouldShowError = false;
+                            notChoosed = false;
+                        }   
+                        if (IsKeyPressed(KEY_A)) {
+                            ExMoveDir = 'A'; 
+                            ExTextureDir = 'L'; 
+                            ShouldMove = true; 
+                            t0 = GetTime(); 
+                            ShouldShowError = false;
+                            notChoosed = false;
+                        }          
+                        if (ShouldMove && Can_Ex_Move_for_Walls(Explorers[l].mapPos, ExMoveDir)) {
+                            Explorers[l].mapPos = Move_Element(Explorers[l].mapPos, ExMoveDir);
+                            Vector2 EndPosition = GET_Start_Elements_Position_for_Draw(StartPoint, Explorers[l].mapPos);       
+                            float Speed = 2.0f;
+                            Exs_Animation(ExMoveDir, ExTextureDir, &Explorers[l].winPos, EndPosition, Speed, 0.1f, StartPoint, m, n, l, Round, GameMusic);
+                            WitchRound = true; l++; Move = false; notChoosed = true; ShouldMove = false;
+                        }
+                        else if (ShouldMove && !(Can_Ex_Move_for_Walls(Explorers[l].mapPos, ExMoveDir))) { 
+                            ShouldShowError = true;
+                            ShouldMove = false;notChoosed = true;
+                        }           
+                        while (ShouldShowError) {
+                            ShouldMove = false; notChoosed = true; 
+                            if (!WindowShouldClose() && GetTime()-t0 <= 1.8) {
+                                UpdateMusicStream(GameMusic);
+                                Show_Invalid_Move_Error(StartPoint, m, n, Round, l);
+                            }
+                            else {ShouldShowError = false; break;}
+                            if (IsKeyPressed(KEY_A) || IsKeyPressed(KEY_D) || IsKeyPressed(KEY_S) || IsKeyPressed(KEY_W)) {ShouldShowError = false;}
+                        }
+                        if (IsKeyPressed(KEY_Q)) {
+                            l++;
+                            notChoosed = true;
+                            WitchRound = true;
+                        }
+                        
+                        ClearBackground(RAYWHITE);
+                        Pointer_To_Player(l, StartPoint);
+                        Draw_Map(StartPoint, m, n, Round, l);
+                        EndDrawing();
+                    
+                        for (int i=0; i<nExplorers; i++)
+                            if (Explorers[i].isAlive && Explorers[i].mapPos.x==Lightcore.x && Explorers[i].mapPos.y==Lightcore.y)
+                                Win_Explorer(i, VictorySound, Round);
+                    }
+
+                    if (GWall) {
+                        UpdateMusicStream(GameMusic);
+                        BeginDrawing();
+                        ClearBackground(RAYWHITE);
+                        Draw_Map(StartPoint, m, n, Round, l);
+                        Rectangle Recs[m][n];
+                        int i, j;
+                        for (j=1; j<2*m+1; j+=2) {
+                            for (i=1; i<2*n+1; i+=2) {                        
+                                Vector2 A = {i, j};
+                                Vector2 B = GET_Start_Elements_Position_for_Draw(StartPoint, A);
+                                B.x -= 2; B.y -= 3; //مربوط به تابع GET_Elements_Position_for_Draw
+                                Rectangle R = {B.x, B.y, Side, Side};
+                                Recs[(j-1)/2][(i-1)/2] = R;
+                            }
+                        }
+                        Vector2 Mouse;
+                        Mouse = GetMousePosition();                                                       
+                        int tempi, tempj;
+                        Rectangle tempDis;
+                        Rectangle tempRforChoose[4];
+
+                        for (j=0; j<m; j++) {
+                            for (i=0; i<n; i++) {
+                                Rectangle Dis;
+
+                                if (j == 0) {
+                                    Rectangle temp = {Recs[j][i].x-70, Recs[j][i].y+50, 140+Side, 50};
+                                    Dis = temp;
+                                } else {
+                                    Rectangle temp = {Recs[j][i].x-70, Recs[j][i].y-50, 140+Side, 50};
+                                    Dis = temp;
+                                }
+
+                                SidesAR A = CheckSides((2*j+1), (2*i+1));
+                                Rectangle RforChoose[4];
+                                Rec_for_Choose((Dis.x+(Side/2-5)), Dis.y+10, A, RforChoose);
+
+                                if (LockinRec == 0) {
+                                    int re = Show_Allowable_Walls(Recs[j][i], Dis, RforChoose, Mouse);
+                                    if (re == 1) {
+                                        LockinRec = 1;
+                                        tempi = i;
+                                        tempj = j;
+                                        tempDis = Dis;
+                                        int k;
+                                        for (k=0; k<4; k++) {
+                                            tempRforChoose[k] = RforChoose[k];
+                                        }
+                                    }
+                                }                                       
+                            }
+                        }                        
+                        if (LockinRec==1) {
+                            int re = Lock_in_Rectangle(Recs[tempj][tempi], tempDis, tempRforChoose, tempj, tempi, l, Mouse);
+                            if (re == 1) {
+                                WitchRound = true;
+                                GWall = false;
+                                notChoosed = true;
+                                l++;
+                                LockinRec=0;
+                            }
+                            if (!WindowShouldClose() && IsKeyPressed(KEY_Q)) {
+                            LockinRec=0;
+                            BeginDrawing(); EndDrawing();
+                            }
+                        }
+
+                        if (IsKeyPressed(KEY_Q)) {
+                                notChoosed = true;
+                                GWall = false;
+                        }  
+                        EndDrawing();    //اگه این نمیبود، با فشردن Q هم از این بخش میرفت بیرون و هم از انتخاب کردن
+                    }
+                        
+                    //     if (!ShouldMove) {
+                    //         UpdateMusicStream(music);
+                    //         BeginDrawing();
+                    //         ClearBackground(RAYWHITE);
+                    //         Draw_Map(StartPoint, m, n);
+                    //         EndDrawing();
+                    //     }
+                    //     //اگه اینا نمیبودن، با فشردن Q هم از این بخش میرفت بیرون و هم از انتخاب کردن
+
+                }
+                if (Are_All_Players_Have_Won()) {Current = EndScreen; break;}  
+                // if (!isPlayed) l ++;    // If first player is dead, others can't play!
+                else {State = MoveShs; break;}
+            }
+            
+            case MoveShs: {
+                l = nExplorers-1;
+                Vector *BFSlistChecked;
+                int BFSListCounter;
+                Vector **WayShcArray; 
+                int WayShcCounter[nShadowCasters];
+                do {
+                    WayShcArray = malloc(nShadowCasters*sizeof(Vector *)); 
+                } while (!WayShcArray);
+                int k;
+                for (k=0; k<nShadowCasters; k++) {
+                    do {
+                        WayShcArray[k] = malloc((m*n)*sizeof(Vector));
+                    } while (!WayShcArray[k]);
+                }
+                
                 int i;
                 for (i=0; i<nShadowCasters; i++) {
-                    ShM[i].Length = 200; ShM[i].FM = '\0'; ShM[i].SM = '\0';
-                    int j;
-                    for (j=0; j<nExplorers; j++) {
+                    do{
+                        BFSlistChecked = malloc((m*n)*sizeof(Vector));
+                    }while (!BFSlistChecked);
+                    BFSListCounter = 1;
+                    (*BFSlistChecked).y = (int)ShadowCasters[i].y; (*BFSlistChecked).x = (int)ShadowCasters[i].x; (*BFSlistChecked).beg = '\0';
+                    WayShcCounter[i] = 0;
+                    Reset_Map_Blocks_for_Move_Elements(m, n);
+                    map[(int)ShadowCasters[i].y][(int)ShadowCasters[i].x] = 0;
+                    ShadowCastersDir[i] = BFS_Way(BFSlistChecked, BFSlistChecked, &BFSListCounter, &WayShcCounter[i], WayShcArray[i]);
+                    
+                    if (WayShcCounter[i]) {
                         Reset_Map_Blocks_for_Move_Elements(m, n);
-                        minlength = 200;
-                        map[(int)Explorers[j].y][(int)Explorers[j].x] = 1;
-                        Move_Shcs(Explorers[j], ShadowCasters[i].y, ShadowCasters[i].x, 0, '\0', '\0');
-                        printf(" Ex: %.0f %.0f\nMinLenght: %d  ", Explorers[j].x, Explorers[j].y, minlength);
-                        if(minlength<ShM[i].Length) {
-                            ShM[i].Length = minlength;
-                            ShM[i].FM = FirstMove;
-                            ShM[i].SM = SecondMove;
-                            ShM[i].indexEx = j;
-                        }
-                    }map[(int)Explorers[j].y][(int)Explorers[j].x] = 2;
-                    Set_Move_of_Sh_in_Map(ShM[i], i);
-                              if (!Win_or_Lose(Explorers[0], ShadowCasters, nShadowCasters, Lightcore)) 
-                    {Current = EndScreen; Win = false; break;}
+                        WayShcCounter[i] = Find_Way(WayShcArray[i], BFSListCounter, WayShcCounter[i], BFSlistChecked, WayShcArray[i]);
+                        if (WayShcCounter[i]<3) {                            
+                            float Speed = 0.2f;
+                            Vector2 End;
+                            Vector2 EndPosition;
+                            End.x = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).x;
+                            End.y = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).y;
+                            EndPosition = GET_Start_Elements_Position_for_Draw(StartPoint, End);
+                            int tempShDir = ShadowCastersDir[i];
+                            char Dir = (*(WayShcArray[i]+WayShcCounter[i]-1-1)).beg;
+                            Shcs_Animation(Dir, &ShadowCastersP[i], EndPosition, Speed, 0.2f, StartPoint, m, n, i, Round, GameMusic);   
+                            ShadowCastersDir[i] = tempShDir;
+                            ShadowCasters[i].y = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).y; // = *(*(WayShcArray+i)+WayShcCounter)
+                            ShadowCasters[i].x = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).x;
+                        } else {
+                            int tempx, tempy;
+                            tempx = (*(WayShcArray[i]+WayShcCounter[i]-1-1-1)).x;
+                            tempy = (*(WayShcArray[i]+WayShcCounter[i]-1-1-1)).y;
+                            if (map[tempy][tempx] != 1 && map[tempy][tempx] != 2) {
+                                tempx = (*(WayShcArray[i]+WayShcCounter[i]-1-1)).x;
+                                tempy = (*(WayShcArray[i]+WayShcCounter[i]-1-1)).y;
+                                if (map[tempy][tempx] == 1 || map[tempy][tempx] == 2) {
+                                    float Speed = 0.2f;
+                                    Vector2 End;
+                                    Vector2 EndPosition;
+                                    End.x = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).x;
+                                    End.y = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).y;
+                                    EndPosition = GET_Start_Elements_Position_for_Draw(StartPoint, End);
+                                    int tempShDir = ShadowCastersDir[i];
+                                    char Dir = (*(WayShcArray[i]+WayShcCounter[i]-1-1)).beg;
+                                    Shcs_Animation(Dir, &ShadowCastersP[i], EndPosition, Speed, 0.2f, StartPoint, m, n, i, Round, GameMusic);
+                                    ShadowCastersDir[i] = tempShDir;
+                                    ShadowCasters[i].y = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).y;
+                                    ShadowCasters[i].x = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).x; 
+                                }
+                            }
+                            else {
+                                int j;
+                                for (j=1; j<=2; j++) {
+                                    float Speed = 0.2f;
+                                    Vector2 End;
+                                    Vector2 EndPosition;
+                                    End.x = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-j)).x;
+                                    End.y = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-j)).y;
+                                    EndPosition = GET_Start_Elements_Position_for_Draw(StartPoint, End);
+                                    int tempShDir = ShadowCastersDir[i];
+                                    char Dir = (*(WayShcArray[i]+WayShcCounter[i]-1-j)).beg;
+                                    Shcs_Animation(Dir, &ShadowCastersP[i], EndPosition, Speed, 0.2f, StartPoint, m, n, i, Round, GameMusic);
+                                    if (j==1) {
+                                        ShadowCasters[i].y = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).y;
+                                        ShadowCasters[i].x = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).x;
+                                    } else {
+                                        ShadowCastersDir[i] = tempShDir;
+                                        ShadowCasters[i].y = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1-1)).y;
+                                        ShadowCasters[i].x = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1-1)).x;
+                                    }
+                                    
+                                }                                
+                            }
+                        }                      
+                    }
+                    free(BFSlistChecked);
                 }
-                // int delay = 2*FPS;
+                Reset_Map_Blocks_for_Move_Elements(m, n);
+                
+            // Witch player is dead?
+                for (int j=0; j<nExplorers; j++) for (int i=0; i<nShadowCasters; i++) {
+                    if (Explorers[j].isAlive)
+                        if ((int)Explorers[j].mapPos.y==(int)ShadowCasters[i].y && (int)Explorers[j].mapPos.x==(int)ShadowCasters[i].x) {
+                            if (j==0)        {Dead_Explorer(j , DieSound, Round);}
+                            else if (j==1)  {Dead_Explorer(j, DieSound, Round);}
+                            else if (j==2) {Dead_Explorer(j, DieSound, Round);}
+                    }
+                }
+
+            // free mallocs
+                for (k=0; k<nShadowCasters; k++) {
+                    free(WayShcArray[k]);
+                }
+                free(WayShcArray);
+
+            // Are all players have died?
+                int x = 0;
+                for (int i=0; i<nExplorers; i++) {if (Explorers[i].isAlive) x ++;} 
+                if (x == 0) {Current = EndScreen; timeEnding = GetTime(); break;}
+
+                Round++;
                 State = MoveExs;
                 break;
             }
@@ -386,20 +601,22 @@ switch(Current)
         break;
     }
 
-    bool HasBeenPlayed = false;
     case EndScreen: 
     {
-        BeginDrawing();
-        ClearBackground(RAYWHITE);
-        if (Win == false) {DrawText("GAME OVER!", 442, 305, 40, RED); if (!HasBeenPlayed) {PlaySound(GameOverSound); HasBeenPlayed = true;}}
-        else {DrawText("VICTORY!", 466, 305, 40, RED); if (!HasBeenPlayed) {PlaySound(VictorySound); HasBeenPlayed = true;}}
-        EndDrawing();
+        bool showResult;
+        while (GetTime() - timeEnding <= 2.5) {
+            showResult = false;
+        }
+        showResult = true;
+        if (showResult) {
+            int x = Show_End_Screen();
+            if (x) {Current = GameScreen; State = GET; m=-1; n=-1;} // restart game
+        }  
         break;
     }
 }
-if (Current == GameScreen && State != GET) Fade_ShadowCasters();
-}
 
+}
 CloseAudioDevice(); CloseWindow();
 UnloadTexture(Ex1Image); UnloadTexture(Ex3Image); UnloadTexture(Ex3Image);
 UnloadTexture(Sh1TextureRight); UnloadTexture(Sh2TextureRight); UnloadTexture(Sh3TextureRight);
@@ -411,4 +628,5 @@ UnloadMusicStream(GameMusic); UnloadMusicStream(music1); UnloadMusicStream(music
 UnloadSound(DieSound); UnloadSound(VictorySound);
 
 return 0;
+
 }
