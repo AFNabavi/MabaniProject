@@ -3,8 +3,6 @@
 
 #include "raylib.h"
 
-<<<<<<< Updated upstream
-=======
 typedef struct SidesAroundRectangle {
     char U;
     char R;
@@ -41,7 +39,6 @@ typedef struct Present {
     Gift type;
 }
 
->>>>>>> Stashed changes
 extern const int Side;
 extern const int FPS;
 extern int swF[3];
