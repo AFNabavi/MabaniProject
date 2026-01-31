@@ -6,7 +6,16 @@
 // 5: InWallIncrease function (AF)
 // 6: Draw gift texture in window (MSadegh)
 // 7: Earthquake function (MSadegh)
-// 8: ForceEnemy function (MSadegh) 
+// 8: ForceEnemy function (MSadegh)
+
+// Show the present in Mymain.c:
+//      bool sw = true;
+//      if (Is_Present_Gotten()) {
+//          if (sw) Show_Present_Rec(StartPoint, m, n, Round, l, GameMusic);
+//              while (sw && !WindowShouldClose()) {
+//                  Show_Present(StartPoint, m, n, Round, l, "Present 1"); if (IsKeyPressed(KEY_SPACE)) sw = false; UpdateMusicStream(GameMusic);
+//              }
+//      }
 
 #include <stdio.h>
 #include <stdbool.h>
@@ -472,7 +481,6 @@ switch(Current)
 
                 }
                 if (Are_All_Players_Have_Won()) {Current = EndScreen; break;}  
-                // if (!isPlayed) l ++;    // If first player is dead, others can't play!
                 else {State = MoveShs; break;}
             }
             

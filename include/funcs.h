@@ -139,6 +139,11 @@ int Are_All_Players_Have_Won();
 int Are_All_Players_Dead();
 int Calculate_Max_Interim_Wall(int m, int n);
 int Show_End_Screen();
+bool Is_Present_Gotten(Vector2 Presents[], int nPresents);
+void Show_Present_Rec(Vector2 StartPoint, int m, int n, int Round, int ExRound, Music music);
+void Show_Present(Vector2 StartPoint, int m, int n, int Round, int ExRound, char *str);
+void ReplayGift(int *l);
+void InWallIncreaseGift(int l);
 
 
 #endif

@@ -1315,5 +1315,56 @@ int Show_End_Screen() {
     return 0;
 }
 
+bool Is_Present_Gotten(Vector2 Presents[], int nPresents) {
+    for (int i=0; i<nPresents; i++)
+        for (int j=0; j<nExplorers; j++)
+            if ((int) Presents[i].x == (int) Explorers[j].mapPos.x && (int) Presents[i].y == (int) Explorers[j].mapPos.y)
+                return true;
+    return false;
+}
 
+void Show_Present_Rec(Vector2 StartPoint, int m, int n, int Round, int ExRound, Music music) {
+    float width = 10;
+    float height = 6;
+    // Vector2 pos = {540, 640};
+    Rectangle rec = {StartPoint.x+(Side*n)/2-5, WindowHeight-20, width, height};
+    Color backColor = {20, 180, 150, 255};
+    while (rec.y >= 260) { 
+        BeginDrawing();
+        ClearBackground(RAYWHITE);
+        Pointer_To_Player(ExRound, StartPoint);
+        Draw_Map(StartPoint, m, n, Round, ExRound);
+        UpdateMusicStream(music);
+        DrawRectangleRounded(rec, 0.1f, 10, backColor);
+        EndDrawing();
+        backColor.a -= 3;
+        backColor.r += 4;
+        backColor.b ++;
+        backColor.g -= 2;
+        rec.y -= 10;
+        rec.x -= 5;
+        rec.width += 10;
+        rec.height += 6;    
+    }
+}
+
+void Show_Present(Vector2 StartPoint, int m, int n, int Round, int ExRound, char *str) {
+    // r=176 g=102 b=189 a=138 from Show_Present_UI (backColor at last)
+    // x=255 y=250 w=390 h=234 from Show_Present_UI (rec at last)
+    Color color = {176, 102, 189, 138};
+    // Color TextColor = {1}
+    Rectangle rec = {255, 250, 390, 234};
+
+    BeginDrawing();
+    ClearBackground(RAYWHITE);
+    Draw_Map(StartPoint, m, n, Round, ExRound);
+    Pointer_To_Player(ExRound, StartPoint);
+    DrawRectangleRounded(rec, 0.1f, 10, color);
+    DrawText(str, rec.x+180, rec.y+rec.height/2, 30, BLACK);
+    EndDrawing();
+}
+
+void ReplayGift(int *l) {(*l) --;}
+
+void InWallIncreaseGift(int l) {Explorers[l].wallCount += 2;}
 
