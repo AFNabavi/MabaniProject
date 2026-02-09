@@ -293,7 +293,7 @@ Wall color and thickness rules based on map[j][i] value:
 
 // Drawing Gifts
     for (i=0; i<nGifts; i++) {
-        DrawTexture(PresentTexture, Gifts[i].winPos.x, Gifts[i].winPos.y, WHITE);
+        DrawTexture(PresentTexture, Gifts[i].winPos.x+4, Gifts[i].winPos.y+4, WHITE);
     }
 
 // Draw explorers (facing toward lightcore)
@@ -1375,30 +1375,14 @@ void ReplayGift(int *l) {(*l) --;}
 
 void InWallIncreaseGift(int l) {Explorers[l].wallCount += 2;}
 
-void Number_Gifts(int m, int n) {
-    if (nExplorers==1) {
-        if (m*n < 42) nGifts = 1;
-        else if (m*n < 90) nGifts = 2;
-        else if (m*n <145) nGifts = 2;
-    }
-    else if (nExplorers==2) {
-        if (m*n < 42) nGifts = 2;
-        else if (m*n < 90) nGifts = 2;
-        else if (m*n <145) nGifts = 2;
-    }
-    else {
-        if (m*n < 42) nGifts = 2;
-        else if (m*n < 90) nGifts = 3;
-        else if (m*n <145) nGifts = 3;
-    }
-}
+void Number_Gifts(int m, int n) {nGifts = nShadowCasters;}
 
 int BFS_Gift(int checked[][2], int start, int end, int m, int n, int len) {
     int i; len++; int k=0;
     for (i=start; i<=end; i++) {
         if (map[checked[i][0]-1][checked[i][1]] == 1 && (map[checked[i][0]-2][checked[i][1]] == 1 || map[checked[i][0]-2][checked[i][1]] == 2)) {
             if (map[checked[i][0]-2][checked[i][1]] == 2) {
-                if (len<4) return 0;
+                if (len<2) return 0;
                 else return 1;
             }
             else {
@@ -1408,7 +1392,7 @@ int BFS_Gift(int checked[][2], int start, int end, int m, int n, int len) {
         }
         if (map[checked[i][0]][checked[i][1]+1] == 1 && (map[checked[i][0]][checked[i][1]+2] == 1 || map[checked[i][0]][checked[i][1]+2] == 2)) {
             if (map[checked[i][0]][checked[i][1]+2] == 2) {
-                if (len<4) return 0;
+                if (len<2) return 0;
                 else return 1;
             }
             else {
@@ -1418,7 +1402,7 @@ int BFS_Gift(int checked[][2], int start, int end, int m, int n, int len) {
         }
         if (map[checked[i][0]+1][checked[i][1]] == 1 && (map[checked[i][0]+2][checked[i][1]] == 1 || map[checked[i][0]+2][checked[i][1]] == 2)) {
             if (map[checked[i][0]+2][checked[i][1]] == 2) {
-                if (len<4) return 0;
+                if (len<2) return 0;
                 else return 1;
             }
             else {
@@ -1428,7 +1412,7 @@ int BFS_Gift(int checked[][2], int start, int end, int m, int n, int len) {
         }
         if (map[checked[i][0]][checked[i][1]-1] == 1 && (map[checked[i][0]][checked[i][1]-2] == 1 || map[checked[i][0]][checked[i][1]-2] == 2)) {
             if (map[checked[i][0]][checked[i][1]-2] == 2) {
-                if (len<4) return 0;
+                if (len<2) return 0;
                 else return 1;
             }
             else {
@@ -1437,7 +1421,7 @@ int BFS_Gift(int checked[][2], int start, int end, int m, int n, int len) {
             }
         }
     }
-    printf("%d ", len);
+    // printf("%d ", len);
     start = end + 1; end += k;
     return BFS_Gift(checked, start, end, m, n, len); 
 }
