@@ -63,6 +63,8 @@ extern Explorer Explorers[3];
 // extern int nInterimWalls[3];
 extern int nInWalls; 
 extern InterimWalls InWalls[30];
+extern Present Gifts[3];
+extern int nGifts;
 
 extern int nShadowCasters;
 extern Vector2 ShadowCasters[3];
@@ -87,6 +89,7 @@ extern Texture2D Ex1TextureLeft;
 extern Texture2D Ex2TextureLeft;
 extern Texture2D Ex3TextureLeft;
 extern Texture2D LiTexture;
+extern Texture2D PresentTexture;
 
 void SET_Map_Array(int M[][25], int m, int n);
 Vector2 GET_StartPoint(int m, int n, int WidthSpace);
@@ -139,6 +142,8 @@ int Are_All_Players_Have_Won();
 int Are_All_Players_Dead();
 int Calculate_Max_Interim_Wall(int m, int n);
 int Show_End_Screen();
+int BFS_Gift(int checked[][2], int start, int end, int m, int n, int len);
+void Number_Gifts(int m, int n);
 
 
 #endif

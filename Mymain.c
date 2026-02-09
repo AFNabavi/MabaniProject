@@ -45,37 +45,37 @@ InitWindow(WindowWidth, WindowHeight, "The Tale of the Labyrinth");
 InitAudioDevice();
 srand(time(NULL));    // randomize choices
 // Load files
-Ex1Image = LoadTexture("source\\explorer1_bigimage.png");
-Ex2Image = LoadTexture("source\\explorer2_bigimage.png");
-Ex3Image = LoadTexture("source\\explorer3_bigimage.png");
-Sh1TextureRight = LoadTexture("source\\shadowcaster1_right_image.png");
-Sh2TextureRight = LoadTexture("source\\shadowcaster2_right_image.png");
-Sh3TextureRight = LoadTexture("source\\shadowcaster3_right_image.png");
-Sh1TextureLeft = LoadTexture("source\\shadowcaster1_left_image.png");
-Sh2TextureLeft = LoadTexture("source\\shadowcaster2_left_image.png");
-Sh3TextureLeft = LoadTexture("source\\shadowcaster3_left_image.png");
-Ex1TextureRight = LoadTexture("source\\explorer1_right_image.png");
-Ex2TextureRight = LoadTexture("source\\explorer2_right_image.png");
-Ex3TextureRight = LoadTexture("source\\explorer3_right_image.png");
-Ex1TextureLeft = LoadTexture("source\\explorer1_left_image.png");
-Ex2TextureLeft = LoadTexture("source\\explorer2_left_image.png");
-Ex3TextureLeft = LoadTexture("source\\explorer3_left_image.png");
-LiTexture = LoadTexture("source\\light_core_image.png");
-PresentTexture = LoadTexture("source\\present_image.png");
-Music music1 = LoadMusicStream("source\\music1.ogg");
-Music music2 = LoadMusicStream("source\\music2.ogg");
-Music music3 = LoadMusicStream("source\\music3.ogg");
-Music music4 = LoadMusicStream("source\\music4.ogg");
+// Ex1Image = LoadTexture("output\\source\\explorer1_bigimage.png");
+// Ex2Image = LoadTexture("output\\source\\explorer2_bigimage.png");
+// Ex3Image = LoadTexture("output\\source\\explorer3_bigimage.png");
+Sh1TextureRight = LoadTexture("output\\source\\shadowcaster1_right_image.png");
+Sh2TextureRight = LoadTexture("output\\source\\shadowcaster2_right_image.png");
+Sh3TextureRight = LoadTexture("output\\source\\shadowcaster3_right_image.png");
+Sh1TextureLeft = LoadTexture("output\\source\\shadowcaster1_left_image.png");
+Sh2TextureLeft = LoadTexture("output\\source\\shadowcaster2_left_image.png");
+Sh3TextureLeft = LoadTexture("output\\source\\shadowcaster3_left_image.png");
+Ex1TextureRight = LoadTexture("output\\source\\explorer1_right_image.png");
+Ex2TextureRight = LoadTexture("output\\source\\explorer2_right_image.png");
+Ex3TextureRight = LoadTexture("output\\source\\explorer3_right_image.png");
+Ex1TextureLeft = LoadTexture("output\\source\\explorer1_left_image.png");
+Ex2TextureLeft = LoadTexture("output\\source\\explorer2_left_image.png");
+Ex3TextureLeft = LoadTexture("output\\source\\explorer3_left_image.png");
+LiTexture = LoadTexture("output\\source\\light_core_image.png");
+PresentTexture = LoadTexture("output\\source\\present_image.png");
+Music music1 = LoadMusicStream("output\\source\\music1.ogg");
+Music music2 = LoadMusicStream("output\\source\\music2.ogg");
+Music music3 = LoadMusicStream("output\\source\\music3.ogg");
+Music music4 = LoadMusicStream("output\\source\\music4.ogg");
 Music musics[4] = {music1, music2, music3, music4};
-Sound VictorySound = LoadSound("source\\victory_sound.wav");
-Sound DieSound = LoadSound("source\\game_over_sound.wav");
+Sound VictorySound = LoadSound("output\\source\\victory_sound.wav");
+Sound DieSound = LoadSound("output\\source\\game_over_sound.wav");
 
 Screen Current = GameScreen;   // Current screen, starts at TitleScreen.
 Level State = GET;   // Current level, starts at GET for inputs.
 
 Texture2D ExTextures[3][2] = {{Ex1TextureLeft, Ex1TextureRight}, 
-                                                  {Ex2TextureLeft, Ex2TextureRight},
-                                                  {Ex3TextureLeft, Ex3TextureRight}} ;
+                            {Ex2TextureLeft, Ex2TextureRight},
+                            {Ex3TextureLeft, Ex3TextureRight}} ;
 Music GameMusic = musics[rand()%4];
 PlayMusicStream(GameMusic);
 SetTargetFPS(FPS);
@@ -272,6 +272,34 @@ switch(Current)
             }
             Reset_Map_Blocks_for_Move_Elements(m, n);   //بسیار مهم برای قسمت MoveShs
 
+            Number_Gifts(m, n); int i;
+            for (i=0; i<nGifts; i++) {
+                InputAgain = true;
+                do {
+                    int y, x;
+                    do {
+                        y = 2*(rand()%m) + 1;
+                        x = 2*(rand()%n) + 1;
+                    } while(map[y][x] != 1);
+
+                    int checked[m*n][2]; checked[0][0] = y; checked[0][1] = x;
+                    Reset_Map_Blocks_for_Move_Elements(m, n); map[checked[0][0]][checked[0][1]] = 0;
+                    int re = BFS_Gift(checked, 0, 0, m, n, 0);
+                    
+                    if (re) {
+                        InputAgain = false;
+                        Gifts[i].isGotten = false; Gifts[i].mapPos.y = (float)y; Gifts[i].mapPos.x = (float)x;
+                        Gifts[i].winPos = GET_Start_Elements_Position_for_Draw(StartPoint, Gifts[i].mapPos);
+                        Gifts[i].type = rand()%4;
+                    }
+                    printf("2");
+                } while (InputAgain);
+                printf("3");
+            }
+            Reset_Map_Blocks_for_Move_Elements(m, n); //بسیار مهم برای قسمت MoveShs
+            
+
+            
             State = MoveExs;
             break;
         }
@@ -299,8 +327,9 @@ switch(Current)
                 if (!Are_All_Players_Dead())
                 while (!WindowShouldClose() && l<nExplorers) {
                     // isPlayed = true;
-                    if (WitchRound) WitchRound = false;   // اگر با روال فشردن کلید بروم، فقط برای یک فریم اجرا می‌شود
-                   
+                    // if (WitchRound) WitchRound = false;   // اگر با روال فشردن کلید بروم، فقط برای یک فریم اجرا می‌شود
+                   // I didn`t udrestannd what is above line doing, so i commented that.
+
                     if (notChoosed) {
                         if (!Explorers[l].isAlive) {l ++; continue;}
                         UpdateMusicStream(GameMusic);
