@@ -1331,11 +1331,11 @@ int Is_Present_Gotten() {
     for (int i=0; i<nGifts; i++)
         if (Gifts[i].isGotten == false) {
             if ((int) Gifts[i].mapPos.x == (int) Explorers[0].mapPos.x && (int) Gifts[i].mapPos.y == (int) Explorers[0].mapPos.y)
-                return 1;  
+                return i+1;  
             if ((int) Gifts[i].mapPos.x == (int) Explorers[1].mapPos.x && (int) Gifts[i].mapPos.y == (int) Explorers[1].mapPos.y)
-                return 2;  
+                return i+1;  
             if ((int) Gifts[i].mapPos.x == (int) Explorers[2].mapPos.x && (int) Gifts[i].mapPos.y == (int) Explorers[2].mapPos.y)
-                return 3; 
+                return i+1; 
         // printf("\nEx %d : %d %d  ,  Gift %d : %d %d\n", j, (int)Explorers[j].mapPos.x, (int)Explorers[j].mapPos.y, i, (int)Gifts[i].mapPos.x, (int)Gifts[i].mapPos.y);
         }
     return 0;
