@@ -57,27 +57,27 @@ srand(time(NULL));    // randomize choices
 // Ex1Image = LoadTexture("output\\source\\explorer1_bigimage.png");
 // Ex2Image = LoadTexture("output\\source\\explorer2_bigimage.png");
 // Ex3Image = LoadTexture("output\\source\\explorer3_bigimage.png");
-Sh1TextureRight = LoadTexture("source\\shadowcaster1_right_image.png");
-Sh2TextureRight = LoadTexture("source\\shadowcaster2_right_image.png");
-Sh3TextureRight = LoadTexture("source\\shadowcaster3_right_image.png");
-Sh1TextureLeft = LoadTexture("source\\shadowcaster1_left_image.png");
-Sh2TextureLeft = LoadTexture("source\\shadowcaster2_left_image.png");
-Sh3TextureLeft = LoadTexture("source\\shadowcaster3_left_image.png");
-Ex1TextureRight = LoadTexture("source\\explorer1_right_image.png");
-Ex2TextureRight = LoadTexture("source\\explorer2_right_image.png");
-Ex3TextureRight = LoadTexture("source\\explorer3_right_image.png");
-Ex1TextureLeft = LoadTexture("source\\explorer1_left_image.png");
-Ex2TextureLeft = LoadTexture("source\\explorer2_left_image.png");
-Ex3TextureLeft = LoadTexture("source\\explorer3_left_image.png");
-LiTexture = LoadTexture("source\\light_core_image.png");
-PresentTexture = LoadTexture("source\\present_image.png");
-Music music1 = LoadMusicStream("source\\music1.ogg");
-Music music2 = LoadMusicStream("source\\music2.ogg");
-Music music3 = LoadMusicStream("source\\music3.ogg");
-Music music4 = LoadMusicStream("source\\music4.ogg");
+Sh1TextureRight = LoadTexture("output\\source\\shadowcaster1_right_image.png");
+Sh2TextureRight = LoadTexture("output\\source\\shadowcaster2_right_image.png");
+Sh3TextureRight = LoadTexture("output\\source\\shadowcaster3_right_image.png");
+Sh1TextureLeft = LoadTexture("output\\source\\shadowcaster1_left_image.png");
+Sh2TextureLeft = LoadTexture("output\\source\\shadowcaster2_left_image.png");
+Sh3TextureLeft = LoadTexture("output\\source\\shadowcaster3_left_image.png");
+Ex1TextureRight = LoadTexture("output\\source\\explorer1_right_image.png");
+Ex2TextureRight = LoadTexture("output\\source\\explorer2_right_image.png");
+Ex3TextureRight = LoadTexture("output\\source\\explorer3_right_image.png");
+Ex1TextureLeft = LoadTexture("output\\source\\explorer1_left_image.png");
+Ex2TextureLeft = LoadTexture("output\\source\\explorer2_left_image.png");
+Ex3TextureLeft = LoadTexture("output\\source\\explorer3_left_image.png");
+LiTexture = LoadTexture("output\\source\\light_core_image.png");
+PresentTexture = LoadTexture("output\\source\\present_image.png");
+Music music1 = LoadMusicStream("output\\source\\music1.ogg");
+Music music2 = LoadMusicStream("output\\source\\music2.ogg");
+Music music3 = LoadMusicStream("output\\source\\music3.ogg");
+Music music4 = LoadMusicStream("output\\source\\music4.ogg");
 Music musics[4] = {music1, music2, music3, music4};
-Sound VictorySound = LoadSound("source\\victory_sound.wav");
-Sound DieSound = LoadSound("source\\game_over_sound.wav");
+Sound VictorySound = LoadSound("output\\source\\victory_sound.wav");
+Sound DieSound = LoadSound("output\\source\\game_over_sound.wav");
 
 Screen Current = GameScreen;   // Current screen, starts at TitleScreen.
 Level State = GET;   // Current level, starts at GET for inputs.
@@ -333,6 +333,10 @@ switch(Current)
                 int l=0;
                 if (!Are_All_Players_Dead())
                 while (!WindowShouldClose() && l<nExplorers) {
+                    
+
+                    // if (IsKeyPressed(KEY_O)) Force_Shc(StartPoint, m, n, GameMusic, Round, l);
+
                     // isPlayed = true;
                     // if (WitchRound) WitchRound = false;   // اگر با روال فشردن کلید بروم، فقط برای یک فریم اجرا می‌شود
                    // I didn`t udrestannd what is above line doing, so i commented that.
@@ -560,7 +564,7 @@ switch(Current)
                             EndPosition = GET_Start_Elements_Position_for_Draw(StartPoint, End);
                             int tempShDir = ShadowCastersDir[i];
                             char Dir = (*(WayShcArray[i]+WayShcCounter[i]-1-1)).beg;
-                            Shcs_Animation(Dir, &ShadowCastersP[i], EndPosition, Speed, 0.2f, StartPoint, m, n, i, Round, GameMusic);   
+                            Shcs_Animation(1, Dir, &ShadowCastersP[i], EndPosition, Speed, 0.2f, StartPoint, m, n, i, Round, GameMusic);   
                             ShadowCastersDir[i] = tempShDir;
                             ShadowCasters[i].y = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).y; // = *(*(WayShcArray+i)+WayShcCounter)
                             ShadowCasters[i].x = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).x;
@@ -580,7 +584,7 @@ switch(Current)
                                     EndPosition = GET_Start_Elements_Position_for_Draw(StartPoint, End);
                                     int tempShDir = ShadowCastersDir[i];
                                     char Dir = (*(WayShcArray[i]+WayShcCounter[i]-1-1)).beg;
-                                    Shcs_Animation(Dir, &ShadowCastersP[i], EndPosition, Speed, 0.2f, StartPoint, m, n, i, Round, GameMusic);
+                                    Shcs_Animation(1, Dir, &ShadowCastersP[i], EndPosition, Speed, 0.2f, StartPoint, m, n, i, Round, GameMusic);
                                     ShadowCastersDir[i] = tempShDir;
                                     ShadowCasters[i].y = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).y;
                                     ShadowCasters[i].x = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).x; 
@@ -597,7 +601,7 @@ switch(Current)
                                     EndPosition = GET_Start_Elements_Position_for_Draw(StartPoint, End);
                                     int tempShDir = ShadowCastersDir[i];
                                     char Dir = (*(WayShcArray[i]+WayShcCounter[i]-1-j)).beg;
-                                    Shcs_Animation(Dir, &ShadowCastersP[i], EndPosition, Speed, 0.2f, StartPoint, m, n, i, Round, GameMusic);
+                                    Shcs_Animation(1, Dir, &ShadowCastersP[i], EndPosition, Speed, 0.2f, StartPoint, m, n, i, Round, GameMusic);
                                     if (j==1) {
                                         ShadowCasters[i].y = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).y;
                                         ShadowCasters[i].x = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).x;
