@@ -301,9 +301,9 @@ switch(Current)
                         Gifts[i].winPos = GET_Start_Elements_Position_for_Draw(StartPoint, Gifts[i].mapPos);
                         Gifts[i].type = rand()%4;
                     }
-                    printf("2");
+                    // printf("2");
                 } while (InputAgain);
-                printf("3");
+                // printf("3");
             }
             Reset_Map_Blocks_for_Move_Elements(m, n); //بسیار مهم برای قسمت MoveShs
             

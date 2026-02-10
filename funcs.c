@@ -1396,6 +1396,7 @@ void Number_Gifts(int m, int n) {
 int BFS_Gift(int checked[][2], int start, int end, int m, int n, int len) {
     int i; len++; int k=0;
     for (i=start; i<=end; i++) {
+        printf("%d/%d %d/%d  %d\n", checked[i][0], 2*m, checked[i][1], 2*n, start);  
         if (map[checked[i][0]-1][checked[i][1]] == 1 && (map[checked[i][0]-2][checked[i][1]] == 1 || map[checked[i][0]-2][checked[i][1]] == 2)) {
             if (map[checked[i][0]-2][checked[i][1]] == 2) {
                 if (len<4) return 0;
@@ -1437,7 +1438,8 @@ int BFS_Gift(int checked[][2], int start, int end, int m, int n, int len) {
             }
         }
     }
-    printf("%d ", len);
+    
+    if (k==0) return 0;
     start = end + 1; end += k;
     return BFS_Gift(checked, start, end, m, n, len); 
 }
