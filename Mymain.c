@@ -57,27 +57,27 @@ srand(time(NULL));    // randomize choices
 // Ex1Image = LoadTexture("output\\source\\explorer1_bigimage.png");
 // Ex2Image = LoadTexture("output\\source\\explorer2_bigimage.png");
 // Ex3Image = LoadTexture("output\\source\\explorer3_bigimage.png");
-Sh1TextureRight = LoadTexture("output\\source\\shadowcaster1_right_image.png");
-Sh2TextureRight = LoadTexture("output\\source\\shadowcaster2_right_image.png");
-Sh3TextureRight = LoadTexture("output\\source\\shadowcaster3_right_image.png");
-Sh1TextureLeft = LoadTexture("output\\source\\shadowcaster1_left_image.png");
-Sh2TextureLeft = LoadTexture("output\\source\\shadowcaster2_left_image.png");
-Sh3TextureLeft = LoadTexture("output\\source\\shadowcaster3_left_image.png");
-Ex1TextureRight = LoadTexture("output\\source\\explorer1_right_image.png");
-Ex2TextureRight = LoadTexture("output\\source\\explorer2_right_image.png");
-Ex3TextureRight = LoadTexture("output\\source\\explorer3_right_image.png");
-Ex1TextureLeft = LoadTexture("output\\source\\explorer1_left_image.png");
-Ex2TextureLeft = LoadTexture("output\\source\\explorer2_left_image.png");
-Ex3TextureLeft = LoadTexture("output\\source\\explorer3_left_image.png");
-LiTexture = LoadTexture("output\\source\\light_core_image.png");
-PresentTexture = LoadTexture("output\\source\\present_image.png");
-Music music1 = LoadMusicStream("output\\source\\music1.ogg");
-Music music2 = LoadMusicStream("output\\source\\music2.ogg");
-Music music3 = LoadMusicStream("output\\source\\music3.ogg");
-Music music4 = LoadMusicStream("output\\source\\music4.ogg");
+Sh1TextureRight = LoadTexture("source\\shadowcaster1_right_image.png");
+Sh2TextureRight = LoadTexture("source\\shadowcaster2_right_image.png");
+Sh3TextureRight = LoadTexture("source\\shadowcaster3_right_image.png");
+Sh1TextureLeft = LoadTexture("source\\shadowcaster1_left_image.png");
+Sh2TextureLeft = LoadTexture("source\\shadowcaster2_left_image.png");
+Sh3TextureLeft = LoadTexture("source\\shadowcaster3_left_image.png");
+Ex1TextureRight = LoadTexture("source\\explorer1_right_image.png");
+Ex2TextureRight = LoadTexture("source\\explorer2_right_image.png");
+Ex3TextureRight = LoadTexture("source\\explorer3_right_image.png");
+Ex1TextureLeft = LoadTexture("source\\explorer1_left_image.png");
+Ex2TextureLeft = LoadTexture("source\\explorer2_left_image.png");
+Ex3TextureLeft = LoadTexture("source\\explorer3_left_image.png");
+LiTexture = LoadTexture("source\\light_core_image.png");
+PresentTexture = LoadTexture("source\\present_image.png");
+Music music1 = LoadMusicStream("source\\music1.ogg");
+Music music2 = LoadMusicStream("source\\music2.ogg");
+Music music3 = LoadMusicStream("source\\music3.ogg");
+Music music4 = LoadMusicStream("source\\music4.ogg");
 Music musics[4] = {music1, music2, music3, music4};
-Sound VictorySound = LoadSound("output\\source\\victory_sound.wav");
-Sound DieSound = LoadSound("output\\source\\game_over_sound.wav");
+Sound VictorySound = LoadSound("source\\victory_sound.wav");
+Sound DieSound = LoadSound("source\\game_over_sound.wav");
 
 Screen Current = GameScreen;   // Current screen, starts at TitleScreen.
 Level State = GET;   // Current level, starts at GET for inputs.
@@ -342,6 +342,7 @@ switch(Current)
                    // I didn`t udrestannd what is above line doing, so i commented that.
 
                     if (notChoosed) {
+                        //  printf("Gift 0: %d  ,  Gift 1: %d  ,  Gift 2: %d\n", Gifts[0].isGotten,Gifts[1].isGotten,Gifts[2].isGotten);
                         if (!Explorers[l].isAlive) {l ++; continue;}
                         UpdateMusicStream(GameMusic);
                         BeginDrawing();
@@ -396,6 +397,22 @@ switch(Current)
                             float Speed = 2.0f;
                             Exs_Animation(ExMoveDir, ExTextureDir, &Explorers[l].winPos, EndPosition, Speed, 0.1f, StartPoint, m, n, l, Round, GameMusic);
                             WitchRound = true; l++; Move = false; notChoosed = true; ShouldMove = false;
+                            
+                            int WhichGift = Is_Present_Gotten();
+                            if (WhichGift) {
+                                Gifts[WhichGift-1].isGotten = true;
+                                bool isShown = false;
+                                Show_Present_Rec(StartPoint, m, n, Round, l, GameMusic);
+                                do {
+                                    Show_Present(StartPoint, m, n, Round, l, Gifts[WhichGift-1].type, GameMusic);
+                                    if (IsKeyPressed(KEY_SPACE)) isShown = true;
+                                } while (!isShown); // Shows the present box while plyer do not click space.
+                                
+                                if (Gifts[WhichGift-1].type == Replay) {int *p; p = &(l); ReplayGift(p);}
+                                else if (Gifts[WhichGift-1].type == InWallIncrease) InWallIncreaseGift(l-1);
+                                else if (Gifts[WhichGift-1].type == ForceEnemy) Force_Shc(StartPoint, m, n, GameMusic, Round, l);
+                                else if (Gifts[WhichGift-1].type == Earthquake) printf("Earthquak!\n");
+                            }
                         }
                         else if (ShouldMove && !(Can_Ex_Move_for_Walls(Explorers[l].mapPos, ExMoveDir))) { 
                             ShouldShowError = true;
@@ -510,15 +527,6 @@ switch(Current)
                     //     }
                     //     //اگه اینا نمیبودن، با فشردن Q هم از این بخش میرفت بیرون و هم از انتخاب کردن
 
-                }
-                int WhichGift = Is_Present_Gotten();
-                if (WhichGift) {
-                    bool isShown = false;
-                    Show_Present_Rec(StartPoint, m, n, Round, l, GameMusic);
-                    do {
-                        Show_Present(StartPoint, m, n, Round, l, Gifts[WhichGift].type, GameMusic);
-                        if (IsKeyPressed(KEY_SPACE)) isShown = true;
-                    } while (!isShown);
                 }
                 if (Are_All_Players_Have_Won()) {Current = EndScreen; break;}  
                 else {State = MoveShs; break;}

@@ -289,7 +289,8 @@ Wall color and thickness rules based on map[j][i] value:
 
 // Drawing Gifts
     for (i=0; i<nGifts; i++) {
-        DrawTexture(PresentTexture, Gifts[i].winPos.x+4, Gifts[i].winPos.y+4, WHITE);
+        if (Gifts[i].isGotten == false)
+            DrawTexture(PresentTexture, Gifts[i].winPos.x+4, Gifts[i].winPos.y+4, WHITE);
     }
 
 // Draw explorers (facing toward lightcore)
@@ -373,6 +374,14 @@ Wall color and thickness rules based on map[j][i] value:
     DrawText("Skip round: 'Q'\n", HintGame.x+11, HintGame.y+145, 20, MyRed);
     DrawText("-----------------", HintGame.x+1, HintGame.y+175, 20, MyRed);
     DrawRectangleRoundedLinesEx(HintGame, 0.1f, 20, 1.0f, MyRed);
+
+    DrawText("-----------------", 901, 290, 20, MyRed);
+    DrawText("Player 1: ", 905, 320, 20, MyRed);
+    DrawTexture(Explorers[0].avatar[0], 1000, 310, MyRed);
+    DrawText("Player 2: ", 905, 380, 20, MyRed);
+    DrawTexture(Explorers[1].avatar[0], 1000, 370, MyRed);
+    DrawText("Player 3: ", 905, 440, 20, MyRed);
+    DrawTexture(Explorers[2].avatar[0], 1000, 430, MyRed);
 
     DrawText("-----------------", 901, 490, 20, MyRed);
     char s[3];
@@ -1320,9 +1329,13 @@ int Show_End_Screen() {
 
 int Is_Present_Gotten() {
     for (int i=0; i<nGifts; i++)
-        for (int j=0; j<nExplorers; j++) {
-            if ((int) Gifts[i].mapPos.x == (int) Explorers[j].mapPos.x && (int) Gifts[i].mapPos.y == (int) Explorers[j].mapPos.y)
-                return i;   // i = index of the gift player has gotten it.
+        if (Gifts[i].isGotten == false) {
+            if ((int) Gifts[i].mapPos.x == (int) Explorers[0].mapPos.x && (int) Gifts[i].mapPos.y == (int) Explorers[0].mapPos.y)
+                return 1;  
+            if ((int) Gifts[i].mapPos.x == (int) Explorers[1].mapPos.x && (int) Gifts[i].mapPos.y == (int) Explorers[1].mapPos.y)
+                return 2;  
+            if ((int) Gifts[i].mapPos.x == (int) Explorers[2].mapPos.x && (int) Gifts[i].mapPos.y == (int) Explorers[2].mapPos.y)
+                return 3; 
         // printf("\nEx %d : %d %d  ,  Gift %d : %d %d\n", j, (int)Explorers[j].mapPos.x, (int)Explorers[j].mapPos.y, i, (int)Gifts[i].mapPos.x, (int)Gifts[i].mapPos.y);
         }
     return 0;
@@ -1360,6 +1373,7 @@ void Show_Present(Vector2 StartPoint, int m, int n, int Round, int ExRound, Gift
     // Color TextColor = {1}
     Rectangle rec = {255, 250, 390, 234};
 
+    UpdateMusicStream(music);
     BeginDrawing();
     ClearBackground(RAYWHITE);
     Draw_Map(StartPoint, m, n, Round, ExRound);
@@ -1383,7 +1397,7 @@ void Number_Gifts(int m, int n) {nGifts = nShadowCasters;}
 int BFS_Gift(int checked[][2], int start, int end, int m, int n, int len) {
     int i; len++; int k=0;
     for (i=start; i<=end; i++) {
-        printf("%d/%d %d/%d  %d\n", checked[i][0], 2*m, checked[i][1], 2*n, start);  
+        // printf("%d/%d %d/%d  %d\n", checked[i][0], 2*m, checked[i][1], 2*n, start);  
         if (map[checked[i][0]-1][checked[i][1]] == 1 && (map[checked[i][0]-2][checked[i][1]] == 1 || map[checked[i][0]-2][checked[i][1]] == 2)) {
             if (map[checked[i][0]-2][checked[i][1]] == 2) {
                 if (len<3) return 0;
@@ -1430,8 +1444,6 @@ int BFS_Gift(int checked[][2], int start, int end, int m, int n, int len) {
     start = end + 1; end += k;
     return BFS_Gift(checked, start, end, m, n, len); 
 }
-
-
 
 int Rectangles_Around_Shc(Vector2 RecsMapP[], Rectangle RecsAround[], Vector2 Shc, Vector2 StartPoint) {
     int nRectangles = 0;
