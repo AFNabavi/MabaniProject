@@ -1355,10 +1355,10 @@ void Show_Present_Rec(Vector2 StartPoint, int m, int n, int Round, int ExRound, 
         UpdateMusicStream(music);
         DrawRectangleRounded(rec, 0.1f, 10, backColor);
         EndDrawing();
-        backColor.a -= 3;
-        backColor.r += 4;
-        backColor.b ++;
-        backColor.g -= 2;
+        backColor.a -= 2.5;
+        backColor.r += 3;
+        backColor.b -= 2;
+        backColor.g -= 3;
         rec.y -= 10;
         rec.x -= 5;
         rec.width += 10;
@@ -1367,9 +1367,9 @@ void Show_Present_Rec(Vector2 StartPoint, int m, int n, int Round, int ExRound, 
 }
 
 void Show_Present(Vector2 StartPoint, int m, int n, int Round, int ExRound, Gift name, Music music) {
-    // r=176 g=102 b=189 a=138 from Show_Present_UI (backColor at last)
+    // r=59 g=63 b=72 a=157 from Show_Present_UI (backColor at last)
     // x=255 y=250 w=390 h=234 from Show_Present_UI (rec at last)
-    Color color = {176, 102, 189, 138};
+    Color color = {59, 63, 72, 157};
     // Color TextColor = {1}
     Rectangle rec = {255, 250, 390, 234};
 
@@ -1379,12 +1379,15 @@ void Show_Present(Vector2 StartPoint, int m, int n, int Round, int ExRound, Gift
     Draw_Map(StartPoint, m, n, Round, ExRound);
     Pointer_To_Player(ExRound, StartPoint);
     DrawRectangleRounded(rec, 0.1f, 10, color);
-    if (name == Replay) {char str[30] = "REPLAY GIFT"; DrawText(str, rec.x+130, rec.y+rec.height/2, 30, BLACK);}
-    else if (name == InWallIncrease) {char str[30] = "INTERIM WALL INCREASE"; DrawText(str, rec.x+120, rec.y+rec.height/2, 30, BLACK);}
-    else if (name == ForceEnemy) {char str[30] = "FORCE ENEMY"; DrawText(str, rec.x+130, rec.y+rec.height/2, 30, BLACK);}
-    else if (name == Earthquake) {char str[30] = "EARTHQUAKE   "; DrawText(str, rec.x+140, rec.y+rec.height/2, 30, BLACK);}
-    else {char str[30] = "NULL"; DrawText(str, rec.x+140, rec.y+rec.height/2, 30, BLACK);}
-    DrawText("Press space to okay.", rec.x+130, rec.y+rec.height/2+35, 20, BLACK);
+    if (name == Replay) 
+        {char str[30] = "REPLAY GIFT"; DrawText(str, rec.x+92, rec.y+rec.height/2-20, 30, GOLD);}
+    else if (name == InWallIncrease)
+        {char str[30] = "INTERIM WALL\n   INCREASE"; DrawText(str, rec.x+75, rec.y+rec.height/2-50, 30, GOLD);}
+    else if (name == ForceEnemy) 
+        {char str[30] = "FORCE ENEMY"; DrawText(str, rec.x+82, rec.y+rec.height/2-20, 30, GOLD);}
+    else if (name == Earthquake) 
+        {char str[30] = "EARTHQUAKE   "; DrawText(str, rec.x+84, rec.y+rec.height/2-20, 30, GOLD);}
+    DrawText("Press space to okay.", rec.x+85, rec.y+rec.height/2+20, 20, GOLD);
     EndDrawing();
 }
 
