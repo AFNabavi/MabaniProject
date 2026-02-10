@@ -289,7 +289,6 @@ switch(Current)
                     do {
                         y = 2*(rand()%m) + 1; 
                         x = 2*(rand()%n) + 1;
-                        printf("%d %d,  ", x, y);
                     } while(map[y][x] != 1);
 
                     int checked[m*n][2]; checked[0][0] = y; checked[0][1] = x;
@@ -507,6 +506,15 @@ switch(Current)
                     //     }
                     //     //اگه اینا نمیبودن، با فشردن Q هم از این بخش میرفت بیرون و هم از انتخاب کردن
 
+                }
+                int WhichGift = Is_Present_Gotten();
+                if (WhichGift) {
+                    bool isShown = false;
+                    Show_Present_Rec(StartPoint, m, n, Round, l, GameMusic);
+                    do {
+                        Show_Present(StartPoint, m, n, Round, l, Gifts[WhichGift].type, GameMusic);
+                        if (IsKeyPressed(KEY_SPACE)) isShown = true;
+                    } while (!isShown);
                 }
                 if (Are_All_Players_Have_Won()) {Current = EndScreen; break;}  
                 else {State = MoveShs; break;}

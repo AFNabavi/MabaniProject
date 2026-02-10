@@ -1322,12 +1322,14 @@ int Show_End_Screen() {
     return 0;
 }
 
-bool Is_Present_Gotten(Vector2 Presents[], int nPresents) {
-    for (int i=0; i<nPresents; i++)
-        for (int j=0; j<nExplorers; j++)
-            if ((int) Presents[i].x == (int) Explorers[j].mapPos.x && (int) Presents[i].y == (int) Explorers[j].mapPos.y)
-                return true;
-    return false;
+int Is_Present_Gotten() {
+    for (int i=0; i<nGifts; i++)
+        for (int j=0; j<nExplorers; j++) {
+            if ((int) Gifts[i].mapPos.x == (int) Explorers[j].mapPos.x && (int) Gifts[i].mapPos.y == (int) Explorers[j].mapPos.y)
+                return i;   // i = index of the gift player has gotten it.
+        // printf("\nEx %d : %d %d  ,  Gift %d : %d %d\n", j, (int)Explorers[j].mapPos.x, (int)Explorers[j].mapPos.y, i, (int)Gifts[i].mapPos.x, (int)Gifts[i].mapPos.y);
+        }
+    return 0;
 }
 
 void Show_Present_Rec(Vector2 StartPoint, int m, int n, int Round, int ExRound, Music music) {
@@ -1355,7 +1357,7 @@ void Show_Present_Rec(Vector2 StartPoint, int m, int n, int Round, int ExRound, 
     }
 }
 
-void Show_Present(Vector2 StartPoint, int m, int n, int Round, int ExRound, char *str) {
+void Show_Present(Vector2 StartPoint, int m, int n, int Round, int ExRound, Gift name, Music music) {
     // r=176 g=102 b=189 a=138 from Show_Present_UI (backColor at last)
     // x=255 y=250 w=390 h=234 from Show_Present_UI (rec at last)
     Color color = {176, 102, 189, 138};
@@ -1367,7 +1369,12 @@ void Show_Present(Vector2 StartPoint, int m, int n, int Round, int ExRound, char
     Draw_Map(StartPoint, m, n, Round, ExRound);
     Pointer_To_Player(ExRound, StartPoint);
     DrawRectangleRounded(rec, 0.1f, 10, color);
-    DrawText(str, rec.x+180, rec.y+rec.height/2, 30, BLACK);
+    if (name == Replay) {char str[30] = "REPLAY GIFT"; DrawText(str, rec.x+130, rec.y+rec.height/2, 30, BLACK);}
+    else if (name == InWallIncrease) {char str[30] = "INTERIM WALL INCREASE"; DrawText(str, rec.x+120, rec.y+rec.height/2, 30, BLACK);}
+    else if (name == ForceEnemy) {char str[30] = "FORCE ENEMY"; DrawText(str, rec.x+130, rec.y+rec.height/2, 30, BLACK);}
+    else if (name == Earthquake) {char str[30] = "EARTHQUAKE   "; DrawText(str, rec.x+140, rec.y+rec.height/2, 30, BLACK);}
+    else {char str[30] = "NULL"; DrawText(str, rec.x+140, rec.y+rec.height/2, 30, BLACK);}
+    DrawText("Press space to okay.", rec.x+130, rec.y+rec.height/2+35, 20, BLACK);
     EndDrawing();
 }
 
@@ -1425,3 +1432,5 @@ int BFS_Gift(int checked[][2], int start, int end, int m, int n, int len) {
     start = end + 1; end += k;
     return BFS_Gift(checked, start, end, m, n, len); 
 }
+
+
