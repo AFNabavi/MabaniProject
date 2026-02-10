@@ -287,8 +287,9 @@ switch(Current)
                 do {
                     int y, x;
                     do {
-                        y = 2*(rand()%m) + 1;
+                        y = 2*(rand()%m) + 1; 
                         x = 2*(rand()%n) + 1;
+                        printf("%d %d,  ", x, y);
                     } while(map[y][x] != 1);
 
                     int checked[m*n][2]; checked[0][0] = y; checked[0][1] = x;
@@ -301,9 +302,7 @@ switch(Current)
                         Gifts[i].winPos = GET_Start_Elements_Position_for_Draw(StartPoint, Gifts[i].mapPos);
                         Gifts[i].type = rand()%4;
                     }
-                    // printf("2");
                 } while (InputAgain);
-                // printf("3");
             }
             Reset_Map_Blocks_for_Move_Elements(m, n); //بسیار مهم برای قسمت MoveShs
             
@@ -335,6 +334,10 @@ switch(Current)
                 int l=0;
                 if (!Are_All_Players_Dead())
                 while (!WindowShouldClose() && l<nExplorers) {
+                    
+
+                    // if (IsKeyPressed(KEY_O)) Force_Shc(StartPoint, m, n, GameMusic, Round, l);
+
                     // isPlayed = true;
                     // if (WitchRound) WitchRound = false;   // اگر با روال فشردن کلید بروم، فقط برای یک فریم اجرا می‌شود
                    // I didn`t udrestannd what is above line doing, so i commented that.
@@ -553,7 +556,7 @@ switch(Current)
                             EndPosition = GET_Start_Elements_Position_for_Draw(StartPoint, End);
                             int tempShDir = ShadowCastersDir[i];
                             char Dir = (*(WayShcArray[i]+WayShcCounter[i]-1-1)).beg;
-                            Shcs_Animation(Dir, &ShadowCastersP[i], EndPosition, Speed, 0.2f, StartPoint, m, n, i, Round, GameMusic);   
+                            Shcs_Animation(1, Dir, &ShadowCastersP[i], EndPosition, Speed, 0.2f, StartPoint, m, n, i, Round, GameMusic);   
                             ShadowCastersDir[i] = tempShDir;
                             ShadowCasters[i].y = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).y; // = *(*(WayShcArray+i)+WayShcCounter)
                             ShadowCasters[i].x = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).x;
@@ -573,7 +576,7 @@ switch(Current)
                                     EndPosition = GET_Start_Elements_Position_for_Draw(StartPoint, End);
                                     int tempShDir = ShadowCastersDir[i];
                                     char Dir = (*(WayShcArray[i]+WayShcCounter[i]-1-1)).beg;
-                                    Shcs_Animation(Dir, &ShadowCastersP[i], EndPosition, Speed, 0.2f, StartPoint, m, n, i, Round, GameMusic);
+                                    Shcs_Animation(1, Dir, &ShadowCastersP[i], EndPosition, Speed, 0.2f, StartPoint, m, n, i, Round, GameMusic);
                                     ShadowCastersDir[i] = tempShDir;
                                     ShadowCasters[i].y = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).y;
                                     ShadowCasters[i].x = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).x; 
@@ -590,7 +593,7 @@ switch(Current)
                                     EndPosition = GET_Start_Elements_Position_for_Draw(StartPoint, End);
                                     int tempShDir = ShadowCastersDir[i];
                                     char Dir = (*(WayShcArray[i]+WayShcCounter[i]-1-j)).beg;
-                                    Shcs_Animation(Dir, &ShadowCastersP[i], EndPosition, Speed, 0.2f, StartPoint, m, n, i, Round, GameMusic);
+                                    Shcs_Animation(1, Dir, &ShadowCastersP[i], EndPosition, Speed, 0.2f, StartPoint, m, n, i, Round, GameMusic);
                                     if (j==1) {
                                         ShadowCasters[i].y = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).y;
                                         ShadowCasters[i].x = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).x;

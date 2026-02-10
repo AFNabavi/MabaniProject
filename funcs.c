@@ -34,10 +34,6 @@ int ShadowCastersDir[3] = {-1, -1, -1};
 int FadeSh[3];
 int swF[3] = {1, 1, 1};
 
-int minlength;
-char FirstMove;
-char SecondMove;
-
 void SET_Map_Array(int M[][25], int m, int n)
 {
 /*
@@ -293,7 +289,7 @@ Wall color and thickness rules based on map[j][i] value:
 
 // Drawing Gifts
     for (i=0; i<nGifts; i++) {
-        DrawTexture(PresentTexture, Gifts[i].winPos.x, Gifts[i].winPos.y, WHITE);
+        DrawTexture(PresentTexture, Gifts[i].winPos.x+4, Gifts[i].winPos.y+4, WHITE);
     }
 
 // Draw explorers (facing toward lightcore)
@@ -972,10 +968,10 @@ void Rec_for_Choose(float x, float y, SidesAR A, Rectangle R[]) {
     } else R[3].x = 1.0;
 }
 
-void Shcs_Animation(const char beg, Vector2 *ShcP, const Vector2 EndP, float Speed,
+void Shcs_Animation(int ChangeDir, const char beg, Vector2 *ShcP, const Vector2 EndP, float Speed,
                                   const float SIncrease, Vector2 StartPoint, int m, int n, int i, int Round, Music music) {
 
-    if (beg == 'R' || beg == 'L') {
+    if (ChangeDir && (beg == 'R' || beg == 'L')) {
         if (beg == 'R') ShadowCastersDir[i] = -2; //-2 ~ left
         else ShadowCastersDir[i] = -3; //-3 ~ right
     }
@@ -1375,23 +1371,7 @@ void ReplayGift(int *l) {(*l) --;}
 
 void InWallIncreaseGift(int l) {Explorers[l].wallCount += 2;}
 
-void Number_Gifts(int m, int n) {
-    if (nExplorers==1) {
-        if (m*n < 42) nGifts = 1;
-        else if (m*n < 90) nGifts = 2;
-        else if (m*n <145) nGifts = 2;
-    }
-    else if (nExplorers==2) {
-        if (m*n < 42) nGifts = 2;
-        else if (m*n < 90) nGifts = 2;
-        else if (m*n <145) nGifts = 2;
-    }
-    else {
-        if (m*n < 42) nGifts = 2;
-        else if (m*n < 90) nGifts = 3;
-        else if (m*n <145) nGifts = 3;
-    }
-}
+void Number_Gifts(int m, int n) {nGifts = nShadowCasters;}
 
 int BFS_Gift(int checked[][2], int start, int end, int m, int n, int len) {
     int i; len++; int k=0;
@@ -1399,7 +1379,7 @@ int BFS_Gift(int checked[][2], int start, int end, int m, int n, int len) {
         printf("%d/%d %d/%d  %d\n", checked[i][0], 2*m, checked[i][1], 2*n, start);  
         if (map[checked[i][0]-1][checked[i][1]] == 1 && (map[checked[i][0]-2][checked[i][1]] == 1 || map[checked[i][0]-2][checked[i][1]] == 2)) {
             if (map[checked[i][0]-2][checked[i][1]] == 2) {
-                if (len<4) return 0;
+                if (len<3) return 0;
                 else return 1;
             }
             else {
@@ -1409,7 +1389,7 @@ int BFS_Gift(int checked[][2], int start, int end, int m, int n, int len) {
         }
         if (map[checked[i][0]][checked[i][1]+1] == 1 && (map[checked[i][0]][checked[i][1]+2] == 1 || map[checked[i][0]][checked[i][1]+2] == 2)) {
             if (map[checked[i][0]][checked[i][1]+2] == 2) {
-                if (len<4) return 0;
+                if (len<3) return 0;
                 else return 1;
             }
             else {
@@ -1419,7 +1399,7 @@ int BFS_Gift(int checked[][2], int start, int end, int m, int n, int len) {
         }
         if (map[checked[i][0]+1][checked[i][1]] == 1 && (map[checked[i][0]+2][checked[i][1]] == 1 || map[checked[i][0]+2][checked[i][1]] == 2)) {
             if (map[checked[i][0]+2][checked[i][1]] == 2) {
-                if (len<4) return 0;
+                if (len<3) return 0;
                 else return 1;
             }
             else {
@@ -1429,7 +1409,7 @@ int BFS_Gift(int checked[][2], int start, int end, int m, int n, int len) {
         }
         if (map[checked[i][0]][checked[i][1]-1] == 1 && (map[checked[i][0]][checked[i][1]-2] == 1 || map[checked[i][0]][checked[i][1]-2] == 2)) {
             if (map[checked[i][0]][checked[i][1]-2] == 2) {
-                if (len<4) return 0;
+                if (len<3) return 0;
                 else return 1;
             }
             else {
@@ -1442,4 +1422,115 @@ int BFS_Gift(int checked[][2], int start, int end, int m, int n, int len) {
     if (k==0) return 0;
     start = end + 1; end += k;
     return BFS_Gift(checked, start, end, m, n, len); 
+}
+
+int Rectangles_Around_Shc(Vector2 RecsMapP[], Rectangle RecsAround[], Vector2 Shc, Vector2 StartPoint) {
+    int nRectangles = 0;
+    if (map[(int)Shc.y-1][(int)Shc.x] == 1 && map[(int)Shc.y-2][(int)Shc.x] == 1) {
+        Vector2 coordinate; coordinate.y = Shc.y-2; coordinate.x = Shc.x;
+        Vector2 temp = GET_Start_Elements_Position_for_Draw(StartPoint, coordinate);
+        Rectangle R = {temp.x-2, temp.y-3, Side, Side};
+        nRectangles++;
+        RecsMapP[nRectangles-1] = coordinate; 
+        RecsAround[nRectangles-1] = R;
+    }
+    if (map[(int)Shc.y][(int)Shc.x+1] == 1 && map[(int)Shc.y][(int)Shc.x+2] == 1) {
+        Vector2 coordinate; coordinate.y = Shc.y; coordinate.x = Shc.x+2;
+        Vector2 temp = GET_Start_Elements_Position_for_Draw(StartPoint, coordinate);
+        Rectangle R = {temp.x-2, temp.y-3, Side, Side};
+        nRectangles++;
+        RecsMapP[nRectangles-1] = coordinate;
+        RecsAround[nRectangles-1] = R;
+    }
+    if (map[(int)Shc.y+1][(int)Shc.x] == 1 && map[(int)Shc.y+2][(int)Shc.x] == 1) {
+        Vector2 coordinate; coordinate.y = Shc.y+2; coordinate.x = Shc.x;
+        Vector2 temp = GET_Start_Elements_Position_for_Draw(StartPoint, coordinate);
+        Rectangle R = {temp.x-2, temp.y-3, Side, Side};
+        nRectangles++;
+        RecsMapP[nRectangles-1] = coordinate;
+        RecsAround[nRectangles-1] = R;
+    }
+    if (map[(int)Shc.y][(int)Shc.x-1] == 1 && map[(int)Shc.y][(int)Shc.x-2] == 1) {
+        Vector2 coordinate; coordinate.y = Shc.y; coordinate.x = Shc.x-2;
+        Vector2 temp = GET_Start_Elements_Position_for_Draw(StartPoint, coordinate);
+        Rectangle R = {temp.x-2, temp.y-3, Side, Side};
+        nRectangles++;
+        RecsMapP[nRectangles-1] = coordinate;
+        RecsAround[nRectangles-1] = R;
+    }
+    return nRectangles;
+}
+
+void Force_Shc(Vector2 StartPoint, int m, int n, Music GameMusic, int Round, int ExRound) {
+    Rectangle ShcsR[nShadowCasters];
+    int i;
+    for (i=0; i<nShadowCasters; i++) {
+        Rectangle R = {ShadowCastersP[i].x-2, ShadowCastersP[i].y-3, Side, Side};
+        ShcsR[i] = R;
+    }
+
+    bool MovedShc = false; bool LockinShc = false; bool Move = false;
+    while (!MovedShc) {
+        UpdateMusicStream(GameMusic);
+        BeginDrawing();
+        ClearBackground(RAYWHITE);
+        Draw_Map(StartPoint, m, n, Round, ExRound);
+        EndDrawing();
+
+        Color Yellow = {253, 249, 0, 150}; Vector2 Mous = GetMousePosition();
+        int ShcIndex;
+        for (i=0; !LockinShc && i<nShadowCasters; i++) {
+            DrawRectangleRec(ShcsR[i], Yellow);
+            if (CheckCollisionPointRec(Mous, ShcsR[i]) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                ShcIndex = i;
+                LockinShc = true;
+            }
+        }
+
+        Vector2 Position;
+        while (LockinShc) {
+            UpdateMusicStream(GameMusic);
+            BeginDrawing();
+            ClearBackground(RAYWHITE);
+            Draw_Map(StartPoint, m, n, Round, ExRound);
+            EndDrawing();
+
+            Rectangle RecsAround[4];
+            Vector2 RecsMapP[4];
+            int nRecs = Rectangles_Around_Shc(RecsMapP, RecsAround, ShadowCasters[ShcIndex], StartPoint);
+
+            Vector2 Mous = GetMousePosition(); Color Magneta = {180, 20, 200, 150};
+            for (i=0; i<nRecs; i++) {
+                DrawRectangleRec(RecsAround[i], Magneta);
+                if (CheckCollisionPointRec(Mous, RecsAround[i]) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                    Position = RecsMapP[i];
+                    Move = true;
+                    LockinShc = false;
+                }   
+            }
+
+            if (IsKeyPressed(KEY_Q)) {
+                LockinShc = false;
+            }
+        }
+
+        if (Move) {
+            char beg;
+            if (ShadowCasters[ShcIndex].x == Position.x) {
+                if (ShadowCasters[ShcIndex].y>Position.y) beg = 'D';
+                else beg = 'U';
+            } else {            
+                if (ShadowCasters[ShcIndex].x>Position.x) beg = 'R';
+                else beg = 'L';            
+            }
+
+            // void Shcs_Animation(const char beg, Vector2 *ShcP, const Vector2 EndP, float Speed,
+            //        const float SIncrease, Vector2 StartPoint, int m, int n, int i, int Round, Music music) {
+            Vector2 EndPosition = GET_Start_Elements_Position_for_Draw(StartPoint, Position);
+            Shcs_Animation(0, beg, &ShadowCastersP[ShcIndex], EndPosition, 0.2f, 0.5f, StartPoint, m, n, ShcIndex, Round, GameMusic);
+            MovedShc = true;
+        }
+
+        
+    }
 }

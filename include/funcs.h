@@ -124,7 +124,7 @@ int Find_Way(Vector *end, const int ACount, int resCount, Vector *Alist, Vector 
 void Draw_Way(Vector *Way, Vector2 StartPoint, const int resCount);
 void Rec_for_Choose(float x, float y, SidesAR A, Rectangle R[]);
 SidesAR CheckSides(int j, int i);
-void Shcs_Animation(const char beg, Vector2 *ShcP, const Vector2 EndP, float Speed, const float SIncrease, Vector2 StartPoint, int m, int n, int i, int Round, Music music);
+void Shcs_Animation(int ChangeDir, const char beg, Vector2 *ShcP, const Vector2 EndP, float Speed, const float SIncrease, Vector2 StartPoint, int m, int n, int i, int Round, Music music);
 void Exs_Animation(const char Mdir, const char Tdir, Vector2 *ExsP, const Vector2 EndP, float Speed, const float SIncrease, Vector2 StartPoint, int m, int n, int i, int ExRound, Music music);
 int Lock_in_Rectangle(Rectangle R, Rectangle RBack, Rectangle RecsforCh[], int j, int i, int Exindex, Vector2 Mous);
 int Show_Allowable_Walls(Rectangle R, Rectangle BackR, Rectangle Recs[], Vector2 Mous);
@@ -149,6 +149,8 @@ void ReplayGift(int *l);
 void InWallIncreaseGift(int l);
 int BFS_Gift(int checked[][2], int start, int end, int m, int n, int len);
 void Number_Gifts(int m, int n);
+int Rectangles_Around_Shc(Vector2 RecsMapP[], Rectangle RecsAround[], Vector2 Shc, Vector2 StartPoint);
+void Force_Shc(Vector2 StartPoint, int m, int n, Music GameMusic, int Round, int ExRound);
 
 
 #endif
