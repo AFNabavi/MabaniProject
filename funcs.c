@@ -231,7 +231,7 @@ else 0.
     else return 0;
 }
 
-void Draw_Map(Vector2 StartPoint, int m, int n, int Round, int ExRound)
+void Draw_Map(int Earthquake, Vector2 StartPoint, int m, int n, int Round, int ExRound)
 {
 /*
 Renders the entire game map including walls, lightcore, explorers, and shadow casters.
@@ -254,32 +254,34 @@ Wall color and thickness rules based on map[j][i] value:
     Color B = {0, 0, 0, 255*(0.4f)};          // Black - Semi-transparent black - guide lines
 
     // Draw horizental walls
-    for (j=0; j<2*m+1; j+=2)
-    {
-        for (i=1; i<2*n+1; i+=2)
+    if (!Earthquake) {
+        for (j=0; j<2*m+1; j+=2)
         {
-            W.Position.x = (float)i; W.Position.y = (float)j; W.HorV = 'H';
-            StartP = GET_Start_Walls_Position_for_Draw(StartPoint, W);
-            EndP.x = StartP.x + Side; EndP.y = StartP.y;
-            if (map[j][i] == 1) DrawLineEx(StartP, EndP, 1.0f, B);
-            else if (map[j][i] == 0) DrawLineEx(StartP, EndP, WallTh, R);
-            else if(map[j][i] == -1) DrawLineEx(StartP, EndP, WallTh, BLACK);
-            else DrawLineEx(StartP, EndP, WallTh, O);
+            for (i=1; i<2*n+1; i+=2)
+            {
+                W.Position.x = (float)i; W.Position.y = (float)j; W.HorV = 'H';
+                StartP = GET_Start_Walls_Position_for_Draw(StartPoint, W);
+                EndP.x = StartP.x + Side; EndP.y = StartP.y;
+                if (map[j][i] == 1) DrawLineEx(StartP, EndP, 1.0f, B);
+                else if (map[j][i] == 0) DrawLineEx(StartP, EndP, WallTh, R);
+                else if(map[j][i] == -1) DrawLineEx(StartP, EndP, WallTh, BLACK);
+                else DrawLineEx(StartP, EndP, WallTh, O);
+            }
         }
-    }
-
-// Draw vertical walls
-    for (i=0 ; i<2*n+1; i+=2)
-    {
-        for (j=1 ; j<2*m+1; j+=2)
+    
+    // Draw vertical walls
+        for (i=0 ; i<2*n+1; i+=2)
         {
-            W.Position.x = (float)i; W.Position.y = (float)j; W.HorV = 'V';
-            StartP = GET_Start_Walls_Position_for_Draw(StartPoint, W);
-            EndP.x = StartP.x; EndP.y = StartP.y + Side;
-            if (map[j][i] == 1) DrawLineEx(StartP, EndP, 1.0f, B);
-            else if(map[j][i] == 0) DrawLineEx(StartP, EndP, WallTh, R);
-            else if(map[j][i] == -1) DrawLineEx(StartP, EndP, WallTh, BLACK);
-            else DrawLineEx(StartP, EndP, WallTh, O);
+            for (j=1 ; j<2*m+1; j+=2)
+            {
+                W.Position.x = (float)i; W.Position.y = (float)j; W.HorV = 'V';
+                StartP = GET_Start_Walls_Position_for_Draw(StartPoint, W);
+                EndP.x = StartP.x; EndP.y = StartP.y + Side;
+                if (map[j][i] == 1) DrawLineEx(StartP, EndP, 1.0f, B);
+                else if(map[j][i] == 0) DrawLineEx(StartP, EndP, WallTh, R);
+                else if(map[j][i] == -1) DrawLineEx(StartP, EndP, WallTh, BLACK);
+                else DrawLineEx(StartP, EndP, WallTh, O);
+            }
         }
     }
 
@@ -977,10 +979,10 @@ void Rec_for_Choose(float x, float y, SidesAR A, Rectangle R[]) {
     } else R[3].x = 1.0;
 }
 
-void Shcs_Animation(int ChangeDir, const char beg, Vector2 *ShcP, const Vector2 EndP, float Speed,
+void Shcs_Animation(const char beg, Vector2 *ShcP, const Vector2 EndP, float Speed,
                                   const float SIncrease, Vector2 StartPoint, int m, int n, int i, int Round, Music music) {
 
-    if (ChangeDir && (beg == 'R' || beg == 'L')) {
+    if (beg == 'R' || beg == 'L') {
         if (beg == 'R') ShadowCastersDir[i] = -2; //-2 ~ left
         else ShadowCastersDir[i] = -3; //-3 ~ right
     }
@@ -988,7 +990,7 @@ void Shcs_Animation(int ChangeDir, const char beg, Vector2 *ShcP, const Vector2 
         UpdateMusicStream(music);
         BeginDrawing();
         ClearBackground(RAYWHITE);
-        Draw_Map(StartPoint, m, n, Round, nExplorers-1); 
+        Draw_Map(0, StartPoint, m, n, Round, nExplorers-1); 
         EndDrawing();                                        
 
         if (beg == 'U') {
@@ -1012,7 +1014,7 @@ void Shcs_Animation(int ChangeDir, const char beg, Vector2 *ShcP, const Vector2 
     (*ShcP) = EndP;
 }
 
-void Exs_Animation(const char Mdir, const char Tdir, Vector2 *ExsP, const Vector2 EndP, float Speed,
+void Exs_Animation (const char Mdir, const char Tdir, Vector2 *ExsP, const Vector2 EndP, float Speed,
                                 const float SIncrease, Vector2 StartPoint, int m, int n, int i, int Round, Music music) {
 
     if (Mdir == 'A' || Mdir == 'D') {                              
@@ -1022,7 +1024,7 @@ void Exs_Animation(const char Mdir, const char Tdir, Vector2 *ExsP, const Vector
         UpdateMusicStream(music);
         BeginDrawing();
         ClearBackground(RAYWHITE);
-        Draw_Map(StartPoint, m, n, Round, i);
+        Draw_Map(0, StartPoint, m, n, Round, i);
         EndDrawing();
 
         if (Mdir == 'W') {                                    
@@ -1237,7 +1239,7 @@ int Get_Explorer_Count() {
 void Show_Invalid_Move_Error(Vector2 StartPoint, int m, int n, int Round, int ExRound) {
     BeginDrawing();
     ClearBackground(RAYWHITE);
-    Draw_Map(StartPoint, m, n, Round, ExRound);      
+    Draw_Map(0, StartPoint, m, n, Round, ExRound);      
     Color Red = {230, 41, 55, 150};
     Color Gray = {130, 130, 130, 150};
     DrawRectangle(206, 3, 491, 22, Gray);        
@@ -1248,7 +1250,7 @@ void Show_Invalid_Move_Error(Vector2 StartPoint, int m, int n, int Round, int Ex
 void Show_Ended_Walls_Error(Vector2 StartPoint, int m, int n, int Round, int ExRound) {
     BeginDrawing();
     ClearBackground(RAYWHITE);
-    Draw_Map(StartPoint, m, n, Round, ExRound);
+    Draw_Map(0, StartPoint, m, n, Round, ExRound);
     Color Red = {230, 41, 55, 150};
     Color Gray = {130, 130, 130, 150};
     DrawRectangle(206, 3, 491, 22, Gray);
@@ -1351,7 +1353,7 @@ void Show_Present_Rec(Vector2 StartPoint, int m, int n, int Round, int ExRound, 
         BeginDrawing();
         ClearBackground(RAYWHITE);
         Pointer_To_Player(ExRound, StartPoint);
-        Draw_Map(StartPoint, m, n, Round, ExRound);
+        Draw_Map(0, StartPoint, m, n, Round, ExRound);
         UpdateMusicStream(music);
         DrawRectangleRounded(rec, 0.1f, 10, backColor);
         EndDrawing();
@@ -1376,7 +1378,7 @@ void Show_Present(Vector2 StartPoint, int m, int n, int Round, int ExRound, Gift
     UpdateMusicStream(music);
     BeginDrawing();
     ClearBackground(RAYWHITE);
-    Draw_Map(StartPoint, m, n, Round, ExRound);
+    Draw_Map(0, StartPoint, m, n, Round, ExRound);
     Pointer_To_Player(ExRound, StartPoint);
     DrawRectangleRounded(rec, 0.1f, 10, color);
     if (name == Replay) {char str[30] = "REPLAY GIFT"; DrawText(str, rec.x+130, rec.y+rec.height/2, 30, BLACK);}
@@ -1495,7 +1497,7 @@ void Force_Shc(Vector2 StartPoint, int m, int n, Music GameMusic, int Round, int
         UpdateMusicStream(GameMusic);
         BeginDrawing();
         ClearBackground(RAYWHITE);
-        Draw_Map(StartPoint, m, n, Round, ExRound);
+        Draw_Map(0, StartPoint, m, n, Round, ExRound);
         EndDrawing();
 
         Color Yellow = {253, 249, 0, 150}; Vector2 Mous = GetMousePosition();
@@ -1513,7 +1515,7 @@ void Force_Shc(Vector2 StartPoint, int m, int n, Music GameMusic, int Round, int
             UpdateMusicStream(GameMusic);
             BeginDrawing();
             ClearBackground(RAYWHITE);
-            Draw_Map(StartPoint, m, n, Round, ExRound);
+            Draw_Map(0, StartPoint, m, n, Round, ExRound);
             EndDrawing();
 
             Rectangle RecsAround[4];
@@ -1545,13 +1547,249 @@ void Force_Shc(Vector2 StartPoint, int m, int n, Music GameMusic, int Round, int
                 else beg = 'L';            
             }
 
-            // void Shcs_Animation(const char beg, Vector2 *ShcP, const Vector2 EndP, float Speed,
-            //        const float SIncrease, Vector2 StartPoint, int m, int n, int i, int Round, Music music) {
             Vector2 EndPosition = GET_Start_Elements_Position_for_Draw(StartPoint, Position);
-            Shcs_Animation(0, beg, &ShadowCastersP[ShcIndex], EndPosition, 0.2f, 0.5f, StartPoint, m, n, ShcIndex, Round, GameMusic);
+            Shcs_Animation_without_Change_Direction(beg, &ShadowCastersP[ShcIndex], EndPosition, 0.2f, 0.5f, StartPoint, m, n, ShcIndex, Round, GameMusic);
+            ShadowCasters[ShcIndex] = Position;
             MovedShc = true;
         }
 
         
     }
+}
+
+void Add_Earthquake_Wall(EarthqWall Walls[], int *nWalls, Vector2 StartPoint, int m, int n, int EarthqMap[][2*n+1], int N, float pixels) {
+    int i;
+    for (i=0; i<N; i++) {
+        bool InputAgain = true;
+        do {
+            int y = 2*(rand()%m)+1; int x = 2*(rand()%n)+1;
+            char HorV; int c = rand()%2;
+            if (!c) HorV = 'H';
+            else HorV = 'V';
+            if (HorV = 'H') {
+                c = rand()%2;
+                if (!c) y -= 1;
+                else y += 1;
+            } else {
+                c = rand()%2;
+                if (!c) x -= 1;
+                else x += 1;
+            }
+
+            if (EarthqMap[y][x]==0) {
+                InputAgain = false;
+                EarthqMap[y][x] = 1;
+                (*nWalls)++;
+                WallPro W; W.Position.y = (float)y; W.Position.x = (float)x; W.HorV = HorV;
+                Walls[*nWalls-1].Start = GET_Start_Walls_Position_for_Draw(StartPoint, W);
+                if (HorV == 'H') {
+                    Walls[*nWalls-1].End = Walls[*nWalls-1].Start;
+                    Walls[*nWalls-1].End.x += Side; 
+                } else {
+                    Walls[*nWalls-1].End = Walls[*nWalls-1].Start;
+                    Walls[*nWalls-1].End.y += Side; 
+                }
+                Walls[*nWalls-1].HorV = HorV; c = rand()%2; 
+                if (!c) Walls[*nWalls-1].dir = -1;
+                else Walls[*nWalls-1].dir = 1;
+                Walls[*nWalls-1].pixels = pixels;
+            } 
+            // typedef struct EarthquakeWall {
+            //     int level = 1;
+            //     Vector2 Start;
+            //     Vector2 End;
+            //     char HorV;
+            //     int dir;
+            //     float pixels;
+            // } EarthqWall;
+        
+            
+        } while (InputAgain);
+    }
+}
+
+void Coordinate_Around_for_Earthquake(Vector2 mapP, Vector2 Around[], int *nAround) {
+    if (map[(int)mapP.y-1][(int)mapP.x] == 1 && map[(int)mapP.y-2][(int)mapP.x] == 1) {
+        Vector2 coordinate; coordinate.y = mapP.y-2; coordinate.x = mapP.x;
+        (*nAround)++;
+        Around[*nAround-1] = coordinate; 
+    }
+    if (map[(int)mapP.y][(int)mapP.x+1] == 1 && map[(int)mapP.y][(int)mapP.x+2] == 1) {
+        Vector2 coordinate; coordinate.y = mapP.y; coordinate.x = mapP.x+2;
+        (*nAround)++;
+        Around[*nAround-1] = coordinate; 
+    }
+    if (map[(int)mapP.y+1][(int)mapP.x] == 1 && map[(int)mapP.y+2][(int)mapP.x] == 1) {
+        Vector2 coordinate; coordinate.y = mapP.y+2; coordinate.x = mapP.x;
+        (*nAround)++;
+        Around[*nAround-1] = coordinate; 
+    }
+    if (map[(int)mapP.y][(int)mapP.x-1] == 1 && map[(int)mapP.y][(int)mapP.x-2] == 1) {
+        Vector2 coordinate; coordinate.y = mapP.y; coordinate.x = mapP.x-2;
+        (*nAround)++;
+        Around[*nAround-1] = coordinate; 
+    }
+}
+
+void Choose_RandomPositions_Around_Element(int ShOrEx, Vector2 *mapP, Vector2 StartPoint, int m, int n, int Index, int Round, Music GameMusic) {
+    float Speed = 0.2f;
+    float SIncrease = 0.1f;
+    if (ShOrEx == 1) {
+        Vector2 Around[4];
+        int nAround = 0;
+        Vector2 temp = *mapP;
+        Coordinate_Around_for_Earthquake(temp, Around, &nAround);
+        if (!nAround) return;
+
+       int c = rand()%nAround;
+        Vector2 End = Around[c];
+        *mapP = Around[c];
+        Vector2 EndPosition = GET_Start_Elements_Position_for_Draw(StartPoint, End);
+
+        char dir;
+        if (End.y==(*mapP).y) {
+            if (End.x>(*mapP).x) dir = 'D';
+            else dir = 'A'; 
+        } else {
+            if (End.y>(*mapP).y) dir = 'S';
+            else dir = 'W'; 
+        }
+        
+        Exs_Animation_without_Change_Direction(dir, &Explorers[Index].winPos, EndPosition, Speed, SIncrease, StartPoint, m, n, Index, Round, GameMusic);
+    } else {
+        // BeginDrawing();
+        // ClearBackground(RAYWHITE);
+        // Draw_Map(0, StartPoint, m, n, Round, Index);
+        // EndDrawing();
+        Vector2 Around[4];
+        int nAround = 0;
+        Vector2 temp = *mapP;
+        // printf("%f %f   %f %f", (*mapP).y, (*mapP).x, temp.y, temp.x);
+        Coordinate_Around_for_Earthquake(temp, Around, &nAround);
+        if (!nAround) return;
+
+        int c = rand()%nAround;
+        Vector2 End = Around[c];
+        *mapP = Around[c];
+        // printf("%d", c);
+        Vector2 EndPosition = GET_Start_Elements_Position_for_Draw(StartPoint, End);
+
+        char beg;
+        if (End.y==(*mapP).y) {
+            if (End.x>(*mapP).x) beg = 'L';
+            else beg = 'R'; 
+        } else {
+            if (End.y>(*mapP).y) beg = 'U';
+            else beg = 'D'; 
+        }
+
+        Shcs_Animation_without_Change_Direction(beg, &ShadowCastersP[Index], EndPosition, Speed, SIncrease, StartPoint, m, n, Index, Round, GameMusic);
+    }
+
+}
+
+void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusic) {
+    int N = (n+1)*(m+1)/2;
+    EarthqWall Walls[N];
+    int nWalls = 0;
+
+    int EarthqMap[2*m+1][2*n+1];
+    int j, i;
+    for (j=0; j<2*m+1; j+=2) {
+        for (i=0; i<2*n+1; i+=2) {
+            EarthqMap[j][i] = 0;
+        }   
+    }
+
+    int pixels = 12;
+    // Add_Earthquake_Wall(Walls, &nWalls, StartPoint, m, n, EarthqMap, N, pixels);
+    
+    bool AllElementsMoved = false;
+
+    while (!AllElementsMoved) {
+        for (i=0; i<nShadowCasters; i++) {
+            // BeginDrawing();
+            // ClearBackground(RAYWHITE);
+            // Draw_Map(0, StartPoint, m, n, Round, i);
+            // EndDrawing();
+            Choose_RandomPositions_Around_Element(-1, &ShadowCasters[i], StartPoint, m, n, i, Round, GameMusic);
+            Reset_Map_Blocks_for_Move_Elements(m, n);
+        }
+        for (i=0; i<nExplorers; i++) {
+            // BeginDrawing();
+            // ClearBackground(RAYWHITE);
+            // Draw_Map(0, StartPoint, m, n, Round, i);
+            // EndDrawing();
+            Choose_RandomPositions_Around_Element(1, &Explorers[i].mapPos, StartPoint, m, n, i, Round, GameMusic);
+            Reset_Map_Blocks_for_Move_Elements(m, n);
+        }
+        AllElementsMoved = true;
+    }
+
+
+
+
+}
+
+void Shcs_Animation_without_Change_Direction(const char beg, Vector2 *ShcP, const Vector2 EndP, float Speed,
+                                  const float SIncrease, Vector2 StartPoint, int m, int n, int i, int Round, Music music) {
+
+    while (!((*ShcP).x == EndP.x && (*ShcP).y == EndP.y)) {
+        UpdateMusicStream(music);
+        BeginDrawing();
+        ClearBackground(RAYWHITE);
+        Draw_Map(0, StartPoint, m, n, Round, nExplorers-1); 
+        EndDrawing();                                        
+
+        if (beg == 'U') {
+            (*ShcP).y += Speed;
+            if ((*ShcP).y>EndP.y) break;
+        }
+        else if (beg == 'R') {
+            (*ShcP).x -= Speed;
+            if ((*ShcP).x<EndP.x) break;
+        }
+        else if (beg == 'D') {
+            (*ShcP).y -= Speed;
+            if ((*ShcP).y<EndP.y) break;
+        }
+        else if (beg == 'L') {
+            (*ShcP).x += Speed;
+            if ((*ShcP).x>EndP.x) break;
+        }
+        Speed += SIncrease;                                        
+    }
+    (*ShcP) = EndP;
+}
+
+void Exs_Animation_without_Change_Direction(const char Mdir, Vector2 *ExsP, const Vector2 EndP, float Speed,
+                                const float SIncrease, Vector2 StartPoint, int m, int n, int i, int Round, Music music) {
+
+    while (!((*ExsP).x == EndP.x && (*ExsP).y == EndP.y)) {
+        UpdateMusicStream(music);
+        BeginDrawing();
+        ClearBackground(RAYWHITE);
+        Draw_Map(0, StartPoint, m, n, Round, i);
+        EndDrawing();
+
+        if (Mdir == 'W') {                                    
+            (*ExsP).y -= Speed;
+            if ((*ExsP).y<EndP.y) break;
+        }
+        if (Mdir == 'S') {                                    
+            (*ExsP).y += Speed;
+            if ((*ExsP).y>EndP.y) break;
+        }
+        if (Mdir == 'A') {                                    
+            (*ExsP).x -= Speed;
+            if ((*ExsP).x<EndP.x) break;
+        }
+        if (Mdir == 'D') {                                    
+            (*ExsP).x += Speed;
+            if ((*ExsP).x>EndP.x) break;
+        }                                      
+        Speed += SIncrease;                                        
+            
+    }
+    (*ExsP) = EndP;
 }
