@@ -312,7 +312,7 @@ switch(Current)
         }
 
         // Next phase. Move and drawing characters.         
-            case MoveExs: {
+            case MoveExs: { 
                 Check_Life_of_Interim_Walls();
                 bool notChoosed = true;
 
@@ -333,15 +333,20 @@ switch(Current)
                 int l=0;
                 if (!Are_All_Players_Dead())
                 while (!WindowShouldClose() && l<nExplorers) {
-                    
 
                     if (IsKeyPressed(KEY_O)) Force_Shc(StartPoint, m, n, GameMusic, Round, l);
                     if (IsKeyPressed(KEY_P)) Earthquake_Gift(m, n, StartPoint, Round, GameMusic);
-
-                    // isPlayed = true;
-                    // if (WitchRound) WitchRound = false;   // اگر با روال فشردن کلید بروم، فقط برای یک فریم اجرا می‌شود
-                   // I didn`t udrestannd what is above line doing, so i commented that.
-
+               
+            // Witch player is dead?
+                for (int j=0; j<nExplorers; j++) for (int i=0; i<nShadowCasters; i++) {
+                    if (Explorers[j].isAlive)
+                        if ((int)Explorers[j].mapPos.y==(int)ShadowCasters[i].y && (int)Explorers[j].mapPos.x==(int)ShadowCasters[i].x) {
+                            if (j==0)        {Dead_Explorer(j , DieSound, Round);}
+                            else if (j==1)  {Dead_Explorer(j, DieSound, Round);}
+                            else if (j==2) {Dead_Explorer(j, DieSound, Round);}
+                    }
+                }     
+                
                     if (notChoosed) {
                         //  printf("Gift 0: %d  ,  Gift 1: %d  ,  Gift 2: %d\n", Gifts[0].isGotten,Gifts[1].isGotten,Gifts[2].isGotten);
                         if (!Explorers[l].isAlive) {l ++; continue;}
@@ -519,15 +524,6 @@ switch(Current)
                         EndDrawing();    //اگه این نمیبود، با فشردن Q هم از این بخش میرفت بیرون و هم از انتخاب کردن
                     }
                         
-                    //     if (!ShouldMove) {
-                    //         UpdateMusicStream(music);
-                    //         BeginDrawing();
-                    //         ClearBackground(RAYWHITE);
-                    //         Draw_Map(0, StartPoint, m, n);
-                    //         EndDrawing();
-                    //     }
-                    //     //اگه اینا نمیبودن، با فشردن Q هم از این بخش میرفت بیرون و هم از انتخاب کردن
-
                 }
                 if (Are_All_Players_Have_Won()) {Current = EndScreen; break;}  
                 else {State = MoveShs; break;}
@@ -627,16 +623,6 @@ switch(Current)
                     free(BFSlistChecked);
                 }
                 Reset_Map_Blocks_for_Move_Elements(m, n);
-                
-            // Witch player is dead?
-                for (int j=0; j<nExplorers; j++) for (int i=0; i<nShadowCasters; i++) {
-                    if (Explorers[j].isAlive)
-                        if ((int)Explorers[j].mapPos.y==(int)ShadowCasters[i].y && (int)Explorers[j].mapPos.x==(int)ShadowCasters[i].x) {
-                            if (j==0)        {Dead_Explorer(j , DieSound, Round);}
-                            else if (j==1)  {Dead_Explorer(j, DieSound, Round);}
-                            else if (j==2) {Dead_Explorer(j, DieSound, Round);}
-                    }
-                }
 
             // free mallocs
                 for (k=0; k<nShadowCasters; k++) {
