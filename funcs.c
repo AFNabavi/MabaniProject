@@ -1293,10 +1293,8 @@ int Are_All_Players_Dead() {
     return 0;
 }
 
-int Show_End_Screen() {    
+void Show_End_Screen() {    
     int i, WinnerCount=0, LoserCount=0;
-    BeginDrawing();
-    ClearBackground(RAYWHITE);
     DrawText("WINNERS:" , 200, 190, 40, RED);
     DrawText("LOSERS:", 700, 190, 40, RED);
     for (i=0; i<nExplorers; i++) {
@@ -1320,13 +1318,6 @@ int Show_End_Screen() {
             LoserCount ++;
         }
     }
-    DrawRectangle(500, 450, 100, 50, LIGHTGRAY);
-    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-        Vector2 v = GetMousePosition();
-        if (v.x>=500 && v.x<=600 && v.y>=450 && v.y<=550) return 1;
-    } 
-    EndDrawing(); 
-    return 0;
 }
 
 int Is_Present_Gotten() {
@@ -1389,7 +1380,7 @@ void Show_Present(Vector2 StartPoint, int m, int n, int Round, int ExRound, Gift
         {char str[30] = "FORCE ENEMY"; DrawText(str, rec.x+82, rec.y+rec.height/2-20, 30, GOLD);}
     else if (name == Earthquake) 
         {char str[30] = "EARTHQUAKE   "; DrawText(str, rec.x+84, rec.y+rec.height/2-20, 30, GOLD);}
-    DrawText("Press space to okay.", rec.x+85, rec.y+rec.height/2+20, 20, GOLD);
+    DrawText("Press Q to okay.", rec.x+89, rec.y+rec.height/2+20, 20, GOLD);
     EndDrawing();
 }
 

@@ -76,8 +76,12 @@ Music music2 = LoadMusicStream("output\\source\\music2.ogg");
 Music music3 = LoadMusicStream("output\\source\\music3.ogg");
 Music music4 = LoadMusicStream("output\\source\\music4.ogg");
 Music musics[4] = {music1, music2, music3, music4};
-Sound VictorySound = LoadSound("output\\source\\victory_sound.wav");
-Sound DieSound = LoadSound("output\\source\\game_over_sound.wav");
+Music EndGameMusic = LoadMusicStream("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\output\\source\\end_game.mp3");
+Sound VictorySound = LoadSound("output\\source\\victory_sound.mp3");
+Sound DieSound = LoadSound("output\\source\\die_sound.mp3");
+Sound GiveGiftSound = LoadSound("output\\source\\give_gift_sound.mp3");
+Sound MovingSound = LoadSound("output\\source\\moving_sound.mp3");
+Sound ShadowSound = LoadSound("output\\source\\shadow_sound.mp3");
 
 Screen Current = GameScreen;   // Current screen, starts at TitleScreen.
 Level State = GET;   // Current level, starts at GET for inputs.
@@ -97,7 +101,7 @@ int l=0;
 int Round = 1;
 
 bool allAreDied = false;
-double timeEnding;
+double TimeEnding;
 
 while (!WindowShouldClose())
 {
@@ -406,6 +410,7 @@ switch(Current)
                             notChoosed = false;
                         }          
                         if (ShouldMove && Can_Ex_Move_for_Walls(Explorers[l].mapPos, ExMoveDir)) {
+                            PlaySound(MovingSound);
                             Explorers[l].mapPos = Move_Element(Explorers[l].mapPos, ExMoveDir);
                             Vector2 EndPosition = GET_Start_Elements_Position_for_Draw(StartPoint, Explorers[l].mapPos);       
                             float Speed = 2.0f;
@@ -414,12 +419,13 @@ switch(Current)
                             
                             int WhichGift = Is_Present_Gotten();
                             if (WhichGift) {
+                                PlaySound(GiveGiftSound);
                                 Gifts[WhichGift-1].isGotten = true;
                                 bool isShown = false;
                                 Show_Present_Rec(StartPoint, m, n, Round, l, GameMusic);
                                 do {
                                     Show_Present(StartPoint, m, n, Round, l, Gifts[WhichGift-1].type, GameMusic);
-                                    if (IsKeyPressed(KEY_SPACE)) isShown = true;
+                                    if (IsKeyPressed(KEY_Q)) isShown = true;
                                 } while (!isShown); // Shows the present box while plyer do not click space.
                                 
                                 if (Gifts[WhichGift-1].type == Replay) {int *p; p = &(l); ReplayGift(p);}
@@ -557,6 +563,7 @@ switch(Current)
                 
                 int i;
                 for (i=0; i<nShadowCasters; i++) {
+                    PlaySound(ShadowSound);
                     do{
                         BFSlistChecked = malloc((m*n)*sizeof(Vector));
                     }while (!BFSlistChecked);
@@ -643,7 +650,7 @@ switch(Current)
             // Are all players have died?
                 int x = 0;
                 for (int i=0; i<nExplorers; i++) {if (Explorers[i].isAlive) x ++;} 
-                if (x == 0) {Current = EndScreen; timeEnding = GetTime(); break;}
+                if (x == 0) {Current = EndScreen; TimeEnding = GetTime(); break;}
 
                 Round++;
                 State = MoveExs;
@@ -656,15 +663,24 @@ switch(Current)
 
     case EndScreen: 
     {
+        PlayMusicStream(EndGameMusic);
         bool showResult;
-        while (GetTime() - timeEnding <= 2.5) {
+        while (GetTime() - TimeEnding <= 2.5) {
             showResult = false;
         }
         showResult = true;
-        if (showResult) {
-            int x = Show_End_Screen();
-            if (x) {Current = GameScreen; State = GET; m=-1; n=-1;} // restart game
-        }  
+        if (showResult)
+            while (!WindowShouldClose()) {
+                UpdateMusicStream(EndGameMusic);
+                BeginDrawing();
+                ClearBackground(RAYWHITE);
+                Show_End_Screen();
+                EndDrawing();
+            }
+
+
+
+
         break;
     }
 }
@@ -678,7 +694,8 @@ UnloadTexture(Sh1TextureLeft); UnloadTexture(Sh2TextureLeft); UnloadTexture(Sh3T
 UnloadTexture(Ex1TextureLeft); UnloadTexture(Ex2TextureLeft); UnloadTexture(Ex3TextureLeft);
 UnloadTexture(LiTexture); UnloadTexture (PresentTexture);
 UnloadMusicStream(GameMusic); UnloadMusicStream(music1); UnloadMusicStream(music2); UnloadMusicStream(music3);
-UnloadSound(DieSound); UnloadSound(VictorySound);
+UnloadSound(DieSound); UnloadSound(VictorySound); UnloadSound(MovingSound); UnloadSound(ShadowSound); 
+UnloadSound(GiveGiftSound); UnloadMusicStream(EndGameMusic);
 
 return 0;
 

@@ -160,7 +160,7 @@ void Win_Explorer(int l, Sound WinSound, int Round);
 int Are_All_Players_Have_Won();
 int Are_All_Players_Dead();
 int Calculate_Max_Interim_Wall(int m, int n);
-int Show_End_Screen();
+void Show_End_Screen();
 int Is_Present_Gotten();
 void Show_Present_Rec(Vector2 StartPoint, int m, int n, int Round, int ExRound, Music music);
 void Show_Present(Vector2 StartPoint, int m, int n, int Round, int ExRound, Gift name, Music music);
