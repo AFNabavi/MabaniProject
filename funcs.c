@@ -1819,7 +1819,7 @@ void Show_Load_Notf(int sw) {
     EndDrawing();
 }
 
-int Save_Game(int Round, int ExRound, int m, int n) {
+int Save_Game(int Round, int ExRound, int m, int n, Vector2 StartPoint) {
     double t0 = GetTime();
     FILE *file;
     file = fopen("save_status.txt", "wt");
@@ -1830,7 +1830,11 @@ int Save_Game(int Round, int ExRound, int m, int n) {
         return 0;
     }
     
-    fprintf(file, "%d %d\n", m, n);
+    fprintf(file, "%d\n", m);
+    fprintf(file, "%d\n", n);
+
+    fprintf(file, "%.0f\n", StartPoint.x);
+    fprintf(file, "%.0f\n", StartPoint.y);
 
     for (int j=0; j<2*n+1; j++) {
         for (int i=0; i<2*m+1; i++) 
@@ -1839,14 +1843,16 @@ int Save_Game(int Round, int ExRound, int m, int n) {
     }
 
     fprintf(file, "%d\n", nExplorers);
-    for (int i=0; i<nExplorers; i++)
-    fprintf(file,"%d\n%d\n%.0f %.0f\n%.0f %.0f\n%d\n%d\n",
-        Explorers[i].isAlive,
-        Explorers[i].age,
-        Explorers[i].mapPos.x, Explorers[i].mapPos.y,
-        Explorers[i].winPos.x, Explorers[i].winPos.y,
-        Explorers[i].wallCount,
-        Explorers[i].direction);
+    for (int i=0; i<nExplorers; i++) {
+        fprintf(file, "%d\n", Explorers[i].isAlive);
+        fprintf(file, "%d\n", Explorers[i].age);
+        fprintf(file, "%0.f\n", Explorers[i].mapPos.x);
+        fprintf(file, "%0.f\n", Explorers[i].mapPos.y);
+        fprintf(file, "%0.f\n", Explorers[i].winPos.x);
+        fprintf(file, "%0.f\n", Explorers[i].winPos.y);
+        fprintf(file, "%d\n", Explorers[i].wallCount);
+        fprintf(file, "%d\n", Explorers[i].direction);
+    }
     
     fprintf(file, "%d\n", ExRound);
     
@@ -1854,60 +1860,71 @@ int Save_Game(int Round, int ExRound, int m, int n) {
     
     fprintf(file, "%d\n", nShadowCasters);
 
-    for (int i=0; i<nShadowCasters; i++) 
-    fprintf(file, "%.0f %.0f\n", ShadowCasters[i].x, ShadowCasters[i].y);
-    
-    for (int i=0; i<nShadowCasters; i++)  
-    fprintf(file, "%.0f %.0f\n", ShadowCastersP[i].x, ShadowCastersP[i].y);
-    
-    for (int i=0; i<nShadowCasters; i++) 
-    fprintf(file, "%d\n", ShadowCastersDir);
+    for (int i=0; i<nShadowCasters; i++) {
+        fprintf(file, "%.0f\n", ShadowCasters[i].x);
+        fprintf(file, "%.0f\n", ShadowCasters[i].y);
+        fprintf(file, "%.0f\n", ShadowCastersP[i].x);
+        fprintf(file, "%.0f\n", ShadowCastersP[i].y);
+        fprintf(file, "%d\n", ShadowCastersDir[i]);
+    }
 
-    fprintf(file, "%.0f %.0f\n", Lightcore.x, Lightcore.y);
+    fprintf(file, "%.0f\n", Lightcore.x);
+    fprintf(file, "%.0f\n", Lightcore.y);
+
+    fprintf(file, "%d\n", nGifts);
+    for (int i=0; i<nGifts; i++) {
+        fprintf(file, "%d\n", Gifts[i].isGotten);
+        fprintf(file, "%.0f\n", Gifts[i].mapPos.x);
+        fprintf(file, "%.0f\n", Gifts[i].mapPos.y);
+        fprintf(file, "%d\n", Gifts[i].type);
+        fprintf(file, "%.0f\n", Gifts[i].winPos.x);
+        fprintf(file, "%.0f\n", Gifts[i].winPos.y);
+    } 
 
     fclose(file);    
-
     while (GetTime() - t0 < 1.5)
         Show_Save_Notf(1);
-
     return 1;
 }
 
-int Load_Game(int *m, int *n, int *ExRound, int *Round) {
+int Load_Game(int *m, int *n, int *ExRound, int *Round, Vector2 *StartPoint) {
     double t0 = GetTime();
     FILE *file;
     file = fopen("save_status.txt", "rt");
-    int i=150;
     if (!file) {
         while (GetTime() - t0 < 1.5)
             Show_Load_Notf(0);
         return 0;
     }
-    // char s[40];
     int height, width, nPlayers, nEnemies;
-    // while (fscanf(file, "%s", s) == 1) {
-    fscanf(file, "%d %d", &height, &width); (*n)=width; (*m)=height;
 
+    fscanf(file, "%d", &height); (*n)=height;
+    fscanf(file, "%d", &width); (*m)=width;
+
+    float x, y;
+    fscanf(file, "%f", &x);
+    fscanf(file, "%f", &y);
+    *StartPoint = (Vector2) {x, y};
+    
     for (int j=0; j<2*(*n)+1; j++) 
         for (int i=0; i<2*(*m)+1; i++) 
             fscanf(file, "%d", &map[j][i]);
 
     fscanf(file, "%d", &nPlayers); nExplorers = nPlayers;
-
     for (int i=0; i<nExplorers; i++) {
-        fscanf(file, "%f", &Explorers[i].isAlive);
-        fscanf(file, "%f", &Explorers[i].age);
+        fscanf(file, "%d", &Explorers[i].isAlive);
+        fscanf(file, "%d", &Explorers[i].age);
         fscanf(file, "%f", &Explorers[i].mapPos.x);
         fscanf(file, "%f", &Explorers[i].mapPos.y);
         fscanf(file, "%f", &Explorers[i].winPos.x);
         fscanf(file, "%f", &Explorers[i].winPos.y);
-        fscanf(file, "%f", &Explorers[i].wallCount);    
-        fscanf(file, "%c", &Explorers[i].direction);
+        fscanf(file, "%d", &Explorers[i].wallCount);    
+        fscanf(file, "%d", &Explorers[i].direction);
     }
     
-    fscanf(file, "%d", &ExRound);
+    fscanf(file, "%d", ExRound);
 
-    fscanf(file, "%d", &Round);
+    fscanf(file, "%d", Round);
 
     fscanf(file, "%d", &nEnemies); nShadowCasters = nEnemies;
 
@@ -1919,11 +1936,21 @@ int Load_Game(int *m, int *n, int *ExRound, int *Round) {
         fscanf(file, "%d", &ShadowCastersDir[i]);
     }
 
-    fscanf(file, "%f %f", &Lightcore.x, &Lightcore.y);
-    // }
+    fscanf(file, "%f", &Lightcore.x);
+    fscanf(file, "%f", &Lightcore.y);
 
+    fscanf(file, "%d", &nGifts);
+    for (int i=0; i<nEnemies; i++) {
+        fscanf(file, "%d", &Gifts[i].isGotten);
+        fscanf(file, "%f", &Gifts[i].mapPos.x);
+        fscanf(file, "%f", &Gifts[i].mapPos.y);
+        fscanf(file, "%d", &Gifts[i].type);
+        fscanf(file, "%f", &Gifts[i].winPos.x);
+        fscanf(file, "%f", &Gifts[i].winPos.y);
+    }   
+
+    fclose(file);
     while (GetTime() - t0 < 1.5)
         Show_Load_Notf(1);
-    fclose(file);
     return 1;
 }

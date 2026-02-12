@@ -178,7 +178,7 @@ void Shcs_Animation_without_Change_Direction(const char beg, Vector2 *ShcP, cons
 void Exs_Animation_without_Change_Direction(const char Mdir, Vector2 *ExsP, const Vector2 EndP, float Speed, const float SIncrease, Vector2 StartPoint, int m, int n, int i, int Round, Music music);
 void Show_Save_Notf(int sw);
 void Show_Load_Notf(int sw);
-int Save_Game(int Round, int ExRound, int m, int n);
-int Load_Game(int *m, int *n, int *ExRound, int *Round);
+int Save_Game(int Round, int ExRound, int m, int n, Vector2 StartPoint);
+int Load_Game(int *m, int *n, int *ExRound, int *Round, Vector2 *StartPoint);
 
 #endif

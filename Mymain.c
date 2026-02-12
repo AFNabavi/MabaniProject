@@ -353,9 +353,13 @@ switch(Current)
                         UpdateMusicStream(GameMusic);
                         BeginDrawing();
                         DrawText("To save: F1\nTo load: F2", 920, 233, 20, (Color){205,50,0,255});
-                        if (IsKeyPressed(KEY_F1)) Save_Game(Round, l, m, n);
+                        if (IsKeyPressed(KEY_F1)) Save_Game(Round, l, m, n, StartPoint);
                         if (IsKeyPressed(KEY_F2)) {
-                            Load_Game(&m, &n, &l, &Round);
+                            BeginDrawing();
+                            Load_Game(&m, &n, &l, &Round, &StartPoint);
+                            ClearBackground(RAYWHITE);
+                            Draw_Map(0, StartPoint, m, n, Round, l);
+                            EndDrawing();
                         }
                         if (IsKeyPressed(KEY_E)) {
                             if (Explorers[l].wallCount == 0) {
