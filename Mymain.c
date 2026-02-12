@@ -352,7 +352,11 @@ switch(Current)
                         if (!Explorers[l].isAlive) {l ++; continue;}
                         UpdateMusicStream(GameMusic);
                         BeginDrawing();
-
+                        DrawText("To save: F1\nTo load: F2", 920, 233, 20, (Color){205,50,0,255});
+                        if (IsKeyPressed(KEY_F1)) Save_Game(Round, l, m, n);
+                        if (IsKeyPressed(KEY_F2)) {
+                            Load_Game(&m, &n, &l, &Round);
+                        }
                         if (IsKeyPressed(KEY_E)) {
                             if (Explorers[l].wallCount == 0) {
                                 double t = GetTime();
@@ -431,7 +435,9 @@ switch(Current)
                                 Show_Invalid_Move_Error(StartPoint, m, n, Round, l);
                             }
                             else {ShouldShowError = false; break;}
-                            if (IsKeyPressed(KEY_A) || IsKeyPressed(KEY_D) || IsKeyPressed(KEY_S) || IsKeyPressed(KEY_W)) {ShouldShowError = false;}
+                            if (IsKeyPressed(KEY_A) || IsKeyPressed(KEY_D) || IsKeyPressed(KEY_S) ||
+                            IsKeyPressed(KEY_W) || IsKeyPressed(KEY_Q) || IsKeyPressed(KEY_E))
+                                {ShouldShowError = false;}
                         }
                         if (IsKeyPressed(KEY_Q)) {
                             l++;

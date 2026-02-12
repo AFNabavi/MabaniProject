@@ -44,6 +44,17 @@ typedef struct Present {
     Vector2 winPos;     // coordinate in window
     Gift type;
 } Present;
+typedef struct ImportantInformation {
+    Explorer Players[3]; // Explorers
+    int nPlayers;
+    int m; // height
+    int n; // width
+    int l; // Explorer round
+    int Round; 
+    Vector2 EnemiesMapPos[3]; // Shadowcasters
+    Vector2 EnemiesWinPos[3];
+    Vector2 Goal; // Lightcore
+} ImportantInf;
 typedef struct EarthquakeWall {
     int level;
     Vector2 Start;
@@ -165,5 +176,9 @@ void Choose_RandomPositions_Around_Element(int ShOrEx, Vector2 *mapP, Vector2 St
 void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusic);
 void Shcs_Animation_without_Change_Direction(const char beg, Vector2 *ShcP, const Vector2 EndP, float Speed, const float SIncrease, Vector2 StartPoint, int m, int n, int i, int Round, Music music);
 void Exs_Animation_without_Change_Direction(const char Mdir, Vector2 *ExsP, const Vector2 EndP, float Speed, const float SIncrease, Vector2 StartPoint, int m, int n, int i, int Round, Music music);
+void Show_Save_Notf(int sw);
+void Show_Load_Notf(int sw);
+int Save_Game(int Round, int ExRound, int m, int n);
+int Load_Game(int *m, int *n, int *ExRound, int *Round);
 
 #endif
