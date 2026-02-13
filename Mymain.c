@@ -339,7 +339,7 @@ switch(Current)
                 while (!WindowShouldClose() && l<nExplorers) {
 
                     if (IsKeyPressed(KEY_O)) Force_Shc(StartPoint, m, n, GameMusic, Round, l);
-                    if (IsKeyPressed(KEY_P)) Earthquake_Gift(m, n, StartPoint, Round, GameMusic);
+                    if (IsKeyPressed(KEY_P)) {Earthquake_Gift(m, n, StartPoint, Round, GameMusic, l);}
                
             // Witch player is dead?
                 for (int j=0; j<nExplorers; j++) for (int i=0; i<nShadowCasters; i++) {
@@ -431,7 +431,7 @@ switch(Current)
                                 if (Gifts[WhichGift-1].type == Replay) {int *p; p = &(l); ReplayGift(p);}
                                 else if (Gifts[WhichGift-1].type == InWallIncrease) InWallIncreaseGift(l-1);
                                 else if (Gifts[WhichGift-1].type == ForceEnemy) Force_Shc(StartPoint, m, n, GameMusic, Round, l);
-                                else if (Gifts[WhichGift-1].type == Earthquake) printf("Earthquak!\n");
+                                else if (Gifts[WhichGift-1].type == Earthquake) Earthquake_Gift(m, n, StartPoint, Round, GameMusic, l);
                             }
                         }
                         else if (ShouldMove && !(Can_Ex_Move_for_Walls(Explorers[l].mapPos, ExMoveDir))) { 
