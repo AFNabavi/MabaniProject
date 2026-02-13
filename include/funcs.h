@@ -48,10 +48,13 @@ typedef struct EarthquakeWall {
     int level;
     Vector2 Start;
     Vector2 End;
+    Vector2 mapPos;
     char HorV;
     int dir;
     float pixels;
+    float n;
 } EarthqWall;
+
 
 extern const int Side;
 extern const int FPS;
@@ -159,11 +162,13 @@ int BFS_Gift(int checked[][2], int start, int end, int m, int n, int len);
 void Number_Gifts(int m, int n);
 int Rectangles_Around_Shc(Vector2 RecsMapP[], Rectangle RecsAround[], Vector2 Shc, Vector2 StartPoint);
 void Force_Shc(Vector2 StartPoint, int m, int n, Music GameMusic, int Round, int ExRound);
-void Add_Earthquake_Wall(EarthqWall Walls[], int *nWalls, Vector2 StartPoint, int m, int n, int EarthqMap[][2*n+1], int N, float pixels);
+void Add_Earthquake_Wall(EarthqWall Walls[], int *nWalls, Vector2 StartPoint, int m, int n, int EarthqMap[][2*n+1], int N, float pixels, int Case);
 void Coordinate_Around_for_Earthquake(Vector2 mapP, Vector2 Around[], int *nAround);
-void Choose_RandomPositions_Around_Element(int ShOrEx, Vector2 *mapP, Vector2 StartPoint, int m, int n, int Index, int Round, Music GameMusic);
-void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusic);
+// void Move_to_RandomPositions_Around_Element(int ShOrEx, Vector2 *mapP, Vector2 StartPoint, int m, int n, int Index, int Round, Music GameMusic);
+void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusic, int ExIndex);
 void Shcs_Animation_without_Change_Direction(const char beg, Vector2 *ShcP, const Vector2 EndP, float Speed, const float SIncrease, Vector2 StartPoint, int m, int n, int i, int Round, Music music);
-void Exs_Animation_without_Change_Direction(const char Mdir, Vector2 *ExsP, const Vector2 EndP, float Speed, const float SIncrease, Vector2 StartPoint, int m, int n, int i, int Round, Music music);
+int Earthquak_ShadowCasters_Animation(const char beg, Vector2 *ShcP, const Vector2 EndP, float Speed, int sw, int frame, float pixels);
+int Earthquak_Explorers_Animation(const char dir, Vector2 *ExP, const Vector2 EndP, float Speed, int sw, int frame, float pixels);
+int Exit_from_While(int canShcsMove[], int canExsMove[]);
 
 #endif
