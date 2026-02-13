@@ -2494,8 +2494,8 @@ int Save_Game(int Round, int ExRound, int m, int n, Vector2 StartPoint) {
     fprintf(file, "%.0f\n", StartPoint.x);
     fprintf(file, "%.0f\n", StartPoint.y);
 
-    for (int j=0; j<2*n+1; j++) {
-        for (int i=0; i<2*m+1; i++) 
+    for (int j=0; j<2*m+1; j++) {
+        for (int i=0; i<2*n+1; i++) 
             fprintf(file, "%d ", map[j][i]);
             fprintf(file, "\n");
     }
@@ -2556,16 +2556,16 @@ int Load_Game(int *m, int *n, int *ExRound, int *Round, Vector2 *StartPoint) {
     }
     int height, width, nPlayers, nEnemies;
 
-    fscanf(file, "%d", &height); (*n)=height;
-    fscanf(file, "%d", &width); (*m)=width;
+    fscanf(file, "%d", &height); (*m)=height;
+    fscanf(file, "%d", &width); (*n)=width;
 
     float x, y;
     fscanf(file, "%f", &x);
     fscanf(file, "%f", &y);
     *StartPoint = (Vector2) {x, y};
     
-    for (int j=0; j<2*(*n)+1; j++) 
-        for (int i=0; i<2*(*m)+1; i++) 
+    for (int j=0; j<2*(*m)+1; j++) 
+        for (int i=0; i<2*(*n)+1; i++) 
             fscanf(file, "%d", &map[j][i]);
 
     fscanf(file, "%d", &nPlayers); nExplorers = nPlayers;

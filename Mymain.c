@@ -1,22 +1,3 @@
-// TODO:
-// 1 : Modify replay after EndScreen
-// 2: Modify GetWallCount
-// 3: UI of get gift (AF)
-// 4: ReplayGift function (AF)
-// 5: InWallIncrease function (AF)
-// 6: Draw gift texture in window (MSadegh)
-// 7: Earthquake function (MSadegh)
-// 8: ForceEnemy function (MSadegh)
-
-// Show the present in Mymain.c:
-//      bool sw = true;
-//      if (Is_Present_Gotten()) {
-//          if (sw) Show_Present_Rec(StartPoint, m, n, Round, l, GameMusic);
-//              while (sw && !WindowShouldClose()) {
-//                  Show_Present(StartPoint, m, n, Round, l, "Present 1"); if (IsKeyPressed(KEY_SPACE)) sw = false; UpdateMusicStream(GameMusic);
-//              }
-//      }
-
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -54,9 +35,6 @@ InitWindow(WindowWidth, WindowHeight, "The Tale of the Labyrinth");
 InitAudioDevice();
 srand(time(NULL));    // randomize choices
 // Load files
-// Ex1Image = LoadTexture("output\\source\\explorer1_bigimage.png");
-// Ex2Image = LoadTexture("output\\source\\explorer2_bigimage.png");
-// Ex3Image = LoadTexture("output\\source\\explorer3_bigimage.png");
 Sh1TextureRight = LoadTexture("output\\source\\shadowcaster1_right_image.png");
 Sh2TextureRight = LoadTexture("output\\source\\shadowcaster2_right_image.png");
 Sh3TextureRight = LoadTexture("output\\source\\shadowcaster3_right_image.png");
@@ -76,16 +54,16 @@ Music music2 = LoadMusicStream("output\\source\\music2.ogg");
 Music music3 = LoadMusicStream("output\\source\\music3.ogg");
 Music music4 = LoadMusicStream("output\\source\\music4.ogg");
 Music musics[4] = {music1, music2, music3, music4};
-Music EndGameMusic = LoadMusicStream("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\output\\source\\end_game.mp3");
+Music EndGameMusic = LoadMusicStream("output\\source\\end_game.mp3");
 Sound VictorySound = LoadSound("output\\source\\victory_sound.mp3");
 Sound DieSound = LoadSound("output\\source\\die_sound.mp3");
 Sound GiveGiftSound = LoadSound("output\\source\\give_gift_sound.mp3");
-Sound MovingSound = LoadSound("output\\source\\moving_sound.mp3");
+Sound MovingSound = LoadSound("output\\source\\force_sound.mp3");
 Sound ShadowSound = LoadSound("output\\source\\shadow_sound.mp3");
 Sound EarthquakeSound = LoadSound("output\\source\\earthquake.mp3");
-Sound ForceSound = LoadSound("output\\source\\force_sound.mp3");
+Sound ForceSound = LoadSound("output\\source\\moving_sound.mp3");
 
-Screen Current = GameScreen;   // Current screen, starts at TitleScreen.
+Screen Current = TitleScreen;   // Current screen, starts at TitleScreen.
 Level State = GET;   // Current level, starts at GET for inputs.
 
 Texture2D ExTextures[3][2] = {{Ex1TextureLeft, Ex1TextureRight}, 
@@ -114,6 +92,7 @@ switch(Current)
         // First phase, click on the screen to start the game
         Rectangle TitleRec = {(WindowWidth-450)/2, (WindowHeight- 180)/2, 450, 180};
         Color TitleColorNotes = { 112, 31, 126, 255};
+        Vector2 Mous = GetMousePosition();
         BeginDrawing();
         ClearBackground(RAYWHITE);
         DrawRectangleRoundedLinesEx(TitleRec, 0.4f, 25, 4, TitleColorNotes);
@@ -121,7 +100,6 @@ switch(Current)
         int TitleNote2 = MeasureText("Explorer Game!", 50);
         DrawText("Click me to play", TitleRec.x+(TitleRec.width-TitleNote1)/2, TitleRec.y+40, 40, TitleColorNotes);
         DrawText("Explorer Game!", TitleRec.x+(TitleRec.width-TitleNote2)/2, TitleRec.y+40+50, 50, TitleColorNotes);
-        Vector2 Mous = GetMousePosition();
         if (CheckCollisionPointRec(Mous, TitleRec) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) ShowTitleNote3 = true;
         if (ShowTitleNote3)
         { 
@@ -130,6 +108,15 @@ switch(Current)
             DrawText("now input game details.", TitleRec.x+(TitleRec.width-TitleNote3)/2, TitleRec.y+40+50+100, 20, RED);
             FPScounter --;
             if(FPScounter<0) Current = GameScreen;
+        }
+
+        Rectangle LoadingRec = {(WindowWidth-225)/2, (WindowHeight-90)/2+TitleRec.height+10, 225, 90};
+        DrawRectangleRoundedLinesEx(LoadingRec, 0.4f, 25, 3, TitleColorNotes);
+        DrawText(" Load the\nlast save.", (WindowWidth-225)/2+40, (WindowHeight-90)/2+TitleRec.height+20, 30, TitleColorNotes);
+        if (CheckCollisionPointRec(Mous, LoadingRec) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            Current = GameScreen;
+            Load_Game(&m, &n, &l, &Round, &StartPoint);
+            Draw_Map(0, StartPoint, m, n, Round, l);
         }
         EndDrawing();
         break;
@@ -333,16 +320,11 @@ switch(Current)
                 double t0;
                 bool ShouldShowError = false;
                 bool ShouldMove = false;
-                
                 bool WitchRound = true;
-                // bool isPlayed = false;
                 int l=0;
-                if (!Are_All_Players_Dead())
-                while (!WindowShouldClose() && l<nExplorers) {
 
-                    if (IsKeyPressed(KEY_O)) Force_Shc(StartPoint, m, n, GameMusic, Round, l, ForceSound);
-                    if (IsKeyPressed(KEY_P)) {Earthquake_Gift(m, n, StartPoint, Round, GameMusic, l, EarthquakeSound);}
-               
+                if (!Are_All_Players_Dead())
+                while (!WindowShouldClose() && l<nExplorers) {             
             // Witch player is dead?
                 for (int j=0; j<nExplorers; j++) for (int i=0; i<nShadowCasters; i++) {
                     if (Explorers[j].isAlive)
@@ -354,7 +336,6 @@ switch(Current)
                 }     
                 
                     if (notChoosed) {
-                        //  printf("Gift 0: %d  ,  Gift 1: %d  ,  Gift 2: %d\n", Gifts[0].isGotten,Gifts[1].isGotten,Gifts[2].isGotten);
                         if (!Explorers[l].isAlive) {l ++; continue;}
                         UpdateMusicStream(GameMusic);
                         BeginDrawing();
