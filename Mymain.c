@@ -82,6 +82,8 @@ Sound DieSound = LoadSound("output\\source\\die_sound.mp3");
 Sound GiveGiftSound = LoadSound("output\\source\\give_gift_sound.mp3");
 Sound MovingSound = LoadSound("output\\source\\moving_sound.mp3");
 Sound ShadowSound = LoadSound("output\\source\\shadow_sound.mp3");
+Sound EarthquakeSound = LoadSound("output\\source\\earthquake.mp3");
+Sound ForceSound = LoadSound("output\\source\\force_sound.mp3");
 
 Screen Current = GameScreen;   // Current screen, starts at TitleScreen.
 Level State = GET;   // Current level, starts at GET for inputs.
@@ -338,8 +340,8 @@ switch(Current)
                 if (!Are_All_Players_Dead())
                 while (!WindowShouldClose() && l<nExplorers) {
 
-                    if (IsKeyPressed(KEY_O)) Force_Shc(StartPoint, m, n, GameMusic, Round, l);
-                    if (IsKeyPressed(KEY_P)) {Earthquake_Gift(m, n, StartPoint, Round, GameMusic, l);}
+                    if (IsKeyPressed(KEY_O)) Force_Shc(StartPoint, m, n, GameMusic, Round, l, ForceSound);
+                    if (IsKeyPressed(KEY_P)) {Earthquake_Gift(m, n, StartPoint, Round, GameMusic, l, EarthquakeSound);}
                
             // Witch player is dead?
                 for (int j=0; j<nExplorers; j++) for (int i=0; i<nShadowCasters; i++) {
@@ -425,13 +427,13 @@ switch(Current)
                                 Show_Present_Rec(StartPoint, m, n, Round, l, GameMusic);
                                 do {
                                     Show_Present(StartPoint, m, n, Round, l, Gifts[WhichGift-1].type, GameMusic);
-                                    if (IsKeyPressed(KEY_Q)) isShown = true;
+                                    if (IsKeyPressed(KEY_SPACE)) isShown = true;
                                 } while (!isShown); // Shows the present box while plyer do not click space.
                                 
                                 if (Gifts[WhichGift-1].type == Replay) {int *p; p = &(l); ReplayGift(p);}
                                 else if (Gifts[WhichGift-1].type == InWallIncrease) InWallIncreaseGift(l-1);
-                                else if (Gifts[WhichGift-1].type == ForceEnemy) Force_Shc(StartPoint, m, n, GameMusic, Round, l);
-                                else if (Gifts[WhichGift-1].type == Earthquake) Earthquake_Gift(m, n, StartPoint, Round, GameMusic, l);
+                                else if (Gifts[WhichGift-1].type == ForceEnemy) {Force_Shc(StartPoint, m, n, GameMusic, Round, l, ForceSound);}
+                                else if (Gifts[WhichGift-1].type == Earthquake) {Earthquake_Gift(m, n, StartPoint, Round, GameMusic, l, EarthquakeSound);}
                             }
                         }
                         else if (ShouldMove && !(Can_Ex_Move_for_Walls(Explorers[l].mapPos, ExMoveDir))) { 

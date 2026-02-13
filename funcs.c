@@ -1379,7 +1379,7 @@ void Show_Present(Vector2 StartPoint, int m, int n, int Round, int ExRound, Gift
         {char str[30] = "FORCE ENEMY"; DrawText(str, rec.x+82, rec.y+rec.height/2-20, 30, GOLD);}
     else if (name == Earthquake) 
         {char str[30] = "EARTHQUAKE   "; DrawText(str, rec.x+84, rec.y+rec.height/2-20, 30, GOLD);}
-    DrawText("Press Q to okay.", rec.x+89, rec.y+rec.height/2+20, 20, GOLD);
+    DrawText("Press SPACE key to okay.", rec.x+89, rec.y+rec.height/2+20, 20, GOLD);
     EndDrawing();
 }
 
@@ -1477,7 +1477,7 @@ int Rectangles_Around_Shc(Vector2 RecsMapP[], Rectangle RecsAround[], Vector2 Sh
     return nRectangles;
 }
 
-void Force_Shc(Vector2 StartPoint, int m, int n, Music GameMusic, int Round, int ExRound) {
+void Force_Shc(Vector2 StartPoint, int m, int n, Music GameMusic, int Round, int ExRound, Sound ForceSound) {
     Rectangle ShcsR[nShadowCasters];
     int i;
     for (i=0; i<nShadowCasters; i++) {
@@ -1540,6 +1540,7 @@ void Force_Shc(Vector2 StartPoint, int m, int n, Music GameMusic, int Round, int
                 else beg = 'L';            
             }
 
+            PlaySound(ForceSound); 
             Vector2 EndPosition = GET_Start_Elements_Position_for_Draw(StartPoint, Position);
             Shcs_Animation_without_Change_Direction(beg, &ShadowCastersP[ShcIndex], EndPosition, 0.2f, 0.5f, StartPoint, m, n, ShcIndex, Round, GameMusic);
             ShadowCasters[ShcIndex] = Position;
@@ -1668,11 +1669,9 @@ void Coordinate_Around_for_Earthquake(Vector2 mapP, Vector2 Around[], int *nArou
 //         Vector2 temp = *mapP;
 //         Coordinate_Around_for_Earthquake(temp, Around, &nAround);
 //         if (!nAround) return;
-
 //         int random = rand()%nAround;
 //         Vector2 End = Around[random];
 //         Vector2 EndPosition = GET_Start_Elements_Position_for_Draw(StartPoint, End);
-        
 //         char dir;
 //         if (End.y==(*mapP).y) {
 //             if (End.x>(*mapP).x) dir = 'D';
@@ -1681,7 +1680,6 @@ void Coordinate_Around_for_Earthquake(Vector2 mapP, Vector2 Around[], int *nArou
 //             if (End.y>(*mapP).y) dir = 'S';
 //             else dir = 'W'; 
 //         }
-        
 //         Exs_Animation_without_Change_Direction(dir, &Explorers[Index].winPos, EndPosition, Speed, SIncrease, StartPoint, m, n, Index, Round, GameMusic);
 //         *mapP = Around[random];
 //     } else {
@@ -1690,11 +1688,9 @@ void Coordinate_Around_for_Earthquake(Vector2 mapP, Vector2 Around[], int *nArou
 //         Vector2 temp = *mapP;
 //         Coordinate_Around_for_Earthquake(temp, Around, &nAround);
 //         if (!nAround) return;
-        
 //         int random = rand()%nAround;
 //         Vector2 End = Around[random];
 //         Vector2 EndPosition = GET_Start_Elements_Position_for_Draw(StartPoint, End);
-        
 //         char beg;
 //         if (End.y==(*mapP).y) {
 //             if (End.x>(*mapP).x) beg = 'L';
@@ -1703,14 +1699,13 @@ void Coordinate_Around_for_Earthquake(Vector2 mapP, Vector2 Around[], int *nArou
 //             if (End.y>(*mapP).y) beg = 'U';
 //             else beg = 'D'; 
 //         }
-        
 //         Shcs_Animation_without_Change_Direction(beg, &ShadowCastersP[Index], EndPosition, Speed, SIncrease, StartPoint, m, n, Index, Round, GameMusic);
 //         *mapP = Around[random];
 //     }
-
 // }
 
-void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusic, int ExIndex) {
+void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusic, int ExIndex, Sound EarthquakeSound) {
+    PlaySound(EarthquakeSound); 
     int N;
     if (m*n < 42) N = 15;
     else if (m*n < 90) N = 30;
