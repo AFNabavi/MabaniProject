@@ -115,6 +115,7 @@ switch(Current)
         DrawText(" Load the\nlast save.", (WindowWidth-225)/2+40, (WindowHeight-90)/2+TitleRec.height+20, 30, TitleColorNotes);
         if (CheckCollisionPointRec(Mous, LoadingRec) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
             Current = GameScreen;
+            State = MoveExs;
             Load_Game(&m, &n, &l, &Round, &StartPoint);
             Draw_Map(0, StartPoint, m, n, Round, l);
         }
@@ -165,18 +166,6 @@ switch(Current)
                 Explorers[i] = (Explorer) {true, 1, (Vector2){0,0}, (Vector2){0,0}, MaxInterimWall, '\0', {ExTextures[i][0], ExTextures[i][1]}}; // initial explorers
             nShadowCasters = MaxPlayer;
 
-        // // Reads texture of every player.
-        //     for (int i=1; i<=MaxPlayer; i++)
-        //         while (!WindowShouldClose()) {
-        //             Choose_Players_Texture_UI(MaxPlayer, i);
-        //             Texture2D x = Choose_Players_Texture();
-        //             if (x) {
-        //                 printf("d  ");
-        //                 Explorers[i-1].picture =  
-        //                 break;
-        //             } 
-        //         }
-
         // Reads lightcore position. Accepts only coordinates in the range 0..n-1 (x) and 0..m-1 (y).
             Lightcore.x = (float) (rand()%n); Lightcore.y = (float) (rand()%m);
             Lightcore = Return_Elements_Position(Lightcore);
@@ -220,19 +209,38 @@ switch(Current)
                 Initializing_FadeSh();
                 Init_FadeSh = false;
             }
-            
-        char s[5];
-        int tempN;
-        while (!WindowShouldClose())
+        
+        // Get wall count:
+            char str[5];
+            int inp; 
+            int lenCounter=0;
+            while (!WindowShouldClose())
             {
+                inp = GetCharPressed();
+                while (inp > 0) {
+                    if (inp>='0' && inp<='9') {
+                        str[lenCounter] = (char) inp;
+                        lenCounter ++;
+                        str[lenCounter] = '\0';
+                    }
+                    inp = GetCharPressed();
+                }
+                if (IsKeyPressed(KEY_BACKSPACE) && lenCounter>0) {
+                    lenCounter --;
+                    str[lenCounter] = '\0';
+                }
                 BeginDrawing();
                 ClearBackground(RAYWHITE);
-                Draw_Walls_Infs(s, n, m);
-                char inp = GetKeyPressed();
-                if ((inp>='0' && inp<='9') || inp == 'r' || inp == 'R') {Print_Number_In_String(s, inp, strlen(s));}
-                tempN = StoI(s, strlen(s));
-                if (Submit_Button(n, m, s, strlen(s))) {nWalls = tempN; break;}
+                Draw_Walls_Infs(str, n, m);
                 EndDrawing();
+                if (Submit_Button()) {
+                    int sum=0;
+                    for (int i=0; i<lenCounter; i++) {
+                        sum *= 10;
+                        sum += ((int) str[i] - '0');
+                    } 
+                    if (sum>=0 && sum<((m-1)*(n-1))) {nWalls = sum; break;}
+                }
             }
 
         // Randomly places valid walls while preserving full map connectivity (BFS-validated)

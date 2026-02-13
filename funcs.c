@@ -720,12 +720,6 @@ void ItoS(char *str, int n) {
     }
 }
 
-int StoI(char s[], int sLen) {
-    int InpNumber = 0;
-    for (int i=0; i<sLen; i++) {InpNumber += (s[i] - '0'); InpNumber*=10;} InpNumber /= 10;
-    return InpNumber;
-}
-
 void Draw_Walls_Infs(char s[], int n, int m)
 {
     Rectangle OutRecLines = {200, 150, 700, 350};
@@ -735,7 +729,7 @@ void Draw_Walls_Infs(char s[], int n, int m)
     int nm = (n-1)*(m-1), i, j, k;
     char str1[5] = {'\0'};
     ItoS(str1, nm);
-    char str0[] = "Enter the number of walls\nyou want (between 0 and ";
+    char str0[] = "  Enter the number of walls\nyou want (between 0 and ";
     char str2[] = "):\n";
     char str[70];
     for (i=0; str0[i]; i++) str[i] = str0[i]; 
@@ -747,37 +741,17 @@ void Draw_Walls_Infs(char s[], int n, int m)
     DrawRectangleRoundedLines(InpShower, 0.5, 4.0, GRAY);
     DrawRectangleRoundedLines(SubmitButton, 0.5, 4.0, GRAY);    
     DrawText(str, OutRecLines.x+105, OutRecLines.y+50, 30, RED);
-    DrawText("(press R to remove your input.)", OutRecLines.x+155, OutRecLines.y+120, 20, RED);
+    DrawText("(press backspace to remove your number.)", OutRecLines.x+140, OutRecLines.y+120, 20, RED);
     DrawText(s, InpShower.x+25, InpShower.y+15, 20, BLACK);
     DrawText("SUBMIT", SubmitButton.x+8, SubmitButton.y+15, 19, DARKGRAY);
 }
 
-char Print_Number_In_String(char s[], char ch, int len)
-{
-    if (len<4)
-    {
-        s[len] = ch;
-        s[len+1] = '\0';
-    }
-    if (ch == 'r' || ch == 'R')
-    {
-        s[len-1] = '\0';
-    }
-    return '\0';
-}
-
-int Submit_Button(int n, int m, char inp[], int inpLen)
+int Submit_Button()
 {   
     Rectangle SubmitButton = {550, 350, 85, 50};
     Vector2 MousePos = GetMousePosition();
-    int InpNumber = StoI(inp, inpLen);
-    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) 
-        if (MousePos.x >= SubmitButton.x &&
-             MousePos.x <= (SubmitButton.x+SubmitButton.width) &&
-             MousePos.y >= SubmitButton.y &&
-             MousePos.y <= (SubmitButton.y+SubmitButton.height)) 
-                if (InpNumber>0 && InpNumber<=((n-1)*(m-1)))
-                    return 1;
+    if (CheckCollisionPointRec(MousePos, SubmitButton) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) 
+        return 1; 
     return 0;
 }
 
@@ -1197,43 +1171,6 @@ int Get_Explorer_Count() {
     }
     return 0;
 }
-
-// void Choose_Players_Texture_UI(int PlayersCount, int Player) {
-//     const int MarginHor = 150;
-//     const int MarginVer = 200;
-//     const int space = 100;
-//     char PlayerStr[2];
-//     Rectangle ex1 = {MarginHor+(0*200+0*space), MarginVer+50, 170, 200};
-//     Rectangle ex2 = {MarginHor+(1*200+1*space), MarginVer+50, 170, 200};
-//     Rectangle ex3 = {MarginHor+(2*200+2*space), MarginVer+50, 170, 200};
-//     BeginDrawing();
-//     ClearBackground(RAYWHITE);
-//     DrawText("Player -  -, choose your texture.", MarginHor+135, MarginVer-10, 30, RED);
-//     ItoS(PlayerStr, Player);
-//     DrawText(PlayerStr, MarginHor+265, MarginVer-10, 30, RED);
-//     DrawTexture(Ex1Image, MarginHor+(0*200+0*space), MarginVer+50, RAYWHITE);
-//     DrawTexture(Ex2Image, MarginHor+(1*200+1*space), MarginVer+50, RAYWHITE);
-//     DrawTexture(Ex3Image, MarginHor+(2*200+2*space), MarginVer+50, RAYWHITE);
-//     DrawRectangleLinesEx(ex1, 2.0, BLACK);
-//     DrawRectangleLinesEx(ex2, 2.0, BLACK);
-//     DrawRectangleLinesEx(ex3, 2.0, BLACK);
-//     EndDrawing();
-// }
-// Texture2D Choose_Players_Texture() {
-//     const int MarginHor = 150;
-//     const int MarginVer = 200;
-//     const int space = 100;
-//     Vector2 v = GetMousePosition();
-//     Rectangle ex1 = {MarginHor+(0*200+0*space), MarginVer+50, 170, 200};
-//     Rectangle ex2 = {MarginHor+(1*200+1*space), MarginVer+50, 170, 200};
-//     Rectangle ex3 = {MarginHor+(2*200+2*space), MarginVer+50, 170, 200};
-//     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-//         if (CheckCollisionPointRec(v, ex1)) return Ex1TextureRight;
-//         if (CheckCollisionPointRec(v, ex2)) return Ex2TextureRight;
-//         if (CheckCollisionPointRec(v, ex3)) return Ex3TextureRight;
-//     }
-//     return;
-// }
 
 void Show_Invalid_Move_Error(Vector2 StartPoint, int m, int n, int Round, int ExRound) {
     BeginDrawing();
@@ -1657,52 +1594,7 @@ void Coordinate_Around_for_Earthquake(Vector2 mapP, Vector2 Around[], int *nArou
         (*nAround)++;
         Around[*nAround-1] = coordinate; 
     }
-    // printf(" %d ", *nAround);
 }
-
-// void Move_to_RandomPositions_Around_Element(int ShOrEx, Vector2 *mapP, Vector2 StartPoint, int m, int n, int Index, int Round, Music GameMusic) {
-//     float Speed = 0.02f;
-//     float SIncrease = 0.02f;
-//     if (ShOrEx == 1) {
-//         Vector2 Around[4];
-//         int nAround = 0;
-//         Vector2 temp = *mapP;
-//         Coordinate_Around_for_Earthquake(temp, Around, &nAround);
-//         if (!nAround) return;
-//         int random = rand()%nAround;
-//         Vector2 End = Around[random];
-//         Vector2 EndPosition = GET_Start_Elements_Position_for_Draw(StartPoint, End);
-//         char dir;
-//         if (End.y==(*mapP).y) {
-//             if (End.x>(*mapP).x) dir = 'D';
-//             else dir = 'A'; 
-//         } else {
-//             if (End.y>(*mapP).y) dir = 'S';
-//             else dir = 'W'; 
-//         }
-//         Exs_Animation_without_Change_Direction(dir, &Explorers[Index].winPos, EndPosition, Speed, SIncrease, StartPoint, m, n, Index, Round, GameMusic);
-//         *mapP = Around[random];
-//     } else {
-//         Vector2 Around[4];
-//         int nAround = 0;
-//         Vector2 temp = *mapP;
-//         Coordinate_Around_for_Earthquake(temp, Around, &nAround);
-//         if (!nAround) return;
-//         int random = rand()%nAround;
-//         Vector2 End = Around[random];
-//         Vector2 EndPosition = GET_Start_Elements_Position_for_Draw(StartPoint, End);
-//         char beg;
-//         if (End.y==(*mapP).y) {
-//             if (End.x>(*mapP).x) beg = 'L';
-//             else beg = 'R'; 
-//         } else if (End.x==(*mapP).x) {
-//             if (End.y>(*mapP).y) beg = 'U';
-//             else beg = 'D'; 
-//         }
-//         Shcs_Animation_without_Change_Direction(beg, &ShadowCastersP[Index], EndPosition, Speed, SIncrease, StartPoint, m, n, Index, Round, GameMusic);
-//         *mapP = Around[random];
-//     }
-// }
 
 void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusic, int ExIndex, Sound EarthquakeSound) {
     PlaySound(EarthquakeSound); 
