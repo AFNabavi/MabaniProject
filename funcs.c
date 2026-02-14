@@ -18,10 +18,7 @@ Vector2 Lightcore = {0.0f};
 
 int nExplorers = 0;
 Explorer Explorers[3];
-// Vector2 Explorers[3] = {0.0f};
-// Vector2 ExplorersP[3] = {0.0f};     // Position in Window
-// char ExplorersDir[3] = {'\0'};
-// int nInterimWalls[3] = {2, 2, 2};
+
 InterimWalls InWalls[30];
 int nInWalls = 0; 
 Present Gifts[3];
@@ -706,12 +703,6 @@ void ItoS(char *str, int n) {
     }
 }
 
-int StoI(char s[], int sLen) {
-    int InpNumber = 0;
-    for (int i=0; i<sLen; i++) {InpNumber += (s[i] - '0'); InpNumber*=10;} InpNumber /= 10;
-    return InpNumber;
-}
-
 void Draw_Walls_Infs(char s[], int n, int m)
 {
     Rectangle OutRecLines = {200, 150, 700, 350};
@@ -733,37 +724,17 @@ void Draw_Walls_Infs(char s[], int n, int m)
     DrawRectangleRoundedLines(InpShower, 0.5, 4.0, GRAY);
     DrawRectangleRoundedLines(SubmitButton, 0.5, 4.0, GRAY);    
     DrawText(str, OutRecLines.x+105, OutRecLines.y+50, 30, RED);
-    DrawText("(press R to remove your input.)", OutRecLines.x+155, OutRecLines.y+120, 20, RED);
+    DrawText("(press backspace to remove your number.)", OutRecLines.x+140, OutRecLines.y+120, 20, RED);
     DrawText(s, InpShower.x+25, InpShower.y+15, 20, BLACK);
     DrawText("SUBMIT", SubmitButton.x+8, SubmitButton.y+15, 19, DARKGRAY);
 }
 
-char Print_Number_In_String(char s[], char ch, int len)
-{
-    if (len<4)
-    {
-        s[len] = ch;
-        s[len+1] = '\0';
-    }
-    if (ch == 'r' || ch == 'R')
-    {
-        s[len-1] = '\0';
-    }
-    return '\0';
-}
-
-int Submit_Button(int n, int m, char inp[], int inpLen)
+int Submit_Button()
 {   
     Rectangle SubmitButton = {550, 350, 85, 50};
     Vector2 MousePos = GetMousePosition();
-    int InpNumber = StoI(inp, inpLen);
-    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) 
-        if (MousePos.x >= SubmitButton.x &&
-             MousePos.x <= (SubmitButton.x+SubmitButton.width) &&
-             MousePos.y >= SubmitButton.y &&
-             MousePos.y <= (SubmitButton.y+SubmitButton.height)) 
-                if (InpNumber>0 && InpNumber<=((n-1)*(m-1)))
-                    return 1;
+    if (CheckCollisionPointRec(MousePos, SubmitButton) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) 
+        return 1; 
     return 0;
 }
 
@@ -994,7 +965,7 @@ void Shcs_Animation(const char beg, Vector2 *ShcP, const Vector2 EndP, float Spe
     while (!((*ShcP).x == EndP.x && (*ShcP).y == EndP.y)) {
         UpdateMusicStream(music);
         BeginDrawing();
-        ClearBackground(RAYWHITE);
+        ClearBackground(BackColor);
         Draw_Map(0, StartPoint, m, n, Round, nExplorers-1); 
         EndDrawing();                                        
 
@@ -1028,7 +999,7 @@ void Exs_Animation (const char Mdir, const char Tdir, Vector2 *ExsP, const Vecto
     while (!((*ExsP).x == EndP.x && (*ExsP).y == EndP.y)) {
         UpdateMusicStream(music);
         BeginDrawing();
-        ClearBackground(RAYWHITE);
+        ClearBackground(BackColor);
         Draw_Map(0, StartPoint, m, n, Round, i);
         EndDrawing();
 
@@ -1177,7 +1148,7 @@ int Get_Explorer_Count_UI(int MaxPlayer) {
     Rectangle rec = {275, 260, 150, 150};
     const int space = 50;
     BeginDrawing();
-    ClearBackground(RAYWHITE);
+    ClearBackground(BackColor);
     DrawText("Enter the number of players", 370, 200, 25, RED);
     for (int i=0; i<MaxPlayer; i++) {
         DrawRectangleGradientH(rec.x+(i*rec.width+i*space), rec.y, rec.width, rec.height, color1, color2);
@@ -1204,46 +1175,9 @@ int Get_Explorer_Count() {
     return 0;
 }
 
-// void Choose_Players_Texture_UI(int PlayersCount, int Player) {
-//     const int MarginHor = 150;
-//     const int MarginVer = 200;
-//     const int space = 100;
-//     char PlayerStr[2];
-//     Rectangle ex1 = {MarginHor+(0*200+0*space), MarginVer+50, 170, 200};
-//     Rectangle ex2 = {MarginHor+(1*200+1*space), MarginVer+50, 170, 200};
-//     Rectangle ex3 = {MarginHor+(2*200+2*space), MarginVer+50, 170, 200};
-//     BeginDrawing();
-//     ClearBackground(RAYWHITE);
-//     DrawText("Player -  -, choose your texture.", MarginHor+135, MarginVer-10, 30, RED);
-//     ItoS(PlayerStr, Player);
-//     DrawText(PlayerStr, MarginHor+265, MarginVer-10, 30, RED);
-//     DrawTexture(Ex1Image, MarginHor+(0*200+0*space), MarginVer+50, RAYWHITE);
-//     DrawTexture(Ex2Image, MarginHor+(1*200+1*space), MarginVer+50, RAYWHITE);
-//     DrawTexture(Ex3Image, MarginHor+(2*200+2*space), MarginVer+50, RAYWHITE);
-//     DrawRectangleLinesEx(ex1, 2.0, BLACK);
-//     DrawRectangleLinesEx(ex2, 2.0, BLACK);
-//     DrawRectangleLinesEx(ex3, 2.0, BLACK);
-//     EndDrawing();
-// }
-// Texture2D Choose_Players_Texture() {
-//     const int MarginHor = 150;
-//     const int MarginVer = 200;
-//     const int space = 100;
-//     Vector2 v = GetMousePosition();
-//     Rectangle ex1 = {MarginHor+(0*200+0*space), MarginVer+50, 170, 200};
-//     Rectangle ex2 = {MarginHor+(1*200+1*space), MarginVer+50, 170, 200};
-//     Rectangle ex3 = {MarginHor+(2*200+2*space), MarginVer+50, 170, 200};
-//     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-//         if (CheckCollisionPointRec(v, ex1)) return Ex1TextureRight;
-//         if (CheckCollisionPointRec(v, ex2)) return Ex2TextureRight;
-//         if (CheckCollisionPointRec(v, ex3)) return Ex3TextureRight;
-//     }
-//     return;
-// }
-
 void Show_Invalid_Move_Error(Vector2 StartPoint, int m, int n, int Round, int ExRound) {
     BeginDrawing();
-    ClearBackground(RAYWHITE);
+    ClearBackground(BackColor);
     Draw_Map(0, StartPoint, m, n, Round, ExRound);      
     Color Red = {230, 41, 55, 150};
     Color Gray = {130, 130, 130, 150};
@@ -1254,7 +1188,7 @@ void Show_Invalid_Move_Error(Vector2 StartPoint, int m, int n, int Round, int Ex
 
 void Show_Ended_Walls_Error(Vector2 StartPoint, int m, int n, int Round, int ExRound) {
     BeginDrawing();
-    ClearBackground(RAYWHITE);
+    ClearBackground(BackColor);
     Draw_Map(0, StartPoint, m, n, Round, ExRound);
     Color Red = {230, 41, 55, 150};
     Color Gray = {130, 130, 130, 150};
@@ -1345,7 +1279,6 @@ int Is_Present_Gotten() {
                 return i+1;  
             if ((int) Gifts[i].mapPos.x == (int) Explorers[2].mapPos.x && (int) Gifts[i].mapPos.y == (int) Explorers[2].mapPos.y)
                 return i+1; 
-        // printf("\nEx %d : %d %d  ,  Gift %d : %d %d\n", j, (int)Explorers[j].mapPos.x, (int)Explorers[j].mapPos.y, i, (int)Gifts[i].mapPos.x, (int)Gifts[i].mapPos.y);
         }
     return 0;
 }
@@ -1353,12 +1286,11 @@ int Is_Present_Gotten() {
 void Show_Present_Rec(Vector2 StartPoint, int m, int n, int Round, int ExRound, Music music) {
     float width = 10;
     float height = 6;
-    // Vector2 pos = {540, 640};
     Rectangle rec = {StartPoint.x+(Side*n)/2-5, WindowHeight-20, width, height};
     Color backColor = {20, 180, 150, 255};
     while (rec.y >= 260) { 
         BeginDrawing();
-        ClearBackground(RAYWHITE);
+        ClearBackground(BackColor);
         Pointer_To_Player(ExRound, StartPoint);
         Draw_Map(0, StartPoint, m, n, Round, ExRound);
         UpdateMusicStream(music);
@@ -1379,12 +1311,11 @@ void Show_Present(Vector2 StartPoint, int m, int n, int Round, int ExRound, Gift
     // r=59 g=63 b=72 a=157 from Show_Present_UI (backColor at last)
     // x=255 y=250 w=390 h=234 from Show_Present_UI (rec at last)
     Color color = {59, 63, 72, 157};
-    // Color TextColor = {1}
     Rectangle rec = {255, 250, 390, 234};
 
     UpdateMusicStream(music);
     BeginDrawing();
-    ClearBackground(RAYWHITE);
+    ClearBackground(BackColor);
     Draw_Map(0, StartPoint, m, n, Round, ExRound);
     Pointer_To_Player(ExRound, StartPoint);
     DrawRectangleRounded(rec, 0.1f, 10, color);
@@ -1396,7 +1327,7 @@ void Show_Present(Vector2 StartPoint, int m, int n, int Round, int ExRound, Gift
         {char str[30] = "FORCE ENEMY"; DrawText(str, rec.x+82, rec.y+rec.height/2-20, 30, GOLD);}
     else if (name == Earthquake) 
         {char str[30] = "EARTHQUAKE   "; DrawText(str, rec.x+84, rec.y+rec.height/2-20, 30, GOLD);}
-    DrawText("Press Q to okay.", rec.x+89, rec.y+rec.height/2+20, 20, GOLD);
+    DrawText("Press SPACE key to okay.", rec.x+89, rec.y+rec.height/2+20, 20, GOLD);
     EndDrawing();
 }
 
@@ -1409,7 +1340,6 @@ void Number_Gifts(int m, int n) {nGifts = nShadowCasters;}
 int BFS_Gift(int checked[][2], int start, int end, int m, int n, int len) {
     int i; len++; int k=0;
     for (i=start; i<=end; i++) {
-        // printf("%d/%d %d/%d  %d\n", checked[i][0], 2*m, checked[i][1], 2*n, start);  
         if (map[checked[i][0]-1][checked[i][1]] == 1 && (map[checked[i][0]-2][checked[i][1]] == 1 || map[checked[i][0]-2][checked[i][1]] == 2)) {
             if (map[checked[i][0]-2][checked[i][1]] == 2) {
                 if (len<3) return 0;
@@ -1494,7 +1424,7 @@ int Rectangles_Around_Shc(Vector2 RecsMapP[][4], Rectangle RecsAround[][4], Vect
     return nRectangles;
 }
 
-void Force_Shc(Vector2 StartPoint, int m, int n, Music GameMusic, int Round, int ExRound) {
+void Force_Shc(Vector2 StartPoint, int m, int n, Music GameMusic, int Round, int ExRound, Sound ForceSound) {
     Rectangle ShcsR[nShadowCasters]; int nRecsA[nShadowCasters];
     Rectangle RecsAround[nShadowCasters][4]; Vector2 RecsMapP[nShadowCasters][4];
     int i;
@@ -1508,7 +1438,7 @@ void Force_Shc(Vector2 StartPoint, int m, int n, Music GameMusic, int Round, int
     while (!MovedShc) {
         UpdateMusicStream(GameMusic);
         BeginDrawing();
-        ClearBackground(RAYWHITE);
+        ClearBackground(BackColor);
         Draw_Map(0, StartPoint, m, n, Round, ExRound);
         EndDrawing();
 
@@ -1528,7 +1458,7 @@ void Force_Shc(Vector2 StartPoint, int m, int n, Music GameMusic, int Round, int
         while (LockinShc) {
             UpdateMusicStream(GameMusic);
             BeginDrawing();
-            ClearBackground(RAYWHITE);
+            ClearBackground(BackColor);
             Draw_Map(0, StartPoint, m, n, Round, ExRound);
             EndDrawing();
 
@@ -1557,6 +1487,7 @@ void Force_Shc(Vector2 StartPoint, int m, int n, Music GameMusic, int Round, int
                 else beg = 'L';            
             }
 
+            PlaySound(ForceSound); 
             Vector2 EndPosition = GET_Start_Elements_Position_for_Draw(StartPoint, Position);
             Shcs_Animation_without_Change_Direction(beg, &ShadowCastersP[ShcIndex], EndPosition, 0.2f, 0.5f, StartPoint, m, n, ShcIndex, Round, GameMusic);
             ShadowCasters[ShcIndex] = Position;
@@ -1674,7 +1605,6 @@ void Coordinate_Around_for_Earthquake(int Case, Vector2 mapP, Vector2 Around[], 
             (*nAround)++;
             Around[*nAround-1] = coordinate; 
         }
-        // printf(" %d ", *nAround);
     } else {
             (*nAround) = 0;
         if (map[(int)mapP.y-1][(int)mapP.x] == 1 && (map[(int)mapP.y-2][(int)mapP.x] == 1 || map[(int)mapP.y-2][(int)mapP.x] == 2)) {
@@ -1701,7 +1631,8 @@ void Coordinate_Around_for_Earthquake(int Case, Vector2 mapP, Vector2 Around[], 
 }
 
 
-void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusic, int ExIndex) {
+void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusic, int ExIndex, Sound EarthquakeSound) {
+    PlaySound(EarthquakeSound);
     int N ;
     if (m*n < 42) N = 15;
     else if (m*n < 90) N = 30;
@@ -1816,7 +1747,7 @@ void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusi
     while (GetTime()-t0<2.5) {
         UpdateMusicStream(GameMusic);
         BeginDrawing();
-        ClearBackground(RAYWHITE);
+        ClearBackground(BackColor);
         Draw_Map(1, StartPoint, m, n, Round, nExplorers-1); 
         EndDrawing(); 
         
@@ -1921,10 +1852,8 @@ void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusi
                     else DrawLineEx(S, E, WallTh, O);        
                 }
             }
-        }   
-        printf("x:%6.2f y:%6.2f level:%d HorV:%c dir:%d p:%6.2f n:%6.2f\n", Walls[1].Start.x, Walls[1].Start.y, Walls[1].level, Walls[1].HorV, Walls[1].dir, Walls[1].pixels, Walls[1].n) ;
+        } 
     }
-    
     
     int sw = -1; float pixels = 4; int frame = 0;
     float Speed = 0.01f; float SIncrease = 0.006f;
@@ -1948,7 +1877,7 @@ void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusi
     while (!Done) {
         UpdateMusicStream(GameMusic);
         BeginDrawing();
-        ClearBackground(RAYWHITE);
+        ClearBackground(BackColor);
         Draw_Map(1, StartPoint, m, n, Round, nExplorers-1); 
         EndDrawing(); 
         for (i=0; i<nShadowCasters; i++) {
@@ -2082,7 +2011,7 @@ void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusi
     while (GetTime()-t0<1.0) {
         UpdateMusicStream(GameMusic);
         BeginDrawing();
-        ClearBackground(RAYWHITE);
+        ClearBackground(BackColor);
         Draw_Map(1, StartPoint, m, n, Round, nExplorers-1); 
         EndDrawing(); 
 
@@ -2195,7 +2124,7 @@ void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusi
         sw1 = 0;
         UpdateMusicStream(GameMusic);
         BeginDrawing();
-        ClearBackground(RAYWHITE);
+        ClearBackground(BackColor);
         Draw_Map(1, StartPoint, m, n, Round, nExplorers-1); 
         EndDrawing(); 
 
@@ -2416,7 +2345,7 @@ void Shcs_Animation_without_Change_Direction(const char beg, Vector2 *ShcP, cons
     while (1) {
         UpdateMusicStream(music);
         BeginDrawing();
-        ClearBackground(RAYWHITE);
+        ClearBackground(BackColor);
         Draw_Map(0, StartPoint, m, n, Round, nExplorers-1); 
         EndDrawing();                                        
 
@@ -2445,7 +2374,7 @@ void Show_Save_Notf(int sw) {
     Color Red = {230, 41, 55, 255};
     Color Gray = {130, 130, 130, 150};
     BeginDrawing();
-    ClearBackground(RAYWHITE);
+    ClearBackground(BackColor);
     DrawRectangle(300, 300, 500, 50, Gray);
     if (sw) DrawText("Saved Succesfully!", 360, 305, 40, Red);
     else DrawText("Can't save it!", 370, 305, 40, Red);
@@ -2456,7 +2385,7 @@ void Show_Load_Notf(int sw) {
     Color Red = {230, 41, 55, 255};
     Color Gray = {130, 130, 130, 150};
     BeginDrawing();
-    ClearBackground(RAYWHITE);
+    ClearBackground(BackColor);
     DrawRectangle(300, 300, 500, 50, Gray);
     if (sw) DrawText("Loaded Succesfully!", 355, 305, 40, Red);
     else DrawText("Can't Load it!", 370, 305, 40, Red);
@@ -2510,6 +2439,8 @@ int Save_Game(int Round, int ExRound, int m, int n, Vector2 StartPoint) {
         fprintf(file, "%.0f\n", ShadowCastersP[i].x);
         fprintf(file, "%.0f\n", ShadowCastersP[i].y);
         fprintf(file, "%d\n", ShadowCastersDir[i]);
+        fprintf(file, "%d\n", FadeSh[i]);
+        fprintf(file, "%d\n", swF[i]);
     }
 
     fprintf(file, "%.0f\n", Lightcore.x);
@@ -2578,6 +2509,8 @@ int Load_Game(int *m, int *n, int *ExRound, int *Round, Vector2 *StartPoint) {
         fscanf(file, "%f", &ShadowCastersP[i].x);
         fscanf(file, "%f", &ShadowCastersP[i].y);
         fscanf(file, "%d", &ShadowCastersDir[i]);
+        fscanf(file, "%d", &FadeSh[i]);
+        fscanf(file, "%d", &swF[i]);
     }
 
     fscanf(file, "%f", &Lightcore.x);

@@ -1,22 +1,3 @@
-// TODO:
-// 1 : Modify replay after EndScreen
-// 2: Modify GetWallCount
-// 3: UI of get gift (AF)
-// 4: ReplayGift function (AF)
-// 5: InWallIncrease function (AF)
-// 6: Draw gift texture in window (MSadegh)
-// 7: Earthquake function (MSadegh)
-// 8: ForceEnemy function (MSadegh)
-
-// Show the present in Mymain.c:
-//      bool sw = true;
-//      if (Is_Present_Gotten()) {
-//          if (sw) Show_Present_Rec(StartPoint, m, n, Round, l, GameMusic);
-//              while (sw && !WindowShouldClose()) {
-//                  Show_Present(StartPoint, m, n, Round, l, "Present 1"); if (IsKeyPressed(KEY_SPACE)) sw = false; UpdateMusicStream(GameMusic);
-//              }
-//      }
-
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -48,15 +29,13 @@ typedef enum {GET, MoveExs, MoveShs} Level;
 bool ShowTitleNote3 = false;    // Flag to show third title note after click, for input prompt.
 bool Win = false;   // Flag for player win, affects EndScreen.
 bool Init_FadeSh = true;
+Color BackColor = RAYWHITE;
 
 int main() {
 InitWindow(WindowWidth, WindowHeight, "The Tale of the Labyrinth");
 InitAudioDevice();
 srand(time(NULL));    // randomize choices
 // Load files
-// Ex1Image = LoadTexture("output\\source\\explorer1_bigimage.png");
-// Ex2Image = LoadTexture("output\\source\\explorer2_bigimage.png");
-// Ex3Image = LoadTexture("output\\source\\explorer3_bigimage.png");
 Sh1TextureRight = LoadTexture("output\\source\\shadowcaster1_right_image.png");
 Sh2TextureRight = LoadTexture("output\\source\\shadowcaster2_right_image.png");
 Sh3TextureRight = LoadTexture("output\\source\\shadowcaster3_right_image.png");
@@ -76,14 +55,16 @@ Music music2 = LoadMusicStream("output\\source\\music2.ogg");
 Music music3 = LoadMusicStream("output\\source\\music3.ogg");
 Music music4 = LoadMusicStream("output\\source\\music4.ogg");
 Music musics[4] = {music1, music2, music3, music4};
-Music EndGameMusic = LoadMusicStream("D:\\Abolfazl\\Programming\\Projects\\MabaniProject\\MabaniProject\\output\\source\\end_game.mp3");
+Music EndGameMusic = LoadMusicStream("output\\source\\end_game.mp3");
 Sound VictorySound = LoadSound("output\\source\\victory_sound.mp3");
 Sound DieSound = LoadSound("output\\source\\die_sound.mp3");
 Sound GiveGiftSound = LoadSound("output\\source\\give_gift_sound.mp3");
-Sound MovingSound = LoadSound("output\\source\\moving_sound.mp3");
+Sound MovingSound = LoadSound("output\\source\\force_sound.mp3");
 Sound ShadowSound = LoadSound("output\\source\\shadow_sound.mp3");
+Sound EarthquakeSound = LoadSound("output\\source\\earthquake.mp3");
+Sound ForceSound = LoadSound("output\\source\\moving_sound.mp3");
 
-Screen Current = GameScreen;   // Current screen, starts at TitleScreen.
+Screen Current = TitleScreen;   // Current screen, starts at TitleScreen.
 Level State = GET;   // Current level, starts at GET for inputs.
 
 Texture2D ExTextures[3][2] = {{Ex1TextureLeft, Ex1TextureRight}, 
@@ -112,14 +93,14 @@ switch(Current)
         // First phase, click on the screen to start the game
         Rectangle TitleRec = {(WindowWidth-450)/2, (WindowHeight- 180)/2, 450, 180};
         Color TitleColorNotes = { 112, 31, 126, 255};
+        Vector2 Mous = GetMousePosition();
         BeginDrawing();
-        ClearBackground(RAYWHITE);
+        ClearBackground(BackColor);
         DrawRectangleRoundedLinesEx(TitleRec, 0.4f, 25, 4, TitleColorNotes);
         int TitleNote1 = MeasureText("Click me to play", 40);
         int TitleNote2 = MeasureText("Explorer Game!", 50);
         DrawText("Click me to play", TitleRec.x+(TitleRec.width-TitleNote1)/2, TitleRec.y+40, 40, TitleColorNotes);
         DrawText("Explorer Game!", TitleRec.x+(TitleRec.width-TitleNote2)/2, TitleRec.y+40+50, 50, TitleColorNotes);
-        Vector2 Mous = GetMousePosition();
         if (CheckCollisionPointRec(Mous, TitleRec) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) ShowTitleNote3 = true;
         if (ShowTitleNote3)
         { 
@@ -128,6 +109,19 @@ switch(Current)
             DrawText("now input game details.", TitleRec.x+(TitleRec.width-TitleNote3)/2, TitleRec.y+40+50+100, 20, RED);
             FPScounter --;
             if(FPScounter<0) Current = GameScreen;
+        }
+
+        Rectangle LoadingRec = {(WindowWidth-225)/2, (WindowHeight-90)/2+TitleRec.height+10, 225, 90};
+        DrawRectangleRoundedLinesEx(LoadingRec, 0.4f, 25, 3, TitleColorNotes);
+        DrawText(" Load the\nlast save.", (WindowWidth-225)/2+40, (WindowHeight-90)/2+TitleRec.height+20, 30, TitleColorNotes);
+        if (CheckCollisionPointRec(Mous, LoadingRec) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            Current = GameScreen;
+            State = MoveExs;
+            Load_Game(&m, &n, &l, &Round, &StartPoint);
+            Draw_Map(0, StartPoint, m, n, Round, l);      
+            Explorers[0].avatar[0] = Ex1TextureLeft; Explorers[0].avatar[1] = Ex1TextureRight;
+            Explorers[1].avatar[0] = Ex2TextureLeft; Explorers[1].avatar[1] = Ex2TextureRight;
+            Explorers[2].avatar[0] = Ex3TextureLeft; Explorers[2].avatar[1] = Ex3TextureRight;
         }
         EndDrawing();
         break;
@@ -144,7 +138,7 @@ switch(Current)
             while(!WindowShouldClose())
             {
                 BeginDrawing();
-                ClearBackground(RAYWHITE);
+                ClearBackground(BackColor);
                 Draw_Map_Infs();
                 if (n == -1) DrawText("Click width of map", 400, 170, 30, RED);
                 else DrawText("Click height of map", 390, 170, 30, RED);
@@ -167,7 +161,7 @@ switch(Current)
             if (m*n < 42) MaxPlayer = 1;
             else if (m*n < 90) MaxPlayer = 2;
             else if (m*n <145) MaxPlayer = 3;
-            while (nExplorers==0) {
+            while (!WindowShouldClose() && nExplorers==0) {
                 Get_Explorer_Count_UI(MaxPlayer);
                 nExplorers = Get_Explorer_Count();  // default = 0
             }
@@ -175,18 +169,6 @@ switch(Current)
             for (int i=0; i<nExplorers; i++) 
                 Explorers[i] = (Explorer) {true, 1, (Vector2){0,0}, (Vector2){0,0}, MaxInterimWall, '\0', {ExTextures[i][0], ExTextures[i][1]}}; // initial explorers
             nShadowCasters = MaxPlayer;
-
-        // // Reads texture of every player.
-        //     for (int i=1; i<=MaxPlayer; i++)
-        //         while (!WindowShouldClose()) {
-        //             Choose_Players_Texture_UI(MaxPlayer, i);
-        //             Texture2D x = Choose_Players_Texture();
-        //             if (x) {
-        //                 printf("d  ");
-        //                 Explorers[i-1].picture =  
-        //                 break;
-        //             } 
-        //         }
 
         // Reads lightcore position. Accepts only coordinates in the range 0..n-1 (x) and 0..m-1 (y).
             Lightcore.x = (float) (rand()%n); Lightcore.y = (float) (rand()%m);
@@ -231,19 +213,38 @@ switch(Current)
                 Initializing_FadeSh();
                 Init_FadeSh = false;
             }
-            
-        char s[5];
-        int tempN;
-        while (!WindowShouldClose())
+        
+        // Get wall count:
+            char str[5];
+            int inp; 
+            int lenCounter=0;
+            while (!WindowShouldClose())
             {
+                inp = GetCharPressed();
+                while (inp > 0) {
+                    if (inp>='0' && inp<='9') {
+                        str[lenCounter] = (char) inp;
+                        lenCounter ++;
+                        str[lenCounter] = '\0';
+                    }
+                    inp = GetCharPressed();
+                }
+                if (IsKeyPressed(KEY_BACKSPACE) && lenCounter>0) {
+                    lenCounter --;
+                    str[lenCounter] = '\0';
+                }
                 BeginDrawing();
-                ClearBackground(RAYWHITE);
-                Draw_Walls_Infs(s, n, m);
-                char inp = GetKeyPressed();
-                if ((inp>='0' && inp<='9') || inp == 'r' || inp == 'R') {Print_Number_In_String(s, inp, strlen(s));}
-                tempN = StoI(s, strlen(s));
-                if (Submit_Button(n, m, s, strlen(s))) {nWalls = tempN; break;}
+                ClearBackground(BackColor);
+                Draw_Walls_Infs(str, n, m);
                 EndDrawing();
+                if (Submit_Button()) {
+                    int sum=0;
+                    for (int i=0; i<lenCounter; i++) {
+                        sum *= 10;
+                        sum += ((int) str[i] - '0');
+                    } 
+                    if (sum>=0 && sum<=((m-1)*(n-1))) {nWalls = sum; break;}
+                }
             }
 
         // Randomly places valid walls while preserving full map connectivity (BFS-validated)
@@ -331,30 +332,29 @@ switch(Current)
                 double t0;
                 bool ShouldShowError = false;
                 bool ShouldMove = false;
-                
                 bool WitchRound = true;
-                // bool isPlayed = false;
                 int l=0;
+
                 if (!Are_All_Players_Dead())
                 while (!WindowShouldClose() && l<nExplorers) {
 
-                    if (IsKeyPressed(KEY_O)) Force_Shc(StartPoint, m, n, GameMusic, Round, l);
-                    if (IsKeyPressed(KEY_P)) {Earthquake_Gift(m, n, StartPoint, Round, GameMusic, l);}
+                    // if (IsKeyPressed(KEY_O)) Force_Shc(StartPoint, m, n, GameMusic, Round, l, ForceSound);
+                    // if (IsKeyPressed(KEY_P)) {Earthquake_Gift(m, n, StartPoint, Round, GameMusic, l, EarthquakeSound);}
                                
                     if (notChoosed) {
-                        //  printf("Gift 0: %d  ,  Gift 1: %d  ,  Gift 2: %d\n", Gifts[0].isGotten,Gifts[1].isGotten,Gifts[2].isGotten);
                         if (!Explorers[l].isAlive) {l ++; continue;}
                         UpdateMusicStream(GameMusic);
                         BeginDrawing();
-                        DrawText("To save: F1\nTo load: F2", 920, 233, 20, (Color){205,50,0,255});
-                        if (IsKeyPressed(KEY_F)) Save_Game(Round, l, m, n, StartPoint);
-                        if (IsKeyPressed(KEY_G)) {
+                        DrawText("   To save: F1\n   To load: F2\n  Ch theme: F3", 901, 220, 20, (Color){205,50,0,255});
+                        if (IsKeyPressed(KEY_F1)) Save_Game(Round, l, m, n, StartPoint);
+                        if (IsKeyPressed(KEY_F2)) {
                             BeginDrawing();
                             Load_Game(&m, &n, &l, &Round, &StartPoint);
-                            ClearBackground(RAYWHITE);
+                            ClearBackground(BackColor);
                             Draw_Map(0, StartPoint, m, n, Round, l);
                             EndDrawing();
                         }
+                        if (IsKeyPressed(KEY_F3)) {if (BackColor.g == 245) BackColor = (Color){170, 175, 180, 255}; else BackColor = RAYWHITE;}
                         if (IsKeyPressed(KEY_E)) {
                             if (Explorers[l].wallCount == 0) {
                                 double t = GetTime();
@@ -411,7 +411,7 @@ switch(Current)
                             Check_Witch_Player_is_Dead(Round, DieSound);
                     
                             UpdateMusicStream(GameMusic);
-                            ClearBackground(RAYWHITE); // اگه خودش رفت تو سایه نگر، مردنش نمایش داده شه
+                            ClearBackground(BackColor); // اگه خودش رفت تو سایه نگر، مردنش نمایش داده شه
                             Draw_Map(0, StartPoint, m, n, Round, l);
                             
                             int WhichGift = Is_Present_Gotten();
@@ -422,21 +422,21 @@ switch(Current)
                                 Show_Present_Rec(StartPoint, m, n, Round, l, GameMusic);
                                 do {
                                     Show_Present(StartPoint, m, n, Round, l, Gifts[WhichGift-1].type, GameMusic);
-                                    if (IsKeyPressed(KEY_Q)) isShown = true;
+                                    if (IsKeyPressed(KEY_SPACE)) isShown = true;
                                 } while (!isShown); // Shows the present box while plyer do not click space.
 
                                 
                                 if (Gifts[WhichGift-1].type == Replay) {int *p; p = &(l); ReplayGift(p);}
                                 else if (Gifts[WhichGift-1].type == InWallIncrease) InWallIncreaseGift(l-1);
                                 else if (Gifts[WhichGift-1].type == ForceEnemy) {
-                                    Force_Shc(StartPoint, m, n, GameMusic, Round, l);
+                                    Force_Shc(StartPoint, m, n, GameMusic, Round, l, ForceSound);
                                     Check_Witch_Player_is_Dead(Round, DieSound);                                 
                                     
                                     UpdateMusicStream(GameMusic);
-                                    ClearBackground(RAYWHITE);
+                                    ClearBackground(BackColor);
                                     Draw_Map(0, StartPoint, m, n, Round, l); //اگه هل داده شد توی سایه نگر، مردنش نمایش داده شه
                                 }
-                                else if (Gifts[WhichGift-1].type == Earthquake) Earthquake_Gift(m, n, StartPoint, Round, GameMusic, l);
+                                else if (Gifts[WhichGift-1].type == Earthquake) Earthquake_Gift(m, n, StartPoint, Round, GameMusic, l, EarthquakeSound);
                             }
                         }
                         else if (ShouldMove && !(Can_Ex_Move_for_Walls(Explorers[l].mapPos, ExMoveDir))) { 
@@ -460,7 +460,7 @@ switch(Current)
                             WitchRound = true;
                         }
                         
-                        ClearBackground(RAYWHITE);
+                        ClearBackground(BackColor);
                         Pointer_To_Player(l, StartPoint);
                         Draw_Map(0, StartPoint, m, n, Round, l);
                         EndDrawing();
@@ -473,7 +473,7 @@ switch(Current)
                     if (GWall) {
                         UpdateMusicStream(GameMusic);
                         BeginDrawing();
-                        ClearBackground(RAYWHITE);
+                        ClearBackground(BackColor);
                         Draw_Map(0, StartPoint, m, n, Round, l);
                         Rectangle Recs[m][n];
                         int i, j;
@@ -644,7 +644,7 @@ switch(Current)
                     Check_Witch_Player_is_Dead(Round, DieSound);
                     UpdateMusicStream(GameMusic);
                     BeginDrawing();
-                    ClearBackground(RAYWHITE);
+                    ClearBackground(BackColor);
                     Draw_Map(0, StartPoint, m, n, Round, l); // اگه سایه نگر کشتش، مردنش نمایش داده شه
                     EndDrawing();
 
@@ -684,7 +684,7 @@ switch(Current)
             while (!WindowShouldClose()) {
                 UpdateMusicStream(EndGameMusic);
                 BeginDrawing();
-                ClearBackground(RAYWHITE);
+                ClearBackground(BackColor);
                 Show_End_Screen();
                 EndDrawing();
             }
