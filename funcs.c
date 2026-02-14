@@ -298,28 +298,14 @@ Wall color and thickness rules based on map[j][i] value:
 // Draw explorers (facing toward lightcore)
     for (i=0; i<nExplorers; i++) {
         if (Explorers[i].isAlive)
-            if (!Explorers[i].direction) {
-                int Direction = Direction_of_Explorers(Explorers[i].mapPos);
-                if (Direction>0) {
-                    if (i==0) DrawTexture(Ex1TextureRight, Explorers[i].winPos.x, Explorers[i].winPos.y, WHITE);
-                    if (i==1) DrawTexture(Ex2TextureRight, Explorers[i].winPos.x, Explorers[i].winPos.y, WHITE);
-                    if (i==2) DrawTexture(Ex3TextureRight, Explorers[i].winPos.x, Explorers[i].winPos.y, WHITE);        
-                } else {
-                    if (i==0) DrawTexture(Ex1TextureLeft, Explorers[i].winPos.x, Explorers[i].winPos.y, WHITE);
-                    if (i==1) DrawTexture(Ex2TextureLeft, Explorers[i].winPos.x, Explorers[i].winPos.y, WHITE);
-                    if (i==2) DrawTexture(Ex3TextureLeft, Explorers[i].winPos.x, Explorers[i].winPos.y, WHITE);
-                }
-            } else {
-                if(Explorers[i].direction=='R') {
-                    if (i==0) DrawTexture(Ex1TextureRight, Explorers[i].winPos.x, Explorers[i].winPos.y, WHITE);
-                    if (i==1) DrawTexture(Ex2TextureRight, Explorers[i].winPos.x, Explorers[i].winPos.y, WHITE);
-                    if (i==2) DrawTexture(Ex3TextureRight, Explorers[i].winPos.x, Explorers[i].winPos.y, WHITE);        
-                } else {
-                    if (i==0) DrawTexture(Ex1TextureLeft, Explorers[i].winPos.x, Explorers[i].winPos.y, WHITE);
-                    if (i==1) DrawTexture(Ex2TextureLeft, Explorers[i].winPos.x, Explorers[i].winPos.y, WHITE);
-                    if (i==2) DrawTexture(Ex3TextureLeft, Explorers[i].winPos.x, Explorers[i].winPos.y, WHITE);
-                }
-            }
+        if (!Explorers[i].direction) {
+            int Direction = Direction_of_Explorers(Explorers[i].mapPos);
+            if (Direction>0) DrawTexture(Explorers[i].avatar[1], Explorers[i].winPos.x, Explorers[i].winPos.y, WHITE);
+            else DrawTexture(Explorers[i].avatar[0], Explorers[i].winPos.x, Explorers[i].winPos.y, WHITE);
+        } else {
+            if(Explorers[i].direction=='R') DrawTexture(Explorers[i].avatar[1], Explorers[i].winPos.x, Explorers[i].winPos.y, WHITE);
+            else DrawTexture(Explorers[i].avatar[0], Explorers[i].winPos.x, Explorers[i].winPos.y, WHITE); 
+        }
     }
 
     
@@ -791,7 +777,7 @@ int BFS_Way(Vector *start, Vector *end, int *ACount, int *resCount, Vector *resu
     for (k=0; k<=(end-start); k++) {
         
         Vector temp;
-        if (map[(*(start+k)).y-1][(*(start+k)).x] == 1 && !(map[(*(start+k)).y-2][(*(start+k)).x] == 0)) {            
+        if ((map[(*(start+k)).y-1][(*(start+k)).x] == 1 || map[(*(start+k)).y-1][(*(start+k)).x] == 2) && !(map[(*(start+k)).y-2][(*(start+k)).x] == 0)) {            
             (*ACount)++;
            temp.beg = 'D'; temp.y = (*(start+k)).y-2; temp.x = (*(start+k)).x;
            if (map[temp.y][temp.x] == 2) {
@@ -808,7 +794,7 @@ int BFS_Way(Vector *start, Vector *end, int *ACount, int *resCount, Vector *resu
            i++;
            *(end+i) = temp;
         }
-        if (map[(*(start+k)).y][(*(start+k)).x+1] == 1 && !(map[(*(start+k)).y][(*(start+k)).x+2] == 0)) {
+        if ((map[(*(start+k)).y][(*(start+k)).x+1] == 1 || map[(*(start+k)).y][(*(start+k)).x+1] == 2) && !(map[(*(start+k)).y][(*(start+k)).x+2] == 0)) {
             (*ACount)++;
            temp.beg = 'L'; temp.y = (*(start+k)).y; temp.x = (*(start+k)).x+2;
            if (map[temp.y][temp.x] == 2) {
@@ -825,7 +811,7 @@ int BFS_Way(Vector *start, Vector *end, int *ACount, int *resCount, Vector *resu
            i++;
            *(end+i) = temp;
         }
-        if (map[(*(start+k)).y+1][(*(start+k)).x] == 1 && !(map[(*(start+k)).y+2][(*(start+k)).x] == 0)) {
+        if ((map[(*(start+k)).y+1][(*(start+k)).x] == 1 || map[(*(start+k)).y+1][(*(start+k)).x] == 2) && !(map[(*(start+k)).y+2][(*(start+k)).x] == 0)) {
             (*ACount)++;
            temp.beg = 'U'; temp.y = (*(start+k)).y+2; temp.x = (*(start+k)).x;
            if (map[temp.y][temp.x] == 2) {
@@ -842,7 +828,7 @@ int BFS_Way(Vector *start, Vector *end, int *ACount, int *resCount, Vector *resu
            i++;
            *(end+i) = temp;
         }
-        if (map[(*(start+k)).y][(*(start+k)).x-1] == 1 && !(map[(*(start+k)).y][(*(start+k)).x-2] == 0)) {
+        if ((map[(*(start+k)).y][(*(start+k)).x-1] == 1 || map[(*(start+k)).y][(*(start+k)).x-1] == 2) && !(map[(*(start+k)).y][(*(start+k)).x-2] == 0)) {
             (*ACount)++;
            temp.beg = 'R'; temp.y = (*(start+k)).y; temp.x = (*(start+k)).x-2;
            if (map[temp.y][temp.x] == 2) {
@@ -863,9 +849,7 @@ int BFS_Way(Vector *start, Vector *end, int *ACount, int *resCount, Vector *resu
     if (!i) return -1;
     startcpy = end+1;
     endcpy = end+i;
-    int R = BFS_Way(startcpy, endcpy, ACount, resCount, result);
-    return R;
-    
+    return BFS_Way(startcpy, endcpy, ACount, resCount, result);    
 }
 
 int Find_Way(Vector *end, const int ACount, int resCount, Vector *Alist, Vector *result) {
@@ -899,6 +883,28 @@ int Find_Way(Vector *end, const int ACount, int resCount, Vector *Alist, Vector 
     resCount++;
 
     return Find_Way(&temp, ACount, resCount, Alist, result);
+}
+
+Vector2 Wall_Coordinate(Vector *nextShcStep) {
+    char c = (*nextShcStep).beg;
+    Vector2 res;
+    if (c == 'U') {
+        res.y = (int)(*nextShcStep).y; res.x = (int)(*nextShcStep).x;
+        res.y--;
+    }
+    if (c == 'D') {
+        res.y = (int)(*nextShcStep).y; res.x = (int)(*nextShcStep).x;
+        res.y++;
+    }
+    if (c == 'L') {
+        res.y = (int)(*nextShcStep).y; res.x = (int)(*nextShcStep).x;
+        res.x--;
+    }
+    if (c == 'R') {
+        res.y = (int)(*nextShcStep).y; res.x = (int)(*nextShcStep).x;
+        res.x++;
+    }
+    return res;
 }
 
 void Draw_Way(Vector *Way, Vector2 StartPoint, const int resCount) {
@@ -1264,6 +1270,17 @@ void Dead_Explorer(int l, Sound DieSound, int Round) {
     PlaySound(DieSound);
 }
 
+void Check_Witch_Player_is_Dead(int Round, Sound DieSound) {
+    for (int j=0; j<nExplorers; j++) {
+        for (int i=0; i<nShadowCasters; i++) {
+            if (Explorers[j].isAlive)
+            if ((int)Explorers[j].mapPos.y==(int)ShadowCasters[i].y && (int)Explorers[j].mapPos.x==(int)ShadowCasters[i].x)
+            Dead_Explorer(j , DieSound, Round);
+            
+        }     
+    }
+}
+
 void Win_Explorer(int l, Sound WinSound, int Round) {
         Explorers[l].isAlive = false;
         Explorers[l].age = Round;
@@ -1440,49 +1457,51 @@ int BFS_Gift(int checked[][2], int start, int end, int m, int n, int len) {
     return BFS_Gift(checked, start, end, m, n, len); 
 }
 
-int Rectangles_Around_Shc(Vector2 RecsMapP[], Rectangle RecsAround[], Vector2 Shc, Vector2 StartPoint) {
+int Rectangles_Around_Shc(Vector2 RecsMapP[][4], Rectangle RecsAround[][4], Vector2 Shc, int Index, Vector2 StartPoint) {
     int nRectangles = 0;
-    if (map[(int)Shc.y-1][(int)Shc.x] == 1 && map[(int)Shc.y-2][(int)Shc.x] == 1) {
+    if (map[(int)Shc.y-1][(int)Shc.x] == 1 && !(map[(int)Shc.y-2][(int)Shc.x] == 3)) {
         Vector2 coordinate; coordinate.y = Shc.y-2; coordinate.x = Shc.x;
         Vector2 temp = GET_Start_Elements_Position_for_Draw(StartPoint, coordinate);
         Rectangle R = {temp.x-2, temp.y-3, Side, Side};
         nRectangles++;
-        RecsMapP[nRectangles-1] = coordinate; 
-        RecsAround[nRectangles-1] = R;
+        RecsMapP[Index][nRectangles-1] = coordinate; 
+        RecsAround[Index][nRectangles-1] = R;
     }
-    if (map[(int)Shc.y][(int)Shc.x+1] == 1 && map[(int)Shc.y][(int)Shc.x+2] == 1) {
+    if (map[(int)Shc.y][(int)Shc.x+1] == 1 && !(map[(int)Shc.y][(int)Shc.x+2] == 3)) {
         Vector2 coordinate; coordinate.y = Shc.y; coordinate.x = Shc.x+2;
         Vector2 temp = GET_Start_Elements_Position_for_Draw(StartPoint, coordinate);
         Rectangle R = {temp.x-2, temp.y-3, Side, Side};
         nRectangles++;
-        RecsMapP[nRectangles-1] = coordinate;
-        RecsAround[nRectangles-1] = R;
+        RecsMapP[Index][nRectangles-1] = coordinate;
+        RecsAround[Index][nRectangles-1] = R;
     }
-    if (map[(int)Shc.y+1][(int)Shc.x] == 1 && map[(int)Shc.y+2][(int)Shc.x] == 1) {
+    if (map[(int)Shc.y+1][(int)Shc.x] == 1 && !(map[(int)Shc.y+2][(int)Shc.x] == 3)) {
         Vector2 coordinate; coordinate.y = Shc.y+2; coordinate.x = Shc.x;
         Vector2 temp = GET_Start_Elements_Position_for_Draw(StartPoint, coordinate);
         Rectangle R = {temp.x-2, temp.y-3, Side, Side};
         nRectangles++;
-        RecsMapP[nRectangles-1] = coordinate;
-        RecsAround[nRectangles-1] = R;
+        RecsMapP[Index][nRectangles-1] = coordinate;
+        RecsAround[Index][nRectangles-1] = R;
     }
-    if (map[(int)Shc.y][(int)Shc.x-1] == 1 && map[(int)Shc.y][(int)Shc.x-2] == 1) {
+    if (map[(int)Shc.y][(int)Shc.x-1] == 1 && !(map[(int)Shc.y][(int)Shc.x-2] == 3)) {
         Vector2 coordinate; coordinate.y = Shc.y; coordinate.x = Shc.x-2;
         Vector2 temp = GET_Start_Elements_Position_for_Draw(StartPoint, coordinate);
         Rectangle R = {temp.x-2, temp.y-3, Side, Side};
         nRectangles++;
-        RecsMapP[nRectangles-1] = coordinate;
-        RecsAround[nRectangles-1] = R;
+        RecsMapP[Index][nRectangles-1] = coordinate;
+        RecsAround[Index][nRectangles-1] = R;
     }
     return nRectangles;
 }
 
 void Force_Shc(Vector2 StartPoint, int m, int n, Music GameMusic, int Round, int ExRound) {
-    Rectangle ShcsR[nShadowCasters];
+    Rectangle ShcsR[nShadowCasters]; int nRecsA[nShadowCasters];
+    Rectangle RecsAround[nShadowCasters][4]; Vector2 RecsMapP[nShadowCasters][4];
     int i;
     for (i=0; i<nShadowCasters; i++) {
         Rectangle R = {ShadowCastersP[i].x-2, ShadowCastersP[i].y-3, Side, Side};
         ShcsR[i] = R;
+        nRecsA[i] = Rectangles_Around_Shc(RecsMapP, RecsAround, ShadowCasters[i], i, StartPoint);
     }
 
     bool MovedShc = false; bool LockinShc = false; bool Move = false;
@@ -1496,10 +1515,12 @@ void Force_Shc(Vector2 StartPoint, int m, int n, Music GameMusic, int Round, int
         Color Yellow = {253, 249, 0, 150}; Vector2 Mous = GetMousePosition();
         int ShcIndex;
         for (i=0; !LockinShc && i<nShadowCasters; i++) {
-            DrawRectangleRec(ShcsR[i], Yellow);
-            if (CheckCollisionPointRec(Mous, ShcsR[i]) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-                ShcIndex = i;
-                LockinShc = true;
+            if (nRecsA[i]) {
+                DrawRectangleRec(ShcsR[i], Yellow);
+                if (CheckCollisionPointRec(Mous, ShcsR[i]) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                    ShcIndex = i;
+                    LockinShc = true;
+                }
             }
         }
 
@@ -1511,15 +1532,11 @@ void Force_Shc(Vector2 StartPoint, int m, int n, Music GameMusic, int Round, int
             Draw_Map(0, StartPoint, m, n, Round, ExRound);
             EndDrawing();
 
-            Rectangle RecsAround[4];
-            Vector2 RecsMapP[4];
-            int nRecs = Rectangles_Around_Shc(RecsMapP, RecsAround, ShadowCasters[ShcIndex], StartPoint);
-
             Vector2 Mous = GetMousePosition(); Color Magneta = {180, 20, 200, 150};
-            for (i=0; i<nRecs; i++) {
-                DrawRectangleRec(RecsAround[i], Magneta);
-                if (CheckCollisionPointRec(Mous, RecsAround[i]) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-                    Position = RecsMapP[i];
+            for (i=0; i<nRecsA[ShcIndex]; i++) {
+                DrawRectangleRec(RecsAround[ShcIndex][i], Magneta);
+                if (CheckCollisionPointRec(Mous, RecsAround[ShcIndex][i]) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                    Position = RecsMapP[ShcIndex][i];
                     Move = true;
                     LockinShc = false;
                 }
@@ -1634,84 +1651,58 @@ void Add_Earthquake_Wall(EarthqWall Walls[], int *nWalls, Vector2 StartPoint, in
     }
 }
 
-void Coordinate_Around_for_Earthquake(Vector2 mapP, Vector2 Around[], int *nAround) {
-    (*nAround) = 0;
-    if (map[(int)mapP.y-1][(int)mapP.x] == 1 && map[(int)mapP.y-2][(int)mapP.x] == 1) {
-        Vector2 coordinate; coordinate.y = mapP.y-2; coordinate.x = mapP.x;
-        (*nAround)++;
-        Around[*nAround-1] = coordinate; 
+void Coordinate_Around_for_Earthquake(int Case, Vector2 mapP, Vector2 Around[], int *nAround) {
+    if (Case == -1) {
+        (*nAround) = 0;
+        if (map[(int)mapP.y-1][(int)mapP.x] == 1 && (map[(int)mapP.y-2][(int)mapP.x] == 1 || map[(int)mapP.y-2][(int)mapP.x] == -1)) {
+            Vector2 coordinate; coordinate.y = mapP.y-2; coordinate.x = mapP.x;
+            (*nAround)++;
+            Around[*nAround-1] = coordinate; 
+        }
+        if (map[(int)mapP.y][(int)mapP.x+1] == 1 && (map[(int)mapP.y][(int)mapP.x+2] == 1 || map[(int)mapP.y][(int)mapP.x+2] == -1)) {
+            Vector2 coordinate; coordinate.y = mapP.y; coordinate.x = mapP.x+2;
+            (*nAround)++;
+            Around[*nAround-1] = coordinate; 
+        }
+        if (map[(int)mapP.y+1][(int)mapP.x] == 1 && (map[(int)mapP.y+2][(int)mapP.x] == 1 || map[(int)mapP.y+2][(int)mapP.x] == -1)) {
+            Vector2 coordinate; coordinate.y = mapP.y+2; coordinate.x = mapP.x;
+            (*nAround)++;
+            Around[*nAround-1] = coordinate; 
+        }
+        if (map[(int)mapP.y][(int)mapP.x-1] == 1 && (map[(int)mapP.y][(int)mapP.x-2] == 1 || map[(int)mapP.y][(int)mapP.x-2] == -1)) {
+            Vector2 coordinate; coordinate.y = mapP.y; coordinate.x = mapP.x-2;
+            (*nAround)++;
+            Around[*nAround-1] = coordinate; 
+        }
+        // printf(" %d ", *nAround);
+    } else {
+            (*nAround) = 0;
+        if (map[(int)mapP.y-1][(int)mapP.x] == 1 && (map[(int)mapP.y-2][(int)mapP.x] == 1 || map[(int)mapP.y-2][(int)mapP.x] == 2)) {
+            Vector2 coordinate; coordinate.y = mapP.y-2; coordinate.x = mapP.x;
+            (*nAround)++;
+            Around[*nAround-1] = coordinate; 
+        }
+        if (map[(int)mapP.y][(int)mapP.x+1] == 1 && (map[(int)mapP.y][(int)mapP.x+2] == 1 || map[(int)mapP.y][(int)mapP.x+2] == 2)) {
+            Vector2 coordinate; coordinate.y = mapP.y; coordinate.x = mapP.x+2;
+            (*nAround)++;
+            Around[*nAround-1] = coordinate; 
+        }
+        if (map[(int)mapP.y+1][(int)mapP.x] == 1 && (map[(int)mapP.y+2][(int)mapP.x] == 1 || map[(int)mapP.y+2][(int)mapP.x] == 2)) {
+            Vector2 coordinate; coordinate.y = mapP.y+2; coordinate.x = mapP.x;
+            (*nAround)++;
+            Around[*nAround-1] = coordinate; 
+        }
+        if (map[(int)mapP.y][(int)mapP.x-1] == 1 && (map[(int)mapP.y][(int)mapP.x-2] == 1 || map[(int)mapP.y][(int)mapP.x-2] == 2)) {
+            Vector2 coordinate; coordinate.y = mapP.y; coordinate.x = mapP.x-2;
+            (*nAround)++;
+            Around[*nAround-1] = coordinate; 
+        }
     }
-    if (map[(int)mapP.y][(int)mapP.x+1] == 1 && map[(int)mapP.y][(int)mapP.x+2] == 1) {
-        Vector2 coordinate; coordinate.y = mapP.y; coordinate.x = mapP.x+2;
-        (*nAround)++;
-        Around[*nAround-1] = coordinate; 
-    }
-    if (map[(int)mapP.y+1][(int)mapP.x] == 1 && map[(int)mapP.y+2][(int)mapP.x] == 1) {
-        Vector2 coordinate; coordinate.y = mapP.y+2; coordinate.x = mapP.x;
-        (*nAround)++;
-        Around[*nAround-1] = coordinate; 
-    }
-    if (map[(int)mapP.y][(int)mapP.x-1] == 1 && map[(int)mapP.y][(int)mapP.x-2] == 1) {
-        Vector2 coordinate; coordinate.y = mapP.y; coordinate.x = mapP.x-2;
-        (*nAround)++;
-        Around[*nAround-1] = coordinate; 
-    }
-    // printf(" %d ", *nAround);
 }
 
-// void Move_to_RandomPositions_Around_Element(int ShOrEx, Vector2 *mapP, Vector2 StartPoint, int m, int n, int Index, int Round, Music GameMusic) {
-//     float Speed = 0.02f;
-//     float SIncrease = 0.02f;
-//     if (ShOrEx == 1) {
-//         Vector2 Around[4];
-//         int nAround = 0;
-//         Vector2 temp = *mapP;
-//         Coordinate_Around_for_Earthquake(temp, Around, &nAround);
-//         if (!nAround) return;
-
-//         int random = rand()%nAround;
-//         Vector2 End = Around[random];
-//         Vector2 EndPosition = GET_Start_Elements_Position_for_Draw(StartPoint, End);
-        
-//         char dir;
-//         if (End.y==(*mapP).y) {
-//             if (End.x>(*mapP).x) dir = 'D';
-//             else dir = 'A'; 
-//         } else {
-//             if (End.y>(*mapP).y) dir = 'S';
-//             else dir = 'W'; 
-//         }
-        
-//         Exs_Animation_without_Change_Direction(dir, &Explorers[Index].winPos, EndPosition, Speed, SIncrease, StartPoint, m, n, Index, Round, GameMusic);
-//         *mapP = Around[random];
-//     } else {
-//         Vector2 Around[4];
-//         int nAround = 0;
-//         Vector2 temp = *mapP;
-//         Coordinate_Around_for_Earthquake(temp, Around, &nAround);
-//         if (!nAround) return;
-        
-//         int random = rand()%nAround;
-//         Vector2 End = Around[random];
-//         Vector2 EndPosition = GET_Start_Elements_Position_for_Draw(StartPoint, End);
-        
-//         char beg;
-//         if (End.y==(*mapP).y) {
-//             if (End.x>(*mapP).x) beg = 'L';
-//             else beg = 'R'; 
-//         } else if (End.x==(*mapP).x) {
-//             if (End.y>(*mapP).y) beg = 'U';
-//             else beg = 'D'; 
-//         }
-        
-//         Shcs_Animation_without_Change_Direction(beg, &ShadowCastersP[Index], EndPosition, Speed, SIncrease, StartPoint, m, n, Index, Round, GameMusic);
-//         *mapP = Around[random];
-//     }
-
-// }
 
 void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusic, int ExIndex) {
-    int N;
+    int N ;
     if (m*n < 42) N = 15;
     else if (m*n < 90) N = 30;
     else if (m*n <145) N = 50;
@@ -1731,29 +1722,15 @@ void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusi
             EarthqMap[j][i] = 0;
         }
     }
-    float MovePixels = 0.5f;
-    float WallsPixels = 10*MovePixels;
+
+    float MovePixels = 1.0f;
+    float WallsPixels = 8*MovePixels;
     Add_Earthquake_Wall(Walls, &nWalls, StartPoint, m, n, EarthqMap, N, WallsPixels, 1);
 
     Color O = {255, 161, 0, 255};     // Orange - explorer-placed walls
     Color R = {230, 41, 55, 255};     // Red - user-placed walls
     Color B = {0, 0, 0, 255*(0.4f)};          // Black - Semi-transparent black - guide lines
 
-    // if (map[j][i] == 1) DrawLineEx(StartP, EndP, 1.0f, B);
-    // else if(map[j][i] == 0) DrawLineEx(StartP, EndP, WallTh, R);
-    // else if(map[j][i] == -1) DrawLineEx(StartP, EndP, WallTh, BLACK);
-    // else DrawLineEx(StartP, EndP, WallTh, O);
-
-    // typedef struct EarthquakeWall {
-    //     int level = 1;
-    //     Vector2 Start;
-    //     Vector2 End;
-    //     char HorV;
-    //     int dir;
-    //     float pixels;
-    // } EarthqWall;
-
-   //--------------------------------------------------------------
     typedef struct PositionsAround {
         Vector2 Around[4];
         int nAround;
@@ -1765,9 +1742,11 @@ void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusi
     Vector2 ShcsMapDestin[nShadowCasters], ShcsWinDestin[nShadowCasters]; 
     Vector2 ExsMapDestin[nExplorers], ExsWinDestin[nExplorers];
     int canShcsMove[nShadowCasters], canExsMove[nExplorers];
-    
+    for (i=0; i<nShadowCasters; i++) canShcsMove[i] = 0;
+    for (i=0; i<nExplorers; i++) canExsMove[i] = 0;
+
     for (i=0; i<nShadowCasters; i++) {
-        Coordinate_Around_for_Earthquake( ShadowCasters[i], PositionsAShcs[i].Around, &(PositionsAShcs[i].nAround));
+        Coordinate_Around_for_Earthquake(-1, ShadowCasters[i], PositionsAShcs[i].Around, &(PositionsAShcs[i].nAround));
         if (PositionsAShcs[i].nAround>0) {
             int c = rand()%PositionsAShcs[i].nAround;
             ShcsMapDestin[i] = PositionsAShcs[i].Around[c];
@@ -1776,14 +1755,14 @@ void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusi
 
             map[(int)ShadowCasters[i].y][(int)ShadowCasters[i].x] = 1;
             ShadowCasters[i] = ShcsMapDestin[i];  
-            map[(int)ShadowCasters[i].y][(int)ShadowCasters[i].x] =  -1;
-            Reset_Map_Blocks_for_Move_Elements(m, n);
+            map[(int)ShadowCasters[i].y][(int)ShadowCasters[i].x] = -1;
+            // Reset_Map_Blocks_for_Move_Elements(m, n);
         } else canShcsMove[i] = 0;
     }
-
+    
     for (i=0; i<nExplorers; i++) {
         if (Explorers[i].isAlive) {
-            Coordinate_Around_for_Earthquake( Explorers[i].mapPos, PositionsAExs[i].Around, &(PositionsAExs[i].nAround));
+            Coordinate_Around_for_Earthquake(1, Explorers[i].mapPos, PositionsAExs[i].Around, &(PositionsAExs[i].nAround));
         }
         if (Explorers[i].isAlive && PositionsAExs[i].nAround>0) {
             int c = rand()%PositionsAExs[i].nAround;
@@ -1794,7 +1773,7 @@ void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusi
             map[(int)Explorers[i].mapPos.y][(int)Explorers[i].mapPos.x] = 1;
             Explorers[i].mapPos = ExsMapDestin[i];
             map[(int)Explorers[i].mapPos.y][(int)Explorers[i].mapPos.x] = 2;
-            Reset_Map_Blocks_for_Move_Elements(m, n);
+            // Reset_Map_Blocks_for_Move_Elements(m, n);
         } else canExsMove[i] = 0;
     }
     
@@ -1822,8 +1801,7 @@ void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusi
             }
         }
     }
-    //---------------------------------------------------
-
+    
     //     typedef struct EarthquakeWall {
     //     int level;
     //     Vector2 Start;
@@ -1841,7 +1819,7 @@ void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusi
         ClearBackground(RAYWHITE);
         Draw_Map(1, StartPoint, m, n, Round, nExplorers-1); 
         EndDrawing(); 
-    
+        
         WallPro W;
         Vector2 StartP, EndP;
         for (j=0; j<2*m+1; j+=2) {
@@ -1874,9 +1852,9 @@ void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusi
             if (Walls[i].level == 1) {
                 if (Walls[i].pixels == 0.0f) {
                     if (Walls[i].HorV == 'H') {
-                        Walls[i].Start.y += (Walls[i].dir*n); Walls[i].End.y += (Walls[i].dir*n);
+                        Walls[i].Start.y += (Walls[i].dir*Walls[i].n); Walls[i].End.y += (Walls[i].dir*Walls[i].n);
                     } else {
-                        Walls[i].Start.x += (Walls[i].dir*n); Walls[i].End.x += (Walls[i].dir*n);
+                        Walls[i].Start.x += (Walls[i].dir*Walls[i].n); Walls[i].End.x += (Walls[i].dir*Walls[i].n);
                     }
                     Walls[i].level++; Walls[i].pixels += (2*WallsPixels); Walls[i].dir *= -1; Walls[i].n = 0.0f;
                 } else {
@@ -1885,9 +1863,9 @@ void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusi
                     int y = (int)Walls[i].mapPos.y; int x = (int)Walls[i].mapPos.x;
                     Vector2 S = Walls[i].Start; Vector2 E = Walls[i].End;
                     if (Walls[i].HorV == 'H') { 
-                        S.y += (Walls[i].dir*n); E.y += (Walls[i].dir*n);
+                        S.y += (Walls[i].dir*Walls[i].n); E.y += (Walls[i].dir*Walls[i].n);
                     } else {
-                        S.x += (Walls[i].dir*n); E.x += (Walls[i].dir*n);
+                        S.x += (Walls[i].dir*Walls[i].n); E.x += (Walls[i].dir*Walls[i].n);
                     }
 
                     if (map[y][x] == 1) DrawLineEx(S, E, 1.0f, B);
@@ -1899,9 +1877,9 @@ void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusi
             if (Walls[i].level == 2) {                
                 if (Walls[i].pixels == 0.0f) {
                     if (Walls[i].HorV == 'H') {
-                        Walls[i].Start.y += (Walls[i].dir*n); Walls[i].End.y += (Walls[i].dir*n);
+                        Walls[i].Start.y += (Walls[i].dir*Walls[i].n); Walls[i].End.y += (Walls[i].dir*Walls[i].n);
                     } else {
-                        Walls[i].Start.x += (Walls[i].dir*n); Walls[i].End.x += (Walls[i].dir*n);
+                        Walls[i].Start.x += (Walls[i].dir*Walls[i].n); Walls[i].End.x += (Walls[i].dir*Walls[i].n);
                     }
                     Walls[i].level++; Walls[i].pixels += WallsPixels; Walls[i].dir *= -1; Walls[i].n = 0.0f;
                 } else {
@@ -1910,9 +1888,9 @@ void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusi
                     int y = (int)Walls[i].mapPos.y; int x = (int)Walls[i].mapPos.x;
                     Vector2 S = Walls[i].Start; Vector2 E = Walls[i].End;
                     if (Walls[i].HorV == 'H') {
-                        S.y += (Walls[i].dir*n); E.y += (Walls[i].dir*n);
+                        S.y += (Walls[i].dir*Walls[i].n); E.y += (Walls[i].dir*Walls[i].n);
                     } else {
-                        S.x += (Walls[i].dir*n); E.x += (Walls[i].dir*n);
+                        S.x += (Walls[i].dir*Walls[i].n); E.x += (Walls[i].dir*Walls[i].n);
                     }
 
                     if (map[y][x] == 1) DrawLineEx(S, E, 1.0f, B);
@@ -1932,9 +1910,9 @@ void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusi
                     int y = (int)Walls[i].mapPos.y; int x = (int)Walls[i].mapPos.x;
                     Vector2 S = Walls[i].Start; Vector2 E = Walls[i].End;
                     if (Walls[i].HorV == 'H') {
-                        S.y += (Walls[i].dir*n); E.y += (Walls[i].dir*n);
+                        S.y += (Walls[i].dir*Walls[i].n); E.y += (Walls[i].dir*Walls[i].n);
                     } else {
-                        S.x += (Walls[i].dir*n); E.x += (Walls[i].dir*n);
+                        S.x += (Walls[i].dir*Walls[i].n); E.x += (Walls[i].dir*Walls[i].n);
                     }
 
                     if (map[y][x] == 1) DrawLineEx(S, E, 1.0f, B);
@@ -1943,14 +1921,15 @@ void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusi
                     else DrawLineEx(S, E, WallTh, O);        
                 }
             }
-        }    
+        }   
+        printf("x:%6.2f y:%6.2f level:%d HorV:%c dir:%d p:%6.2f n:%6.2f\n", Walls[1].Start.x, Walls[1].Start.y, Walls[1].level, Walls[1].HorV, Walls[1].dir, Walls[1].pixels, Walls[1].n) ;
     }
-
-
+    
+    
     int sw = -1; float pixels = 4; int frame = 0;
     float Speed = 0.01f; float SIncrease = 0.006f;
     for (i=0; i<nShadowCasters; i++) {
-        if (canShcsMove[i]) {
+        if (canShcsMove[i]>0) {
             if (ShcsBeg[i] == 'U' || ShcsBeg[i] == 'D') ShadowCastersP[i].x += pixels;
             else ShadowCastersP[i].y += pixels;
         }
@@ -1962,6 +1941,8 @@ void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusi
         }
     }
     
+    for (i=0; i<nShadowCasters; i++) if (canShcsMove[i]==0) ShadowCastersP[i] = GET_Start_Elements_Position_for_Draw(StartPoint, ShadowCasters[i]);
+    //رفع باگ مسخره
     
     bool Done = false;
     while (!Done) {
@@ -1971,7 +1952,7 @@ void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusi
         Draw_Map(1, StartPoint, m, n, Round, nExplorers-1); 
         EndDrawing(); 
         for (i=0; i<nShadowCasters; i++) {
-            if (canShcsMove[i]) {
+            if (canShcsMove[i]>0) {
                 int re = Earthquak_ShadowCasters_Animation(ShcsBeg[i], &ShadowCastersP[i], ShcsWinDestin[i], Speed, sw, frame, pixels);
                 if (!re) canShcsMove[i] = 0;
             }
@@ -2017,9 +1998,9 @@ void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusi
                 if (Walls[i].level == 1) {
                     if (Walls[i].pixels == 0.0f) {
                         if (Walls[i].HorV == 'H') {
-                            Walls[i].Start.y += (Walls[i].dir*n); Walls[i].End.y += (Walls[i].dir*n);
+                            Walls[i].Start.y += (Walls[i].dir*Walls[i].n); Walls[i].End.y += (Walls[i].dir*Walls[i].n);
                         } else {
-                            Walls[i].Start.x += (Walls[i].dir*n); Walls[i].End.x += (Walls[i].dir*n);
+                            Walls[i].Start.x += (Walls[i].dir*Walls[i].n); Walls[i].End.x += (Walls[i].dir*Walls[i].n);
                         }
                         Walls[i].level++; Walls[i].pixels += (2*WallsPixels); Walls[i].dir *= -1; Walls[i].n = 0.0f;
                     } else {
@@ -2028,9 +2009,9 @@ void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusi
                         int y = (int)Walls[i].mapPos.y; int x = (int)Walls[i].mapPos.x;
                         Vector2 S = Walls[i].Start; Vector2 E = Walls[i].End;
                         if (Walls[i].HorV == 'H') {
-                            S.y += (Walls[i].dir*n); E.y += (Walls[i].dir*n);
+                            S.y += (Walls[i].dir*Walls[i].n); E.y += (Walls[i].dir*Walls[i].n);
                         } else {
-                            S.x += (Walls[i].dir*n); E.x += (Walls[i].dir*n);
+                            S.x += (Walls[i].dir*Walls[i].n); E.x += (Walls[i].dir*Walls[i].n);
                         }
 
                         if (map[y][x] == 1) DrawLineEx(S, E, 1.0f, B);
@@ -2042,9 +2023,9 @@ void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusi
                 if (Walls[i].level == 2) {                
                     if (Walls[i].pixels == 0.0f) {
                         if (Walls[i].HorV == 'H') {
-                            Walls[i].Start.y += (Walls[i].dir*n); Walls[i].End.y += (Walls[i].dir*n);
+                            Walls[i].Start.y += (Walls[i].dir*Walls[i].n); Walls[i].End.y += (Walls[i].dir*Walls[i].n);
                         } else {
-                            Walls[i].Start.x += (Walls[i].dir*n); Walls[i].End.x += (Walls[i].dir*n);
+                            Walls[i].Start.x += (Walls[i].dir*Walls[i].n); Walls[i].End.x += (Walls[i].dir*Walls[i].n);
                         }
                         Walls[i].level++; Walls[i].pixels += WallsPixels; Walls[i].dir *= -1; Walls[i].n = 0.0f;
                     } else {
@@ -2053,9 +2034,9 @@ void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusi
                         int y = (int)Walls[i].mapPos.y; int x = (int)Walls[i].mapPos.x;
                         Vector2 S = Walls[i].Start; Vector2 E = Walls[i].End;
                         if (Walls[i].HorV == 'H') {
-                            S.y += (Walls[i].dir*n); E.y += (Walls[i].dir*n);
+                            S.y += (Walls[i].dir*Walls[i].n); E.y += (Walls[i].dir*Walls[i].n);
                         } else {
-                            S.x += (Walls[i].dir*n); E.x += (Walls[i].dir*n);
+                            S.x += (Walls[i].dir*Walls[i].n); E.x += (Walls[i].dir*Walls[i].n);
                         }
 
                         if (map[y][x] == 1) DrawLineEx(S, E, 1.0f, B);
@@ -2075,9 +2056,9 @@ void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusi
                         int y = (int)Walls[i].mapPos.y; int x = (int)Walls[i].mapPos.x;
                         Vector2 S = Walls[i].Start; Vector2 E = Walls[i].End;
                         if (Walls[i].HorV == 'H') {
-                            S.y += (Walls[i].dir*n); E.y += (Walls[i].dir*n);
+                            S.y += (Walls[i].dir*Walls[i].n); E.y += (Walls[i].dir*Walls[i].n);
                         } else {
-                            S.x += (Walls[i].dir*n); E.x += (Walls[i].dir*n);
+                            S.x += (Walls[i].dir*Walls[i].n); E.x += (Walls[i].dir*Walls[i].n);
                         }
 
                         if (map[y][x] == 1) DrawLineEx(S, E, 1.0f, B);
@@ -2096,7 +2077,7 @@ void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusi
         Speed += SIncrease;   
     }
     Reset_Map_Blocks_for_Move_Elements(m, n);
-
+    
     t0 = GetTime();
     while (GetTime()-t0<1.0) {
         UpdateMusicStream(GameMusic);
@@ -2137,9 +2118,9 @@ void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusi
             if (Walls[i].level == 1) {
                 if (Walls[i].pixels == 0.0f) {
                     if (Walls[i].HorV == 'H') {
-                        Walls[i].Start.y += (Walls[i].dir*n); Walls[i].End.y += (Walls[i].dir*n);
+                        Walls[i].Start.y += (Walls[i].dir*Walls[i].n); Walls[i].End.y += (Walls[i].dir*Walls[i].n);
                     } else {
-                        Walls[i].Start.x += (Walls[i].dir*n); Walls[i].End.x += (Walls[i].dir*n);
+                        Walls[i].Start.x += (Walls[i].dir*Walls[i].n); Walls[i].End.x += (Walls[i].dir*Walls[i].n);
                     }
                     Walls[i].level++; Walls[i].pixels += (2*WallsPixels); Walls[i].dir *= -1; Walls[i].n = 0.0f;
                 } else {
@@ -2148,9 +2129,9 @@ void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusi
                     int y = (int)Walls[i].mapPos.y; int x = (int)Walls[i].mapPos.x;
                     Vector2 S = Walls[i].Start; Vector2 E = Walls[i].End;
                     if (Walls[i].HorV == 'H') {
-                        S.y += (Walls[i].dir*n); E.y += (Walls[i].dir*n);
+                        S.y += (Walls[i].dir*Walls[i].n); E.y += (Walls[i].dir*Walls[i].n);
                     } else {
-                        S.x += (Walls[i].dir*n); E.x += (Walls[i].dir*n);
+                        S.x += (Walls[i].dir*Walls[i].n); E.x += (Walls[i].dir*Walls[i].n);
                     }
 
                     if (map[y][x] == 1) DrawLineEx(S, E, 1.0f, B);
@@ -2162,9 +2143,9 @@ void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusi
             if (Walls[i].level == 2) {                
                 if (Walls[i].pixels == 0.0f) {
                     if (Walls[i].HorV == 'H') {
-                        Walls[i].Start.y += (Walls[i].dir*n); Walls[i].End.y += (Walls[i].dir*n);
+                        Walls[i].Start.y += (Walls[i].dir*Walls[i].n); Walls[i].End.y += (Walls[i].dir*Walls[i].n);
                     } else {
-                        Walls[i].Start.x += (Walls[i].dir*n); Walls[i].End.x += (Walls[i].dir*n);
+                        Walls[i].Start.x += (Walls[i].dir*Walls[i].n); Walls[i].End.x += (Walls[i].dir*Walls[i].n);
                     }
                     Walls[i].level++; Walls[i].pixels += WallsPixels; Walls[i].dir *= -1; Walls[i].n = 0.0f;
                 } else {
@@ -2173,9 +2154,9 @@ void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusi
                     int y = (int)Walls[i].mapPos.y; int x = (int)Walls[i].mapPos.x;
                     Vector2 S = Walls[i].Start; Vector2 E = Walls[i].End;
                     if (Walls[i].HorV == 'H') {
-                        S.y += (Walls[i].dir*n); E.y += (Walls[i].dir*n);
+                        S.y += (Walls[i].dir*Walls[i].n); E.y += (Walls[i].dir*Walls[i].n);
                     } else {
-                        S.x += (Walls[i].dir*n); E.x += (Walls[i].dir*n);
+                        S.x += (Walls[i].dir*Walls[i].n); E.x += (Walls[i].dir*Walls[i].n);
                     }
 
                     if (map[y][x] == 1) DrawLineEx(S, E, 1.0f, B);
@@ -2195,9 +2176,9 @@ void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusi
                     int y = (int)Walls[i].mapPos.y; int x = (int)Walls[i].mapPos.x;
                     Vector2 S = Walls[i].Start; Vector2 E = Walls[i].End;
                     if (Walls[i].HorV == 'H') {
-                        S.y += (Walls[i].dir*n); E.y += (Walls[i].dir*n);
+                        S.y += (Walls[i].dir*Walls[i].n); E.y += (Walls[i].dir*Walls[i].n);
                     } else {
-                        S.x += (Walls[i].dir*n); E.x += (Walls[i].dir*n);
+                        S.x += (Walls[i].dir*Walls[i].n); E.x += (Walls[i].dir*Walls[i].n);
                     }
 
                     if (map[y][x] == 1) DrawLineEx(S, E, 1.0f, B);
@@ -2250,9 +2231,9 @@ void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusi
             if (Walls[i].level == 1) {
                 if (Walls[i].pixels <= 0.0f) {
                     if (Walls[i].HorV == 'H') {
-                        Walls[i].Start.y += (Walls[i].dir*n); Walls[i].End.y += (Walls[i].dir*n);
+                        Walls[i].Start.y += (Walls[i].dir*Walls[i].n); Walls[i].End.y += (Walls[i].dir*Walls[i].n);
                     } else {
-                        Walls[i].Start.x += (Walls[i].dir*n); Walls[i].End.x += (Walls[i].dir*n);
+                        Walls[i].Start.x += (Walls[i].dir*Walls[i].n); Walls[i].End.x += (Walls[i].dir*Walls[i].n);
                     }
                     Walls[i].level++; Walls[i].pixels += (2*WallsPixels); Walls[i].dir *= -1; Walls[i].n = 0.0f;
                 } else {
@@ -2262,9 +2243,9 @@ void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusi
                     int y = (int)Walls[i].mapPos.y; int x = (int)Walls[i].mapPos.x;
                     Vector2 S = Walls[i].Start; Vector2 E = Walls[i].End;
                     if (Walls[i].HorV == 'H') {
-                        S.y += (Walls[i].dir*n); E.y += (Walls[i].dir*n);
+                        S.y += (Walls[i].dir*Walls[i].n); E.y += (Walls[i].dir*Walls[i].n);
                     } else {
-                        S.x += (Walls[i].dir*n); E.x += (Walls[i].dir*n);
+                        S.x += (Walls[i].dir*Walls[i].n); E.x += (Walls[i].dir*Walls[i].n);
                     }
 
                     if (map[y][x] == 1) DrawLineEx(S, E, 1.0f, B);
@@ -2276,9 +2257,9 @@ void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusi
             if (Walls[i].level == 2) {                
                 if (Walls[i].pixels <= 0.0f) {
                     if (Walls[i].HorV == 'H') {
-                        Walls[i].Start.y += (Walls[i].dir*n); Walls[i].End.y += (Walls[i].dir*n);
+                        Walls[i].Start.y += (Walls[i].dir*Walls[i].n); Walls[i].End.y += (Walls[i].dir*Walls[i].n);
                     } else {
-                        Walls[i].Start.x += (Walls[i].dir*n); Walls[i].End.x += (Walls[i].dir*n);
+                        Walls[i].Start.x += (Walls[i].dir*Walls[i].n); Walls[i].End.x += (Walls[i].dir*Walls[i].n);
                     }
                     Walls[i].level++; Walls[i].pixels += WallsPixels; Walls[i].dir *= -1; Walls[i].n = 0.0f;
                 } else {
@@ -2288,9 +2269,9 @@ void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusi
                     int y = (int)Walls[i].mapPos.y; int x = (int)Walls[i].mapPos.x;
                     Vector2 S = Walls[i].Start; Vector2 E = Walls[i].End;
                     if (Walls[i].HorV == 'H') {
-                        S.y += (Walls[i].dir*n); E.y += (Walls[i].dir*n);
+                        S.y += (Walls[i].dir*Walls[i].n); E.y += (Walls[i].dir*Walls[i].n);
                     } else {
-                        S.x += (Walls[i].dir*n); E.x += (Walls[i].dir*n);
+                        S.x += (Walls[i].dir*Walls[i].n); E.x += (Walls[i].dir*Walls[i].n);
                     }
 
                     if (map[y][x] == 1) DrawLineEx(S, E, 1.0f, B);
@@ -2312,9 +2293,9 @@ void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusi
                     int y = (int)Walls[i].mapPos.y; int x = (int)Walls[i].mapPos.x;
                     Vector2 S = Walls[i].Start; Vector2 E = Walls[i].End;
                     if (Walls[i].HorV == 'H') {
-                        S.y += (Walls[i].dir*n); E.y += (Walls[i].dir*n);
+                        S.y += (Walls[i].dir*Walls[i].n); E.y += (Walls[i].dir*Walls[i].n);
                     } else {
-                        S.x += (Walls[i].dir*n); E.x += (Walls[i].dir*n);
+                        S.x += (Walls[i].dir*Walls[i].n); E.x += (Walls[i].dir*Walls[i].n);
                     }
 
                     if (map[y][x] == 1) DrawLineEx(S, E, 1.0f, B);
@@ -2499,8 +2480,8 @@ int Save_Game(int Round, int ExRound, int m, int n, Vector2 StartPoint) {
     fprintf(file, "%.0f\n", StartPoint.x);
     fprintf(file, "%.0f\n", StartPoint.y);
 
-    for (int j=0; j<2*n+1; j++) {
-        for (int i=0; i<2*m+1; i++) 
+    for (int j=0; j<2*m+1; j++) {
+        for (int i=0; i<2*n+1; i++) 
             fprintf(file, "%d ", map[j][i]);
             fprintf(file, "\n");
     }
@@ -2561,16 +2542,16 @@ int Load_Game(int *m, int *n, int *ExRound, int *Round, Vector2 *StartPoint) {
     }
     int height, width, nPlayers, nEnemies;
 
-    fscanf(file, "%d", &height); (*n)=height;
-    fscanf(file, "%d", &width); (*m)=width;
+    fscanf(file, "%d", &height); (*m)=height;
+    fscanf(file, "%d", &width); (*n)=width;
 
     float x, y;
     fscanf(file, "%f", &x);
     fscanf(file, "%f", &y);
     *StartPoint = (Vector2) {x, y};
     
-    for (int j=0; j<2*(*n)+1; j++) 
-        for (int i=0; i<2*(*m)+1; i++) 
+    for (int j=0; j<2*(*m)+1; j++) 
+        for (int i=0; i<2*(*n)+1; i++) 
             fscanf(file, "%d", &map[j][i]);
 
     fscanf(file, "%d", &nPlayers); nExplorers = nPlayers;

@@ -340,25 +340,15 @@ switch(Current)
 
                     if (IsKeyPressed(KEY_O)) Force_Shc(StartPoint, m, n, GameMusic, Round, l);
                     if (IsKeyPressed(KEY_P)) {Earthquake_Gift(m, n, StartPoint, Round, GameMusic, l);}
-               
-            // Witch player is dead?
-                for (int j=0; j<nExplorers; j++) for (int i=0; i<nShadowCasters; i++) {
-                    if (Explorers[j].isAlive)
-                        if ((int)Explorers[j].mapPos.y==(int)ShadowCasters[i].y && (int)Explorers[j].mapPos.x==(int)ShadowCasters[i].x) {
-                            if (j==0)        {Dead_Explorer(j , DieSound, Round);}
-                            else if (j==1)  {Dead_Explorer(j, DieSound, Round);}
-                            else if (j==2) {Dead_Explorer(j, DieSound, Round);}
-                    }
-                }     
-                
+                               
                     if (notChoosed) {
                         //  printf("Gift 0: %d  ,  Gift 1: %d  ,  Gift 2: %d\n", Gifts[0].isGotten,Gifts[1].isGotten,Gifts[2].isGotten);
                         if (!Explorers[l].isAlive) {l ++; continue;}
                         UpdateMusicStream(GameMusic);
                         BeginDrawing();
                         DrawText("To save: F1\nTo load: F2", 920, 233, 20, (Color){205,50,0,255});
-                        if (IsKeyPressed(KEY_F1)) Save_Game(Round, l, m, n, StartPoint);
-                        if (IsKeyPressed(KEY_F2)) {
+                        if (IsKeyPressed(KEY_F)) Save_Game(Round, l, m, n, StartPoint);
+                        if (IsKeyPressed(KEY_G)) {
                             BeginDrawing();
                             Load_Game(&m, &n, &l, &Round, &StartPoint);
                             ClearBackground(RAYWHITE);
@@ -416,6 +406,13 @@ switch(Current)
                             float Speed = 2.0f;
                             Exs_Animation(ExMoveDir, ExTextureDir, &Explorers[l].winPos, EndPosition, Speed, 0.1f, StartPoint, m, n, l, Round, GameMusic);
                             WitchRound = true; l++; Move = false; notChoosed = true; ShouldMove = false;
+
+                            // Witch player is dead?
+                            Check_Witch_Player_is_Dead(Round, DieSound);
+                    
+                            UpdateMusicStream(GameMusic);
+                            ClearBackground(RAYWHITE); // اگه خودش رفت تو سایه نگر، مردنش نمایش داده شه
+                            Draw_Map(0, StartPoint, m, n, Round, l);
                             
                             int WhichGift = Is_Present_Gotten();
                             if (WhichGift) {
@@ -427,10 +424,18 @@ switch(Current)
                                     Show_Present(StartPoint, m, n, Round, l, Gifts[WhichGift-1].type, GameMusic);
                                     if (IsKeyPressed(KEY_Q)) isShown = true;
                                 } while (!isShown); // Shows the present box while plyer do not click space.
+
                                 
                                 if (Gifts[WhichGift-1].type == Replay) {int *p; p = &(l); ReplayGift(p);}
                                 else if (Gifts[WhichGift-1].type == InWallIncrease) InWallIncreaseGift(l-1);
-                                else if (Gifts[WhichGift-1].type == ForceEnemy) Force_Shc(StartPoint, m, n, GameMusic, Round, l);
+                                else if (Gifts[WhichGift-1].type == ForceEnemy) {
+                                    Force_Shc(StartPoint, m, n, GameMusic, Round, l);
+                                    Check_Witch_Player_is_Dead(Round, DieSound);                                 
+                                    
+                                    UpdateMusicStream(GameMusic);
+                                    ClearBackground(RAYWHITE);
+                                    Draw_Map(0, StartPoint, m, n, Round, l); //اگه هل داده شد توی سایه نگر، مردنش نمایش داده شه
+                                }
                                 else if (Gifts[WhichGift-1].type == Earthquake) Earthquake_Gift(m, n, StartPoint, Round, GameMusic, l);
                             }
                         }
@@ -546,6 +551,7 @@ switch(Current)
             }
             
             case MoveShs: {
+                
                 l = nExplorers-1;
                 Vector *BFSlistChecked;
                 int BFSListCounter;
@@ -577,66 +583,71 @@ switch(Current)
                     if (WayShcCounter[i]) {
                         Reset_Map_Blocks_for_Move_Elements(m, n);
                         WayShcCounter[i] = Find_Way(WayShcArray[i], BFSListCounter, WayShcCounter[i], BFSlistChecked, WayShcArray[i]);
-                        if (WayShcCounter[i]<3) {                            
-                            float Speed = 0.2f;
-                            Vector2 End;
-                            Vector2 EndPosition;
-                            End.x = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).x;
-                            End.y = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).y;
-                            EndPosition = GET_Start_Elements_Position_for_Draw(StartPoint, End);
-                            int tempShDir = ShadowCastersDir[i];
-                            char Dir = (*(WayShcArray[i]+WayShcCounter[i]-1-1)).beg;
-                            Shcs_Animation(Dir, &ShadowCastersP[i], EndPosition, Speed, 0.2f, StartPoint, m, n, i, Round, GameMusic);   
-                            ShadowCastersDir[i] = tempShDir;
-                            ShadowCasters[i].y = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).y; // = *(*(WayShcArray+i)+WayShcCounter)
-                            ShadowCasters[i].x = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).x;
-                        } else {
-                            int tempx, tempy;
-                            tempx = (*(WayShcArray[i]+WayShcCounter[i]-1-1-1)).x;
-                            tempy = (*(WayShcArray[i]+WayShcCounter[i]-1-1-1)).y;
-                            if (map[tempy][tempx] != 1 && map[tempy][tempx] != 2) {
-                                tempx = (*(WayShcArray[i]+WayShcCounter[i]-1-1)).x;
-                                tempy = (*(WayShcArray[i]+WayShcCounter[i]-1-1)).y;
-                                if (map[tempy][tempx] == 1 || map[tempy][tempx] == 2) {
-                                    float Speed = 0.2f;
-                                    Vector2 End;
-                                    Vector2 EndPosition;
-                                    End.x = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).x;
-                                    End.y = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).y;
-                                    EndPosition = GET_Start_Elements_Position_for_Draw(StartPoint, End);
-                                    int tempShDir = ShadowCastersDir[i];
-                                    char Dir = (*(WayShcArray[i]+WayShcCounter[i]-1-1)).beg;
-                                    Shcs_Animation(Dir, &ShadowCastersP[i], EndPosition, Speed, 0.2f, StartPoint, m, n, i, Round, GameMusic);
-                                    ShadowCastersDir[i] = tempShDir;
-                                    ShadowCasters[i].y = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).y;
-                                    ShadowCasters[i].x = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).x; 
-                                }
+                        if (WayShcCounter[i]<3) {
+                            Vector2 w; w = Wall_Coordinate((WayShcArray[i]+WayShcCounter[i]-1-1));
+                            if (map[(int)w.y][(int)w.x] == 1) {
+                                float Speed = 0.2f;
+                                Vector2 End; Vector2 EndPosition;
+                                End.x = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).x; End.y = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).y;
+                                EndPosition = GET_Start_Elements_Position_for_Draw(StartPoint, End);
+
+                                int tempShDir = ShadowCastersDir[i];
+                                char Dir = (*(WayShcArray[i]+WayShcCounter[i]-1-1)).beg;
+                                Shcs_Animation(Dir, &ShadowCastersP[i], EndPosition, Speed, 0.2f, StartPoint, m, n, i, Round, GameMusic);   
+
+                                ShadowCastersDir[i] = tempShDir;
+                                ShadowCasters[i].y = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).y; // = *(*(WayShcArray+i)+WayShcCounter)
+                                ShadowCasters[i].x = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).x;
                             }
-                            else {
+                        } else {
+                            int tempx1, tempy1, tempx2, tempy2; Vector2 w1, w2;
+                            tempx1 = (*(WayShcArray[i]+WayShcCounter[i]-1-1)).x; tempy1 = (*(WayShcArray[i]+WayShcCounter[i]-1-1)).y;
+                            tempx2 = (*(WayShcArray[i]+WayShcCounter[i]-1-1-1)).x; tempy2 = (*(WayShcArray[i]+WayShcCounter[i]-1-1-1)).y;
+                            w1 = Wall_Coordinate((WayShcArray[i]+WayShcCounter[i]-1-1)); w2 = Wall_Coordinate((WayShcArray[i]+WayShcCounter[i]-1-1-1));
+                            if ((map[(int)w1.y][(int)w1.x] == 1 && map[(int)w2.y][(int)w2.x] == 1) && !(map[tempy2][tempx2] == 3)) {
                                 int j;
+                                int tempShDir = ShadowCastersDir[i];
                                 for (j=1; j<=2; j++) {
                                     float Speed = 0.2f;
-                                    Vector2 End;
-                                    Vector2 EndPosition;
-                                    End.x = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-j)).x;
-                                    End.y = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-j)).y;
+                                    Vector2 End; Vector2 EndPosition;
+                                    End.x = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-j)).x; End.y = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-j)).y;
                                     EndPosition = GET_Start_Elements_Position_for_Draw(StartPoint, End);
-                                    int tempShDir = ShadowCastersDir[i];
+
                                     char Dir = (*(WayShcArray[i]+WayShcCounter[i]-1-j)).beg;
                                     Shcs_Animation(Dir, &ShadowCastersP[i], EndPosition, Speed, 0.2f, StartPoint, m, n, i, Round, GameMusic);
+
                                     if (j==1) {
-                                        ShadowCasters[i].y = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).y;
-                                        ShadowCasters[i].x = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).x;
+                                        ShadowCasters[i].y = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).y; ShadowCasters[i].x = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).x;
                                     } else {
                                         ShadowCastersDir[i] = tempShDir;
-                                        ShadowCasters[i].y = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1-1)).y;
-                                        ShadowCasters[i].x = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1-1)).x;
+                                        ShadowCasters[i].y = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1-1)).y; ShadowCasters[i].x = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1-1)).x;
                                     }
                                     
                                 }                                
                             }
+                            else if (map[(int)w1.y][(int)w1.x] == 1 && !(map[tempy1][tempx1] == 3)) {
+                                float Speed = 0.2f;
+                                Vector2 End; Vector2 EndPosition;
+                                End.x = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).x; End.y = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).y;
+                                EndPosition = GET_Start_Elements_Position_for_Draw(StartPoint, End);
+
+                                int tempShDir = ShadowCastersDir[i];
+                                char Dir = (*(WayShcArray[i]+WayShcCounter[i]-1-1)).beg;
+                                Shcs_Animation(Dir, &ShadowCastersP[i], EndPosition, Speed, 0.2f, StartPoint, m, n, i, Round, GameMusic);
+
+                                ShadowCastersDir[i] = tempShDir;
+                                ShadowCasters[i].y = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).y; ShadowCasters[i].x = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).x;                                 
+                            }
                         }                      
                     }
+                    // Witch player is dead?
+                    Check_Witch_Player_is_Dead(Round, DieSound);
+                    UpdateMusicStream(GameMusic);
+                    BeginDrawing();
+                    ClearBackground(RAYWHITE);
+                    Draw_Map(0, StartPoint, m, n, Round, l); // اگه سایه نگر کشتش، مردنش نمایش داده شه
+                    EndDrawing();
+
                     free(BFSlistChecked);
                 }
                 Reset_Map_Blocks_for_Move_Elements(m, n);
