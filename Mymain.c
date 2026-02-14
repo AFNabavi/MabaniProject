@@ -118,7 +118,7 @@ switch(Current)
             Current = GameScreen;
             State = MoveExs;
             Load_Game(&m, &n, &l, &Round, &StartPoint);
-            Draw_Map(0, StartPoint, m, n, Round, l);
+            Draw_Map(0, StartPoint, m, n, Round, l);      
             Explorers[0].avatar[0] = Ex1TextureLeft; Explorers[0].avatar[1] = Ex1TextureRight;
             Explorers[1].avatar[0] = Ex2TextureLeft; Explorers[1].avatar[1] = Ex2TextureRight;
             Explorers[2].avatar[0] = Ex3TextureLeft; Explorers[2].avatar[1] = Ex3TextureRight;
@@ -161,7 +161,7 @@ switch(Current)
             if (m*n < 42) MaxPlayer = 1;
             else if (m*n < 90) MaxPlayer = 2;
             else if (m*n <145) MaxPlayer = 3;
-            while (nExplorers==0) {
+            while (!WindowShouldClose() && nExplorers==0) {
                 Get_Explorer_Count_UI(MaxPlayer);
                 nExplorers = Get_Explorer_Count();  // default = 0
             }
@@ -338,14 +338,14 @@ switch(Current)
                 if (!Are_All_Players_Dead())
                 while (!WindowShouldClose() && l<nExplorers) {
 
-                    if (IsKeyPressed(KEY_O)) Force_Shc(StartPoint, m, n, GameMusic, Round, l, ForceSound);
-                    if (IsKeyPressed(KEY_P)) {Earthquake_Gift(m, n, StartPoint, Round, GameMusic, l, EarthquakeSound);}
+                    // if (IsKeyPressed(KEY_O)) Force_Shc(StartPoint, m, n, GameMusic, Round, l, ForceSound);
+                    // if (IsKeyPressed(KEY_P)) {Earthquake_Gift(m, n, StartPoint, Round, GameMusic, l, EarthquakeSound);}
                                
                     if (notChoosed) {
                         if (!Explorers[l].isAlive) {l ++; continue;}
                         UpdateMusicStream(GameMusic);
                         BeginDrawing();
-                        DrawText("   To save: F1\n   To load: F2\n  Ch theme: F3", 915, 220, 20, (Color){205,50,0,255});
+                        DrawText("   To save: F1\n   To load: F2\n  Ch theme: F3", 901, 220, 20, (Color){205,50,0,255});
                         if (IsKeyPressed(KEY_F1)) Save_Game(Round, l, m, n, StartPoint);
                         if (IsKeyPressed(KEY_F2)) {
                             BeginDrawing();
