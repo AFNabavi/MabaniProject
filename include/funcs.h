@@ -44,7 +44,29 @@ typedef struct Present {
     Vector2 winPos;     // coordinate in window
     Gift type;
 } Present;
+typedef struct ImportantInformation {
+    Explorer Players[3]; // Explorers
+    int nPlayers;
+    int m; // height
+    int n; // width
+    int l; // Explorer round
+    int Round; 
+    Vector2 EnemiesMapPos[3]; // Shadowcasters
+    Vector2 EnemiesWinPos[3];
+    Vector2 Goal; // Lightcore
+} ImportantInf;
+typedef struct EarthquakeWall {
+    int level;
+    Vector2 Start;
+    Vector2 End;
+    Vector2 mapPos;
+    char HorV;
+    int dir;
+    float pixels;
+    float n;
+} EarthqWall;
 
+extern Color BackColor;
 extern const int Side;
 extern const int FPS;
 extern const int FadeCo;
@@ -63,6 +85,8 @@ extern Explorer Explorers[3];
 // extern int nInterimWalls[3];
 extern int nInWalls; 
 extern InterimWalls InWalls[30];
+extern Present Gifts[3];
+extern int nGifts;
 
 extern int nShadowCasters;
 extern Vector2 ShadowCasters[3];
@@ -87,6 +111,7 @@ extern Texture2D Ex1TextureLeft;
 extern Texture2D Ex2TextureLeft;
 extern Texture2D Ex3TextureLeft;
 extern Texture2D LiTexture;
+extern Texture2D PresentTexture;
 
 void SET_Map_Array(int M[][25], int m, int n);
 Vector2 GET_StartPoint(int m, int n, int WidthSpace);
@@ -98,7 +123,7 @@ int Direction_of_Explorers(Vector2 Explorer);
 int Direction_of_ShadowCasters(Vector2 ShadowCaster);
 int Check_Elements(Vector2 E, int numberExNow, int numberShNow);
 int Check_Walls(WallPro W);
-void Draw_Map(Vector2 StartPoint, int m, int n, int Round, int ExRound);
+void Draw_Map(int Earthquake, Vector2 StartPoint, int m, int n, int Round, int ExRound);
 int Distance_Check(Vector2 v1, Vector2 v2, Explorer arr1[], int arr1c, Vector2 arr2[], int arr2c);
 WallPro Put_Wall(int m, int n);
 void BFS_Check(char sw, int BlocksA[][2], int ACount, int BlocksB[][2], int BCount, int *Checked);
@@ -111,13 +136,12 @@ int Win_or_Lose(Vector2 E, Vector2 Sh[], int nSh, Vector2 L);
 int Get_Map_Infs();
 void Draw_Map_Infs();
 void Draw_Walls_Infs(char s[], int n, int m);
-char Print_Number_In_String(char s[], char ch, int len);
 void ItoS(char *str, int n);
-int StoI(char s[], int sLen);
-int Submit_Button(int n, int m, char inp[], int inpLen);
+int Submit_Button();
 void Reset_Map_Blocks_for_Move_Elements(int m, int n); 
 int BFS_Way(Vector *start, Vector *end, int *ACount, int *resCount, Vector *result);
 int Find_Way(Vector *end, const int ACount, int resCount, Vector *Alist, Vector *result);
+Vector2 Wall_Coordinate(Vector *nextShcStep);
 void Draw_Way(Vector *Way, Vector2 StartPoint, const int resCount);
 void Rec_for_Choose(float x, float y, SidesAR A, Rectangle R[]);
 SidesAR CheckSides(int j, int i);
@@ -129,16 +153,34 @@ void Check_Life_of_Interim_Walls();
 void Pointer_To_Player(int index, Vector2 StartPoint);
 int Get_Explorer_Count_UI(int MaxPlayer);
 int Get_Explorer_Count();
-// void Choose_Players_Texture_UI(int PlayersCount, int Player);
-// Texture2D Choose_Players_Texture();
 void Show_Invalid_Move_Error(Vector2 StartPoint, int m, int n, int Round, int ExRound);
 void Show_Ended_Walls_Error(Vector2 StartPoint, int m, int n, int Round, int ExRound);
 void Dead_Explorer(int l, Sound DieSound, int Round);
+void Check_Witch_Player_is_Dead(int Round, Sound DieSound);
 void Win_Explorer(int l, Sound WinSound, int Round);
 int Are_All_Players_Have_Won();
 int Are_All_Players_Dead();
 int Calculate_Max_Interim_Wall(int m, int n);
-int Show_End_Screen();
-
+void Show_End_Screen();
+int Is_Present_Gotten();
+void Show_Present_Rec(Vector2 StartPoint, int m, int n, int Round, int ExRound, Music music);
+void Show_Present(Vector2 StartPoint, int m, int n, int Round, int ExRound, Gift name, Music music);
+void ReplayGift(int *l);
+void InWallIncreaseGift(int l);
+int BFS_Gift(int checked[][2], int start, int end, int m, int n, int len);
+void Number_Gifts(int m, int n);
+int Rectangles_Around_Shc(Vector2 RecsMapP[][4], Rectangle RecsAround[][4], Vector2 Shc, int Index, Vector2 StartPoint);
+void Force_Shc(Vector2 StartPoint, int m, int n, Music GameMusic, int Round, int ExRound, Sound ForceSound);
+void Add_Earthquake_Wall(EarthqWall Walls[], int *nWalls, Vector2 StartPoint, int m, int n, int EarthqMap[][2*n+1], int N, float pixels, int Case);
+void Coordinate_Around_for_Earthquake(int Case, Vector2 mapP, Vector2 Around[], int *nAround);
+void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusic, int ExIndex, Sound EarthquakeSound);
+void Shcs_Animation_without_Change_Direction(const char beg, Vector2 *ShcP, const Vector2 EndP, float Speed, const float SIncrease, Vector2 StartPoint, int m, int n, int i, int Round, Music music);
+int Earthquak_ShadowCasters_Animation(const char beg, Vector2 *ShcP, const Vector2 EndP, float Speed, int sw, int frame, float pixels);
+int Earthquak_Explorers_Animation(const char dir, Vector2 *ExP, const Vector2 EndP, float Speed, int sw, int frame, float pixels);
+int Exit_from_While(int canShcsMove[], int canExsMove[]);
+void Show_Save_Notf(int sw);
+void Show_Load_Notf(int sw);
+int Save_Game(int Round, int ExRound, int m, int n, Vector2 StartPoint);
+int Load_Game(int *m, int *n, int *ExRound, int *Round, Vector2 *StartPoint);
 
 #endif

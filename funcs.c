@@ -24,6 +24,8 @@ Explorer Explorers[3];
 // int nInterimWalls[3] = {2, 2, 2};
 InterimWalls InWalls[30];
 int nInWalls = 0; 
+Present Gifts[3];
+int nGifts;
 
 int nShadowCasters;
 Vector2 ShadowCasters[3] = {0.0f};
@@ -31,10 +33,6 @@ Vector2 ShadowCastersP[3] = {0.0f};     // Position in Window
 int ShadowCastersDir[3] = {-1, -1, -1};
 int FadeSh[3];
 int swF[3] = {1, 1, 1};
-
-int minlength;
-char FirstMove;
-char SecondMove;
 
 void SET_Map_Array(int M[][25], int m, int n)
 {
@@ -233,7 +231,7 @@ else 0.
     else return 0;
 }
 
-void Draw_Map(Vector2 StartPoint, int m, int n, int Round, int ExRound)
+void Draw_Map(int Earthquake, Vector2 StartPoint, int m, int n, int Round, int ExRound)
 {
 /*
 Renders the entire game map including walls, lightcore, explorers, and shadow casters.
@@ -256,32 +254,34 @@ Wall color and thickness rules based on map[j][i] value:
     Color B = {0, 0, 0, 255*(0.4f)};          // Black - Semi-transparent black - guide lines
 
     // Draw horizental walls
-    for (j=0; j<2*m+1; j+=2)
-    {
-        for (i=1; i<2*n+1; i+=2)
+    if (!Earthquake) {
+        for (j=0; j<2*m+1; j+=2)
         {
-            W.Position.x = (float)i; W.Position.y = (float)j; W.HorV = 'H';
-            StartP = GET_Start_Walls_Position_for_Draw(StartPoint, W);
-            EndP.x = StartP.x + Side; EndP.y = StartP.y;
-            if (map[j][i] == 1) DrawLineEx(StartP, EndP, 1.0f, B);
-            else if (map[j][i] == 0) DrawLineEx(StartP, EndP, WallTh, R);
-            else if(map[j][i] == -1) DrawLineEx(StartP, EndP, WallTh, BLACK);
-            else DrawLineEx(StartP, EndP, WallTh, O);
+            for (i=1; i<2*n+1; i+=2)
+            {
+                W.Position.x = (float)i; W.Position.y = (float)j; W.HorV = 'H';
+                StartP = GET_Start_Walls_Position_for_Draw(StartPoint, W);
+                EndP.x = StartP.x + Side; EndP.y = StartP.y;
+                if (map[j][i] == 1) DrawLineEx(StartP, EndP, 1.0f, B);
+                else if (map[j][i] == 0) DrawLineEx(StartP, EndP, WallTh, R);
+                else if(map[j][i] == -1) DrawLineEx(StartP, EndP, WallTh, BLACK);
+                else DrawLineEx(StartP, EndP, WallTh, O);
+            }
         }
-    }
-
-// Draw vertical walls
-    for (i=0 ; i<2*n+1; i+=2)
-    {
-        for (j=1 ; j<2*m+1; j+=2)
+    
+    // Draw vertical walls
+        for (i=0 ; i<2*n+1; i+=2)
         {
-            W.Position.x = (float)i; W.Position.y = (float)j; W.HorV = 'V';
-            StartP = GET_Start_Walls_Position_for_Draw(StartPoint, W);
-            EndP.x = StartP.x; EndP.y = StartP.y + Side;
-            if (map[j][i] == 1) DrawLineEx(StartP, EndP, 1.0f, B);
-            else if(map[j][i] == 0) DrawLineEx(StartP, EndP, WallTh, R);
-            else if(map[j][i] == -1) DrawLineEx(StartP, EndP, WallTh, BLACK);
-            else DrawLineEx(StartP, EndP, WallTh, O);
+            for (j=1 ; j<2*m+1; j+=2)
+            {
+                W.Position.x = (float)i; W.Position.y = (float)j; W.HorV = 'V';
+                StartP = GET_Start_Walls_Position_for_Draw(StartPoint, W);
+                EndP.x = StartP.x; EndP.y = StartP.y + Side;
+                if (map[j][i] == 1) DrawLineEx(StartP, EndP, 1.0f, B);
+                else if(map[j][i] == 0) DrawLineEx(StartP, EndP, WallTh, R);
+                else if(map[j][i] == -1) DrawLineEx(StartP, EndP, WallTh, BLACK);
+                else DrawLineEx(StartP, EndP, WallTh, O);
+            }
         }
     }
 
@@ -289,31 +289,23 @@ Wall color and thickness rules based on map[j][i] value:
     Vector2 S = GET_Start_Elements_Position_for_Draw(StartPoint, Lightcore);
     DrawTexture(LiTexture, S.x, S.y, WHITE);
 
+// Drawing Gifts
+    for (i=0; i<nGifts; i++) {
+        if (Gifts[i].isGotten == false)
+            DrawTexture(PresentTexture, Gifts[i].winPos.x+4, Gifts[i].winPos.y+4, WHITE);
+    }
+
 // Draw explorers (facing toward lightcore)
     for (i=0; i<nExplorers; i++) {
         if (Explorers[i].isAlive)
-            if (!Explorers[i].direction) {
-                int Direction = Direction_of_Explorers(Explorers[i].mapPos);
-                if (Direction>0) {
-                    if (i==0) DrawTexture(Ex1TextureRight, Explorers[i].winPos.x, Explorers[i].winPos.y, WHITE);
-                    if (i==1) DrawTexture(Ex2TextureRight, Explorers[i].winPos.x, Explorers[i].winPos.y, WHITE);
-                    if (i==2) DrawTexture(Ex3TextureRight, Explorers[i].winPos.x, Explorers[i].winPos.y, WHITE);        
-                } else {
-                    if (i==0) DrawTexture(Ex1TextureLeft, Explorers[i].winPos.x, Explorers[i].winPos.y, WHITE);
-                    if (i==1) DrawTexture(Ex2TextureLeft, Explorers[i].winPos.x, Explorers[i].winPos.y, WHITE);
-                    if (i==2) DrawTexture(Ex3TextureLeft, Explorers[i].winPos.x, Explorers[i].winPos.y, WHITE);
-                }
-            } else {
-                if(Explorers[i].direction=='R') {
-                    if (i==0) DrawTexture(Ex1TextureRight, Explorers[i].winPos.x, Explorers[i].winPos.y, WHITE);
-                    if (i==1) DrawTexture(Ex2TextureRight, Explorers[i].winPos.x, Explorers[i].winPos.y, WHITE);
-                    if (i==2) DrawTexture(Ex3TextureRight, Explorers[i].winPos.x, Explorers[i].winPos.y, WHITE);        
-                } else {
-                    if (i==0) DrawTexture(Ex1TextureLeft, Explorers[i].winPos.x, Explorers[i].winPos.y, WHITE);
-                    if (i==1) DrawTexture(Ex2TextureLeft, Explorers[i].winPos.x, Explorers[i].winPos.y, WHITE);
-                    if (i==2) DrawTexture(Ex3TextureLeft, Explorers[i].winPos.x, Explorers[i].winPos.y, WHITE);
-                }
-            }
+        if (!Explorers[i].direction) {
+            int Direction = Direction_of_Explorers(Explorers[i].mapPos);
+            if (Direction>0) DrawTexture(Explorers[i].avatar[1], Explorers[i].winPos.x, Explorers[i].winPos.y, WHITE);
+            else DrawTexture(Explorers[i].avatar[0], Explorers[i].winPos.x, Explorers[i].winPos.y, WHITE);
+        } else {
+            if(Explorers[i].direction=='R') DrawTexture(Explorers[i].avatar[1], Explorers[i].winPos.x, Explorers[i].winPos.y, WHITE);
+            else DrawTexture(Explorers[i].avatar[0], Explorers[i].winPos.x, Explorers[i].winPos.y, WHITE); 
+        }
     }
 
     
@@ -370,6 +362,14 @@ Wall color and thickness rules based on map[j][i] value:
     DrawText("Skip round: 'Q'\n", HintGame.x+11, HintGame.y+145, 20, MyRed);
     DrawText("-----------------", HintGame.x+1, HintGame.y+175, 20, MyRed);
     DrawRectangleRoundedLinesEx(HintGame, 0.1f, 20, 1.0f, MyRed);
+
+    DrawText("-----------------", 901, 290, 20, MyRed);
+    DrawText("Player 1: ", 905, 320, 20, MyRed);
+    DrawTexture(Explorers[0].avatar[0], 1000, 310, MyRed);
+    DrawText("Player 2: ", 905, 380, 20, MyRed);
+    DrawTexture(Explorers[1].avatar[0], 1000, 370, MyRed);
+    DrawText("Player 3: ", 905, 440, 20, MyRed);
+    DrawTexture(Explorers[2].avatar[0], 1000, 430, MyRed);
 
     DrawText("-----------------", 901, 490, 20, MyRed);
     char s[3];
@@ -566,8 +566,7 @@ void Reset_Map_Blocks_for_Move_Elements(int m, int n) {
     }
     for (i=0; i<nExplorers; i++) {
         if (Explorers[i].isAlive) {
-        map[(int)Explorers[i].mapPos.y][(int)Explorers[i].mapPos.x] = 2;
-        for (int j=0; j<nShadowCasters; j++) ShadowCastersDir[j] = -1;
+            map[(int)Explorers[i].mapPos.y][(int)Explorers[i].mapPos.x] = 2;
         }
     }
 }
@@ -707,12 +706,6 @@ void ItoS(char *str, int n) {
     }
 }
 
-int StoI(char s[], int sLen) {
-    int InpNumber = 0;
-    for (int i=0; i<sLen; i++) {InpNumber += (s[i] - '0'); InpNumber*=10;} InpNumber /= 10;
-    return InpNumber;
-}
-
 void Draw_Walls_Infs(char s[], int n, int m)
 {
     Rectangle OutRecLines = {200, 150, 700, 350};
@@ -722,7 +715,7 @@ void Draw_Walls_Infs(char s[], int n, int m)
     int nm = (n-1)*(m-1), i, j, k;
     char str1[5] = {'\0'};
     ItoS(str1, nm);
-    char str0[] = "Enter the number of walls\nyou want (between 0 and ";
+    char str0[] = "  Enter the number of walls\nyou want (between 0 and ";
     char str2[] = "):\n";
     char str[70];
     for (i=0; str0[i]; i++) str[i] = str0[i]; 
@@ -734,37 +727,17 @@ void Draw_Walls_Infs(char s[], int n, int m)
     DrawRectangleRoundedLines(InpShower, 0.5, 4.0, GRAY);
     DrawRectangleRoundedLines(SubmitButton, 0.5, 4.0, GRAY);    
     DrawText(str, OutRecLines.x+105, OutRecLines.y+50, 30, RED);
-    DrawText("(press R to remove your input.)", OutRecLines.x+155, OutRecLines.y+120, 20, RED);
+    DrawText("(press backspace to remove your number.)", OutRecLines.x+140, OutRecLines.y+120, 20, RED);
     DrawText(s, InpShower.x+25, InpShower.y+15, 20, BLACK);
     DrawText("SUBMIT", SubmitButton.x+8, SubmitButton.y+15, 19, DARKGRAY);
 }
 
-char Print_Number_In_String(char s[], char ch, int len)
-{
-    if (len<4)
-    {
-        s[len] = ch;
-        s[len+1] = '\0';
-    }
-    if (ch == 'r' || ch == 'R')
-    {
-        s[len-1] = '\0';
-    }
-    return '\0';
-}
-
-int Submit_Button(int n, int m, char inp[], int inpLen)
+int Submit_Button()
 {   
     Rectangle SubmitButton = {550, 350, 85, 50};
     Vector2 MousePos = GetMousePosition();
-    int InpNumber = StoI(inp, inpLen);
-    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) 
-        if (MousePos.x >= SubmitButton.x &&
-             MousePos.x <= (SubmitButton.x+SubmitButton.width) &&
-             MousePos.y >= SubmitButton.y &&
-             MousePos.y <= (SubmitButton.y+SubmitButton.height)) 
-                if (InpNumber>0 && InpNumber<=((n-1)*(m-1)))
-                    return 1;
+    if (CheckCollisionPointRec(MousePos, SubmitButton) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) 
+        return 1; 
     return 0;
 }
 
@@ -778,7 +751,7 @@ int BFS_Way(Vector *start, Vector *end, int *ACount, int *resCount, Vector *resu
     for (k=0; k<=(end-start); k++) {
         
         Vector temp;
-        if (map[(*(start+k)).y-1][(*(start+k)).x] == 1 && !(map[(*(start+k)).y-2][(*(start+k)).x] == 0)) {            
+        if ((map[(*(start+k)).y-1][(*(start+k)).x] == 1 || map[(*(start+k)).y-1][(*(start+k)).x] == 2) && !(map[(*(start+k)).y-2][(*(start+k)).x] == 0)) {            
             (*ACount)++;
            temp.beg = 'D'; temp.y = (*(start+k)).y-2; temp.x = (*(start+k)).x;
            if (map[temp.y][temp.x] == 2) {
@@ -795,7 +768,7 @@ int BFS_Way(Vector *start, Vector *end, int *ACount, int *resCount, Vector *resu
            i++;
            *(end+i) = temp;
         }
-        if (map[(*(start+k)).y][(*(start+k)).x+1] == 1 && !(map[(*(start+k)).y][(*(start+k)).x+2] == 0)) {
+        if ((map[(*(start+k)).y][(*(start+k)).x+1] == 1 || map[(*(start+k)).y][(*(start+k)).x+1] == 2) && !(map[(*(start+k)).y][(*(start+k)).x+2] == 0)) {
             (*ACount)++;
            temp.beg = 'L'; temp.y = (*(start+k)).y; temp.x = (*(start+k)).x+2;
            if (map[temp.y][temp.x] == 2) {
@@ -812,7 +785,7 @@ int BFS_Way(Vector *start, Vector *end, int *ACount, int *resCount, Vector *resu
            i++;
            *(end+i) = temp;
         }
-        if (map[(*(start+k)).y+1][(*(start+k)).x] == 1 && !(map[(*(start+k)).y+2][(*(start+k)).x] == 0)) {
+        if ((map[(*(start+k)).y+1][(*(start+k)).x] == 1 || map[(*(start+k)).y+1][(*(start+k)).x] == 2) && !(map[(*(start+k)).y+2][(*(start+k)).x] == 0)) {
             (*ACount)++;
            temp.beg = 'U'; temp.y = (*(start+k)).y+2; temp.x = (*(start+k)).x;
            if (map[temp.y][temp.x] == 2) {
@@ -829,7 +802,7 @@ int BFS_Way(Vector *start, Vector *end, int *ACount, int *resCount, Vector *resu
            i++;
            *(end+i) = temp;
         }
-        if (map[(*(start+k)).y][(*(start+k)).x-1] == 1 && !(map[(*(start+k)).y][(*(start+k)).x-2] == 0)) {
+        if ((map[(*(start+k)).y][(*(start+k)).x-1] == 1 || map[(*(start+k)).y][(*(start+k)).x-1] == 2) && !(map[(*(start+k)).y][(*(start+k)).x-2] == 0)) {
             (*ACount)++;
            temp.beg = 'R'; temp.y = (*(start+k)).y; temp.x = (*(start+k)).x-2;
            if (map[temp.y][temp.x] == 2) {
@@ -850,9 +823,7 @@ int BFS_Way(Vector *start, Vector *end, int *ACount, int *resCount, Vector *resu
     if (!i) return -1;
     startcpy = end+1;
     endcpy = end+i;
-    int R = BFS_Way(startcpy, endcpy, ACount, resCount, result);
-    return R;
-    
+    return BFS_Way(startcpy, endcpy, ACount, resCount, result);    
 }
 
 int Find_Way(Vector *end, const int ACount, int resCount, Vector *Alist, Vector *result) {
@@ -886,6 +857,28 @@ int Find_Way(Vector *end, const int ACount, int resCount, Vector *Alist, Vector 
     resCount++;
 
     return Find_Way(&temp, ACount, resCount, Alist, result);
+}
+
+Vector2 Wall_Coordinate(Vector *nextShcStep) {
+    char c = (*nextShcStep).beg;
+    Vector2 res;
+    if (c == 'U') {
+        res.y = (int)(*nextShcStep).y; res.x = (int)(*nextShcStep).x;
+        res.y--;
+    }
+    if (c == 'D') {
+        res.y = (int)(*nextShcStep).y; res.x = (int)(*nextShcStep).x;
+        res.y++;
+    }
+    if (c == 'L') {
+        res.y = (int)(*nextShcStep).y; res.x = (int)(*nextShcStep).x;
+        res.x--;
+    }
+    if (c == 'R') {
+        res.y = (int)(*nextShcStep).y; res.x = (int)(*nextShcStep).x;
+        res.x++;
+    }
+    return res;
 }
 
 void Draw_Way(Vector *Way, Vector2 StartPoint, const int resCount) {
@@ -975,8 +968,8 @@ void Shcs_Animation(const char beg, Vector2 *ShcP, const Vector2 EndP, float Spe
     while (!((*ShcP).x == EndP.x && (*ShcP).y == EndP.y)) {
         UpdateMusicStream(music);
         BeginDrawing();
-        ClearBackground(RAYWHITE);
-        Draw_Map(StartPoint, m, n, Round, nExplorers-1); 
+        ClearBackground(BackColor);
+        Draw_Map(0, StartPoint, m, n, Round, nExplorers-1); 
         EndDrawing();                                        
 
         if (beg == 'U') {
@@ -1000,7 +993,7 @@ void Shcs_Animation(const char beg, Vector2 *ShcP, const Vector2 EndP, float Spe
     (*ShcP) = EndP;
 }
 
-void Exs_Animation(const char Mdir, const char Tdir, Vector2 *ExsP, const Vector2 EndP, float Speed,
+void Exs_Animation (const char Mdir, const char Tdir, Vector2 *ExsP, const Vector2 EndP, float Speed,
                                 const float SIncrease, Vector2 StartPoint, int m, int n, int i, int Round, Music music) {
 
     if (Mdir == 'A' || Mdir == 'D') {                              
@@ -1009,8 +1002,8 @@ void Exs_Animation(const char Mdir, const char Tdir, Vector2 *ExsP, const Vector
     while (!((*ExsP).x == EndP.x && (*ExsP).y == EndP.y)) {
         UpdateMusicStream(music);
         BeginDrawing();
-        ClearBackground(RAYWHITE);
-        Draw_Map(StartPoint, m, n, Round, i);
+        ClearBackground(BackColor);
+        Draw_Map(0, StartPoint, m, n, Round, i);
         EndDrawing();
 
         if (Mdir == 'W') {                                    
@@ -1158,7 +1151,7 @@ int Get_Explorer_Count_UI(int MaxPlayer) {
     Rectangle rec = {275, 260, 150, 150};
     const int space = 50;
     BeginDrawing();
-    ClearBackground(RAYWHITE);
+    ClearBackground(BackColor);
     DrawText("Enter the number of players", 370, 200, 25, RED);
     for (int i=0; i<MaxPlayer; i++) {
         DrawRectangleGradientH(rec.x+(i*rec.width+i*space), rec.y, rec.width, rec.height, color1, color2);
@@ -1185,47 +1178,10 @@ int Get_Explorer_Count() {
     return 0;
 }
 
-// void Choose_Players_Texture_UI(int PlayersCount, int Player) {
-//     const int MarginHor = 150;
-//     const int MarginVer = 200;
-//     const int space = 100;
-//     char PlayerStr[2];
-//     Rectangle ex1 = {MarginHor+(0*200+0*space), MarginVer+50, 170, 200};
-//     Rectangle ex2 = {MarginHor+(1*200+1*space), MarginVer+50, 170, 200};
-//     Rectangle ex3 = {MarginHor+(2*200+2*space), MarginVer+50, 170, 200};
-//     BeginDrawing();
-//     ClearBackground(RAYWHITE);
-//     DrawText("Player -  -, choose your texture.", MarginHor+135, MarginVer-10, 30, RED);
-//     ItoS(PlayerStr, Player);
-//     DrawText(PlayerStr, MarginHor+265, MarginVer-10, 30, RED);
-//     DrawTexture(Ex1Image, MarginHor+(0*200+0*space), MarginVer+50, RAYWHITE);
-//     DrawTexture(Ex2Image, MarginHor+(1*200+1*space), MarginVer+50, RAYWHITE);
-//     DrawTexture(Ex3Image, MarginHor+(2*200+2*space), MarginVer+50, RAYWHITE);
-//     DrawRectangleLinesEx(ex1, 2.0, BLACK);
-//     DrawRectangleLinesEx(ex2, 2.0, BLACK);
-//     DrawRectangleLinesEx(ex3, 2.0, BLACK);
-//     EndDrawing();
-// }
-// Texture2D Choose_Players_Texture() {
-//     const int MarginHor = 150;
-//     const int MarginVer = 200;
-//     const int space = 100;
-//     Vector2 v = GetMousePosition();
-//     Rectangle ex1 = {MarginHor+(0*200+0*space), MarginVer+50, 170, 200};
-//     Rectangle ex2 = {MarginHor+(1*200+1*space), MarginVer+50, 170, 200};
-//     Rectangle ex3 = {MarginHor+(2*200+2*space), MarginVer+50, 170, 200};
-//     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-//         if (CheckCollisionPointRec(v, ex1)) return Ex1TextureRight;
-//         if (CheckCollisionPointRec(v, ex2)) return Ex2TextureRight;
-//         if (CheckCollisionPointRec(v, ex3)) return Ex3TextureRight;
-//     }
-//     return;
-// }
-
 void Show_Invalid_Move_Error(Vector2 StartPoint, int m, int n, int Round, int ExRound) {
     BeginDrawing();
-    ClearBackground(RAYWHITE);
-    Draw_Map(StartPoint, m, n, Round, ExRound);      
+    ClearBackground(BackColor);
+    Draw_Map(0, StartPoint, m, n, Round, ExRound);      
     Color Red = {230, 41, 55, 150};
     Color Gray = {130, 130, 130, 150};
     DrawRectangle(206, 3, 491, 22, Gray);        
@@ -1235,8 +1191,8 @@ void Show_Invalid_Move_Error(Vector2 StartPoint, int m, int n, int Round, int Ex
 
 void Show_Ended_Walls_Error(Vector2 StartPoint, int m, int n, int Round, int ExRound) {
     BeginDrawing();
-    ClearBackground(RAYWHITE);
-    Draw_Map(StartPoint, m, n, Round, ExRound);
+    ClearBackground(BackColor);
+    Draw_Map(0, StartPoint, m, n, Round, ExRound);
     Color Red = {230, 41, 55, 150};
     Color Gray = {130, 130, 130, 150};
     DrawRectangle(206, 3, 491, 22, Gray);
@@ -1251,12 +1207,23 @@ void Dead_Explorer(int l, Sound DieSound, int Round) {
     PlaySound(DieSound);
 }
 
+void Check_Witch_Player_is_Dead(int Round, Sound DieSound) {
+    for (int j=0; j<nExplorers; j++) {
+        for (int i=0; i<nShadowCasters; i++) {
+            if (Explorers[j].isAlive)
+            if ((int)Explorers[j].mapPos.y==(int)ShadowCasters[i].y && (int)Explorers[j].mapPos.x==(int)ShadowCasters[i].x)
+            Dead_Explorer(j , DieSound, Round);
+            
+        }     
+    }
+}
+
 void Win_Explorer(int l, Sound WinSound, int Round) {
         Explorers[l].isAlive = false;
         Explorers[l].age = Round;
         map[(int)Explorers[l].mapPos.y][(int)Explorers[l].mapPos.x] = 1;
         PlaySound(WinSound);
-    }
+}
 
 int Are_All_Players_Have_Won() {
 /*
@@ -1279,10 +1246,8 @@ int Are_All_Players_Dead() {
     return 0;
 }
 
-int Show_End_Screen() {    
+void Show_End_Screen() {    
     int i, WinnerCount=0, LoserCount=0;
-    BeginDrawing();
-    ClearBackground(RAYWHITE);
     DrawText("WINNERS:" , 200, 190, 40, RED);
     DrawText("LOSERS:", 700, 190, 40, RED);
     for (i=0; i<nExplorers; i++) {
@@ -1306,14 +1271,1265 @@ int Show_End_Screen() {
             LoserCount ++;
         }
     }
-    DrawRectangle(500, 450, 100, 50, LIGHTGRAY);
-    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-        Vector2 v = GetMousePosition();
-        if (v.x>=500 && v.x<=600 && v.y>=450 && v.y<=550) return 1;
-    } 
-    EndDrawing(); 
+}
+
+int Is_Present_Gotten() {
+    for (int i=0; i<nGifts; i++)
+        if (Gifts[i].isGotten == false) {
+            if ((int) Gifts[i].mapPos.x == (int) Explorers[0].mapPos.x && (int) Gifts[i].mapPos.y == (int) Explorers[0].mapPos.y)
+                return i+1;  
+            if ((int) Gifts[i].mapPos.x == (int) Explorers[1].mapPos.x && (int) Gifts[i].mapPos.y == (int) Explorers[1].mapPos.y)
+                return i+1;  
+            if ((int) Gifts[i].mapPos.x == (int) Explorers[2].mapPos.x && (int) Gifts[i].mapPos.y == (int) Explorers[2].mapPos.y)
+                return i+1; 
+        }
     return 0;
 }
 
+void Show_Present_Rec(Vector2 StartPoint, int m, int n, int Round, int ExRound, Music music) {
+    float width = 10;
+    float height = 6;
+    Rectangle rec = {StartPoint.x+(Side*n)/2-5, WindowHeight-20, width, height};
+    Color backColor = {20, 180, 150, 255};
+    while (rec.y >= 260) { 
+        BeginDrawing();
+        ClearBackground(BackColor);
+        Pointer_To_Player(ExRound, StartPoint);
+        Draw_Map(0, StartPoint, m, n, Round, ExRound);
+        UpdateMusicStream(music);
+        DrawRectangleRounded(rec, 0.1f, 10, backColor);
+        EndDrawing();
+        backColor.a -= 2.5;
+        backColor.r += 3;
+        backColor.b -= 2;
+        backColor.g -= 3;
+        rec.y -= 10;
+        rec.x -= 5;
+        rec.width += 10;
+        rec.height += 6;    
+    }
+}
+
+void Show_Present(Vector2 StartPoint, int m, int n, int Round, int ExRound, Gift name, Music music) {
+    // r=59 g=63 b=72 a=157 from Show_Present_UI (backColor at last)
+    // x=255 y=250 w=390 h=234 from Show_Present_UI (rec at last)
+    Color color = {59, 63, 72, 157};
+    // Color TextColor = {1}
+    Rectangle rec = {255, 250, 390, 234};
+
+    UpdateMusicStream(music);
+    BeginDrawing();
+    ClearBackground(BackColor);
+    Draw_Map(0, StartPoint, m, n, Round, ExRound);
+    Pointer_To_Player(ExRound, StartPoint);
+    DrawRectangleRounded(rec, 0.1f, 10, color);
+    if (name == Replay) 
+        {char str[30] = "REPLAY GIFT"; DrawText(str, rec.x+92, rec.y+rec.height/2-20, 30, GOLD);}
+    else if (name == InWallIncrease)
+        {char str[30] = "INTERIM WALL\n   INCREASE"; DrawText(str, rec.x+75, rec.y+rec.height/2-50, 30, GOLD);}
+    else if (name == ForceEnemy) 
+        {char str[30] = "FORCE ENEMY"; DrawText(str, rec.x+82, rec.y+rec.height/2-20, 30, GOLD);}
+    else if (name == Earthquake) 
+        {char str[30] = "EARTHQUAKE   "; DrawText(str, rec.x+84, rec.y+rec.height/2-20, 30, GOLD);}
+    DrawText("Press SPACE key to okay.", rec.x+89, rec.y+rec.height/2+20, 20, GOLD);
+    EndDrawing();
+}
+
+void ReplayGift(int *l) {(*l) --;}
+
+void InWallIncreaseGift(int l) {Explorers[l].wallCount += 2;}
+
+void Number_Gifts(int m, int n) {nGifts = nShadowCasters;}
+
+int BFS_Gift(int checked[][2], int start, int end, int m, int n, int len) {
+    int i; len++; int k=0;
+    for (i=start; i<=end; i++) {
+        if (map[checked[i][0]-1][checked[i][1]] == 1 && (map[checked[i][0]-2][checked[i][1]] == 1 || map[checked[i][0]-2][checked[i][1]] == 2)) {
+            if (map[checked[i][0]-2][checked[i][1]] == 2) {
+                if (len<3) return 0;
+                else return 1;
+            }
+            else {
+                map[checked[i][0]-2][checked[i][1]] = 0;
+                k++; checked[end+k][0] = checked[i][0]-2; checked[end+k][1] = checked[i][1];
+            }
+        }
+        if (map[checked[i][0]][checked[i][1]+1] == 1 && (map[checked[i][0]][checked[i][1]+2] == 1 || map[checked[i][0]][checked[i][1]+2] == 2)) {
+            if (map[checked[i][0]][checked[i][1]+2] == 2) {
+                if (len<3) return 0;
+                else return 1;
+            }
+            else {
+                map[checked[i][0]][checked[i][1]+2] = 0;
+                k++; checked[end+k][0] = checked[i][0]; checked[end+k][1] = checked[i][1]+2;
+            }
+        }
+        if (map[checked[i][0]+1][checked[i][1]] == 1 && (map[checked[i][0]+2][checked[i][1]] == 1 || map[checked[i][0]+2][checked[i][1]] == 2)) {
+            if (map[checked[i][0]+2][checked[i][1]] == 2) {
+                if (len<3) return 0;
+                else return 1;
+            }
+            else {
+                map[checked[i][0]+2][checked[i][1]] = 0;
+                k++; checked[end+k][0] = checked[i][0]+2; checked[end+k][1] = checked[i][1];
+            }
+        }
+        if (map[checked[i][0]][checked[i][1]-1] == 1 && (map[checked[i][0]][checked[i][1]-2] == 1 || map[checked[i][0]][checked[i][1]-2] == 2)) {
+            if (map[checked[i][0]][checked[i][1]-2] == 2) {
+                if (len<3) return 0;
+                else return 1;
+            }
+            else {
+                map[checked[i][0]][checked[i][1]-2] = 0;
+                k++; checked[end+k][0] = checked[i][0]; checked[end+k][1] = checked[i][1]-2;
+            }
+        }
+    }
+    
+    if (k==0) return 0;
+    start = end + 1; end += k;
+    return BFS_Gift(checked, start, end, m, n, len); 
+}
+
+int Rectangles_Around_Shc(Vector2 RecsMapP[][4], Rectangle RecsAround[][4], Vector2 Shc, int Index, Vector2 StartPoint) {
+    int nRectangles = 0;
+    if (map[(int)Shc.y-1][(int)Shc.x] == 1 && !(map[(int)Shc.y-2][(int)Shc.x] == 3)) {
+        Vector2 coordinate; coordinate.y = Shc.y-2; coordinate.x = Shc.x;
+        Vector2 temp = GET_Start_Elements_Position_for_Draw(StartPoint, coordinate);
+        Rectangle R = {temp.x-2, temp.y-3, Side, Side};
+        nRectangles++;
+        RecsMapP[Index][nRectangles-1] = coordinate; 
+        RecsAround[Index][nRectangles-1] = R;
+    }
+    if (map[(int)Shc.y][(int)Shc.x+1] == 1 && !(map[(int)Shc.y][(int)Shc.x+2] == 3)) {
+        Vector2 coordinate; coordinate.y = Shc.y; coordinate.x = Shc.x+2;
+        Vector2 temp = GET_Start_Elements_Position_for_Draw(StartPoint, coordinate);
+        Rectangle R = {temp.x-2, temp.y-3, Side, Side};
+        nRectangles++;
+        RecsMapP[Index][nRectangles-1] = coordinate;
+        RecsAround[Index][nRectangles-1] = R;
+    }
+    if (map[(int)Shc.y+1][(int)Shc.x] == 1 && !(map[(int)Shc.y+2][(int)Shc.x] == 3)) {
+        Vector2 coordinate; coordinate.y = Shc.y+2; coordinate.x = Shc.x;
+        Vector2 temp = GET_Start_Elements_Position_for_Draw(StartPoint, coordinate);
+        Rectangle R = {temp.x-2, temp.y-3, Side, Side};
+        nRectangles++;
+        RecsMapP[Index][nRectangles-1] = coordinate;
+        RecsAround[Index][nRectangles-1] = R;
+    }
+    if (map[(int)Shc.y][(int)Shc.x-1] == 1 && !(map[(int)Shc.y][(int)Shc.x-2] == 3)) {
+        Vector2 coordinate; coordinate.y = Shc.y; coordinate.x = Shc.x-2;
+        Vector2 temp = GET_Start_Elements_Position_for_Draw(StartPoint, coordinate);
+        Rectangle R = {temp.x-2, temp.y-3, Side, Side};
+        nRectangles++;
+        RecsMapP[Index][nRectangles-1] = coordinate;
+        RecsAround[Index][nRectangles-1] = R;
+    }
+    return nRectangles;
+}
+
+void Force_Shc(Vector2 StartPoint, int m, int n, Music GameMusic, int Round, int ExRound, Sound ForceSound) {
+    Rectangle ShcsR[nShadowCasters]; int nRecsA[nShadowCasters];
+    Rectangle RecsAround[nShadowCasters][4]; Vector2 RecsMapP[nShadowCasters][4];
+    int i;
+    for (i=0; i<nShadowCasters; i++) {
+        Rectangle R = {ShadowCastersP[i].x-2, ShadowCastersP[i].y-3, Side, Side};
+        ShcsR[i] = R;
+        nRecsA[i] = Rectangles_Around_Shc(RecsMapP, RecsAround, ShadowCasters[i], i, StartPoint);
+    }
+
+    bool MovedShc = false; bool LockinShc = false; bool Move = false;
+    while (!MovedShc) {
+        UpdateMusicStream(GameMusic);
+        BeginDrawing();
+        ClearBackground(BackColor);
+        Draw_Map(0, StartPoint, m, n, Round, ExRound);
+        EndDrawing();
+
+        Color Yellow = {253, 249, 0, 150}; Vector2 Mous = GetMousePosition();
+        int ShcIndex;
+        for (i=0; !LockinShc && i<nShadowCasters; i++) {
+            if (nRecsA[i]) {
+                DrawRectangleRec(ShcsR[i], Yellow);
+                if (CheckCollisionPointRec(Mous, ShcsR[i]) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                    ShcIndex = i;
+                    LockinShc = true;
+                }
+            }
+        }
+
+        Vector2 Position;
+        while (LockinShc) {
+            UpdateMusicStream(GameMusic);
+            BeginDrawing();
+            ClearBackground(BackColor);
+            Draw_Map(0, StartPoint, m, n, Round, ExRound);
+            EndDrawing();
+
+            Vector2 Mous = GetMousePosition(); Color Magneta = {180, 20, 200, 150};
+            for (i=0; i<nRecsA[ShcIndex]; i++) {
+                DrawRectangleRec(RecsAround[ShcIndex][i], Magneta);
+                if (CheckCollisionPointRec(Mous, RecsAround[ShcIndex][i]) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                    Position = RecsMapP[ShcIndex][i];
+                    Move = true;
+                    LockinShc = false;
+                }
+            }
+
+            if (IsKeyPressed(KEY_Q)) {
+                LockinShc = false;
+            }
+        }
+
+        if (Move) {
+            char beg;
+            if (ShadowCasters[ShcIndex].x == Position.x) {
+                if (ShadowCasters[ShcIndex].y>Position.y) beg = 'D';
+                else beg = 'U';
+            } else {            
+                if (ShadowCasters[ShcIndex].x>Position.x) beg = 'R';
+                else beg = 'L';            
+            }
+
+            PlaySound(ForceSound); 
+            Vector2 EndPosition = GET_Start_Elements_Position_for_Draw(StartPoint, Position);
+            Shcs_Animation_without_Change_Direction(beg, &ShadowCastersP[ShcIndex], EndPosition, 0.2f, 0.5f, StartPoint, m, n, ShcIndex, Round, GameMusic);
+            ShadowCasters[ShcIndex] = Position;
+            Reset_Map_Blocks_for_Move_Elements(m, n);
+            MovedShc = true;
+        }
+
+        
+    }
+}
+
+void Add_Earthquake_Wall(EarthqWall Walls[], int *nWalls, Vector2 StartPoint, int m, int n, int EarthqMap[][2*n+1], int N, float pixels, int Case) {
+    if (Case == 1) {
+        int i;
+        for (i=0; i<N; i++) {
+            bool InputAgain = true;
+            do {
+                int y = 2*(rand()%m)+1; int x = 2*(rand()%n)+1;
+                char HorV; int c = rand()%2;
+                if (c == 0) HorV = 'H';
+                else HorV = 'V';
+                if (HorV == 'H') {
+                    c = rand()%2;
+                    if (!c) y -= 1;
+                    else y += 1;
+                } else {
+                    c = rand()%2;
+                    if (!c) x -= 1;
+                    else x += 1;
+                }
+
+                if (EarthqMap[y][x]==0) {
+                    InputAgain = false;
+                    EarthqMap[y][x] = 1;
+                    (*nWalls)++;
+                    Walls[*nWalls-1].mapPos.y = (float)y; Walls[*nWalls-1].mapPos.x = (float)x;
+                    WallPro W; W.Position.y = (float)y; W.Position.x = (float)x; W.HorV = HorV;
+                    Walls[*nWalls-1].Start = GET_Start_Walls_Position_for_Draw(StartPoint, W);
+                    if (HorV == 'H') {
+                        Walls[*nWalls-1].End = Walls[*nWalls-1].Start;
+                        Walls[*nWalls-1].End.x += Side; 
+                    } else {
+                        Walls[*nWalls-1].End = Walls[*nWalls-1].Start;
+                        Walls[*nWalls-1].End.y += Side; 
+                    }
+                    Walls[*nWalls-1].HorV = HorV; c = rand()%2; 
+                    if (!c) Walls[*nWalls-1].dir = -1;
+                    else Walls[*nWalls-1].dir = 1;
+                    Walls[*nWalls-1].pixels = pixels; Walls[*nWalls-1].n = 0.0f;
+                    Walls[*nWalls-1].level = 1; 
+                } 
+            } while (InputAgain);
+        }
+    } else if (Case == 2) {
+        bool InputAgain = true;
+        do {
+            int y = 2*(rand()%m)+1; int x = 2*(rand()%n)+1;
+            char HorV; int c = rand()%2;
+            if (!c) HorV = 'H';
+            else HorV = 'V';
+            if (HorV == 'H') {
+                c = rand()%2;
+                if (!c) y -= 1;
+                else y += 1;
+            } else {
+                c = rand()%2;
+                if (!c) x -= 1;
+                else x += 1;
+            }
+
+            if (EarthqMap[y][x]==0) {
+                InputAgain = false;
+                EarthqMap[y][x] = 1;
+                (*nWalls)++;
+                Walls[*nWalls-1].mapPos.y = (float)y; Walls[*nWalls-1].mapPos.x = (float)x;
+                WallPro W; W.Position.y = (float)y; W.Position.x = (float)x; W.HorV = HorV;
+                Walls[*nWalls-1].Start = GET_Start_Walls_Position_for_Draw(StartPoint, W);
+                if (HorV == 'H') {
+                    Walls[*nWalls-1].End = Walls[*nWalls-1].Start;
+                    Walls[*nWalls-1].End.x += Side; 
+                } else {
+                    Walls[*nWalls-1].End = Walls[*nWalls-1].Start;
+                    Walls[*nWalls-1].End.y += Side; 
+                }
+                Walls[*nWalls-1].HorV = HorV; c = rand()%2; 
+                if (!c) Walls[*nWalls-1].dir = -1;
+                else Walls[*nWalls-1].dir = 1;
+                Walls[*nWalls-1].pixels = pixels; Walls[*nWalls-1].n = 0.0f;
+                Walls[*nWalls-1].level = 1; 
+            }
+        } while (InputAgain);
+    }
+}
+
+void Coordinate_Around_for_Earthquake(int Case, Vector2 mapP, Vector2 Around[], int *nAround) {
+    if (Case == -1) {
+        (*nAround) = 0;
+        if (map[(int)mapP.y-1][(int)mapP.x] == 1 && (map[(int)mapP.y-2][(int)mapP.x] == 1 || map[(int)mapP.y-2][(int)mapP.x] == -1)) {
+            Vector2 coordinate; coordinate.y = mapP.y-2; coordinate.x = mapP.x;
+            (*nAround)++;
+            Around[*nAround-1] = coordinate; 
+        }
+        if (map[(int)mapP.y][(int)mapP.x+1] == 1 && (map[(int)mapP.y][(int)mapP.x+2] == 1 || map[(int)mapP.y][(int)mapP.x+2] == -1)) {
+            Vector2 coordinate; coordinate.y = mapP.y; coordinate.x = mapP.x+2;
+            (*nAround)++;
+            Around[*nAround-1] = coordinate; 
+        }
+        if (map[(int)mapP.y+1][(int)mapP.x] == 1 && (map[(int)mapP.y+2][(int)mapP.x] == 1 || map[(int)mapP.y+2][(int)mapP.x] == -1)) {
+            Vector2 coordinate; coordinate.y = mapP.y+2; coordinate.x = mapP.x;
+            (*nAround)++;
+            Around[*nAround-1] = coordinate; 
+        }
+        if (map[(int)mapP.y][(int)mapP.x-1] == 1 && (map[(int)mapP.y][(int)mapP.x-2] == 1 || map[(int)mapP.y][(int)mapP.x-2] == -1)) {
+            Vector2 coordinate; coordinate.y = mapP.y; coordinate.x = mapP.x-2;
+            (*nAround)++;
+            Around[*nAround-1] = coordinate; 
+        }
+    } else {
+            (*nAround) = 0;
+        if (map[(int)mapP.y-1][(int)mapP.x] == 1 && (map[(int)mapP.y-2][(int)mapP.x] == 1 || map[(int)mapP.y-2][(int)mapP.x] == 2)) {
+            Vector2 coordinate; coordinate.y = mapP.y-2; coordinate.x = mapP.x;
+            (*nAround)++;
+            Around[*nAround-1] = coordinate; 
+        }
+        if (map[(int)mapP.y][(int)mapP.x+1] == 1 && (map[(int)mapP.y][(int)mapP.x+2] == 1 || map[(int)mapP.y][(int)mapP.x+2] == 2)) {
+            Vector2 coordinate; coordinate.y = mapP.y; coordinate.x = mapP.x+2;
+            (*nAround)++;
+            Around[*nAround-1] = coordinate; 
+        }
+        if (map[(int)mapP.y+1][(int)mapP.x] == 1 && (map[(int)mapP.y+2][(int)mapP.x] == 1 || map[(int)mapP.y+2][(int)mapP.x] == 2)) {
+            Vector2 coordinate; coordinate.y = mapP.y+2; coordinate.x = mapP.x;
+            (*nAround)++;
+            Around[*nAround-1] = coordinate; 
+        }
+        if (map[(int)mapP.y][(int)mapP.x-1] == 1 && (map[(int)mapP.y][(int)mapP.x-2] == 1 || map[(int)mapP.y][(int)mapP.x-2] == 2)) {
+            Vector2 coordinate; coordinate.y = mapP.y; coordinate.x = mapP.x-2;
+            (*nAround)++;
+            Around[*nAround-1] = coordinate; 
+        }
+    }
+}
 
 
+void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusic, int ExIndex, Sound EarthquakeSound) {
+    PlaySound(EarthquakeSound);
+    int N ;
+    if (m*n < 42) N = 15;
+    else if (m*n < 90) N = 30;
+    else if (m*n <145) N = 50;
+
+    EarthqWall Walls[N];
+    int nWalls = 0;
+
+    int EarthqMap[2*m+1][2*n+1];
+    int j, i;
+    for (j=0; j<2*m+1; j+=2) {
+        for (i=1; i<2*n+1; i+=2) {
+            EarthqMap[j][i] = 0;
+        }   
+    }
+    for (i=0 ; i<2*n+1; i+=2) {
+        for (j=1 ; j<2*m+1; j+=2) {
+            EarthqMap[j][i] = 0;
+        }
+    }
+
+    float MovePixels = 1.0f;
+    float WallsPixels = 8*MovePixels;
+    Add_Earthquake_Wall(Walls, &nWalls, StartPoint, m, n, EarthqMap, N, WallsPixels, 1);
+
+    Color O = {255, 161, 0, 255};     // Orange - explorer-placed walls
+    Color R = {230, 41, 55, 255};     // Red - user-placed walls
+    Color B = {0, 0, 0, 255*(0.4f)};          // Black - Semi-transparent black - guide lines
+
+    typedef struct PositionsAround {
+        Vector2 Around[4];
+        int nAround;
+    } PositionsAround;
+
+    PositionsAround PositionsAShcs[nShadowCasters];
+    PositionsAround PositionsAExs[nExplorers];
+    
+    Vector2 ShcsMapDestin[nShadowCasters], ShcsWinDestin[nShadowCasters]; 
+    Vector2 ExsMapDestin[nExplorers], ExsWinDestin[nExplorers];
+    int canShcsMove[nShadowCasters], canExsMove[nExplorers];
+    for (i=0; i<nShadowCasters; i++) canShcsMove[i] = 0;
+    for (i=0; i<nExplorers; i++) canExsMove[i] = 0;
+
+    for (i=0; i<nShadowCasters; i++) {
+        Coordinate_Around_for_Earthquake(-1, ShadowCasters[i], PositionsAShcs[i].Around, &(PositionsAShcs[i].nAround));
+        if (PositionsAShcs[i].nAround>0) {
+            int c = rand()%PositionsAShcs[i].nAround;
+            ShcsMapDestin[i] = PositionsAShcs[i].Around[c];
+            ShcsWinDestin[i] = GET_Start_Elements_Position_for_Draw(StartPoint, ShcsMapDestin[i]);
+            canShcsMove[i] = 1;
+
+            map[(int)ShadowCasters[i].y][(int)ShadowCasters[i].x] = 1;
+            ShadowCasters[i] = ShcsMapDestin[i];  
+            map[(int)ShadowCasters[i].y][(int)ShadowCasters[i].x] = -1;
+            // Reset_Map_Blocks_for_Move_Elements(m, n);
+        } else canShcsMove[i] = 0;
+    }
+    
+    for (i=0; i<nExplorers; i++) {
+        if (Explorers[i].isAlive) {
+            Coordinate_Around_for_Earthquake(1, Explorers[i].mapPos, PositionsAExs[i].Around, &(PositionsAExs[i].nAround));
+        }
+        if (Explorers[i].isAlive && PositionsAExs[i].nAround>0) {
+            int c = rand()%PositionsAExs[i].nAround;
+            ExsMapDestin[i] = PositionsAExs[i].Around[c];
+            ExsWinDestin[i] = GET_Start_Elements_Position_for_Draw(StartPoint, ExsMapDestin[i]);
+            canExsMove[i] = 1;
+
+            map[(int)Explorers[i].mapPos.y][(int)Explorers[i].mapPos.x] = 1;
+            Explorers[i].mapPos = ExsMapDestin[i];
+            map[(int)Explorers[i].mapPos.y][(int)Explorers[i].mapPos.x] = 2;
+            // Reset_Map_Blocks_for_Move_Elements(m, n);
+        } else canExsMove[i] = 0;
+    }
+    
+    char ShcsBeg[nShadowCasters];
+    char ExsDir[nExplorers];
+    for (i=0; i<nShadowCasters; i++) {
+        if (canShcsMove[i]) {
+            if (ShcsWinDestin[i].y==ShadowCastersP[i].y) {
+                if (ShcsWinDestin[i].x>ShadowCastersP[i].x) ShcsBeg[i] = 'L';
+                else ShcsBeg[i] = 'R'; 
+            } else {
+                if (ShcsWinDestin[i].y>ShadowCastersP[i].y) ShcsBeg[i] = 'U';
+                else ShcsBeg[i] = 'D';
+            }
+        }
+    }
+    for (i=0; i<nExplorers; i++) {
+        if (Explorers[i].isAlive && canExsMove[i]) {
+            if (ExsWinDestin[i].y==Explorers[i].winPos.y) {
+                if (ExsWinDestin[i].x>Explorers[i].winPos.x) ExsDir[i] = 'D';
+                else ExsDir[i] = 'A'; 
+            } else {
+                if (ExsWinDestin[i].y>Explorers[i].winPos.y) ExsDir[i] = 'S';
+                else ExsDir[i] = 'W'; 
+            }
+        }
+    }
+    
+    //     typedef struct EarthquakeWall {
+    //     int level;
+    //     Vector2 Start;
+    //     Vector2 End;
+    //     Vector2 mapPos;
+    //     char HorV;
+    //     int dir;
+    //     float pixels;
+    //     float n;
+    // } EarthqWall;
+    double t0 = GetTime();  
+    while (GetTime()-t0<2.5) {
+        UpdateMusicStream(GameMusic);
+        BeginDrawing();
+        ClearBackground(BackColor);
+        Draw_Map(1, StartPoint, m, n, Round, nExplorers-1); 
+        EndDrawing(); 
+        
+        WallPro W;
+        Vector2 StartP, EndP;
+        for (j=0; j<2*m+1; j+=2) {
+            for (i=1; i<2*n+1; i+=2) {
+                if (EarthqMap[j][i] == 0) {
+                    W.Position.x = (float)i; W.Position.y = (float)j; W.HorV = 'H';
+                    StartP = GET_Start_Walls_Position_for_Draw(StartPoint, W);
+                    EndP.x = StartP.x + Side; EndP.y = StartP.y;
+                    if (map[j][i] == 1) DrawLineEx(StartP, EndP, 1.0f, B);
+                    else if (map[j][i] == 0) DrawLineEx(StartP, EndP, WallTh, R);
+                    else if(map[j][i] == -1) DrawLineEx(StartP, EndP, WallTh, BLACK);
+                    else DrawLineEx(StartP, EndP, WallTh, O);
+                }
+            }
+        }
+        for (i=0 ; i<2*n+1; i+=2) {
+            for (j=1 ; j<2*m+1; j+=2) {
+                if (EarthqMap[j][i] == 0) {
+                    W.Position.x = (float)i; W.Position.y = (float)j; W.HorV = 'V';
+                    StartP = GET_Start_Walls_Position_for_Draw(StartPoint, W);
+                    EndP.x = StartP.x; EndP.y = StartP.y + Side;
+                    if (map[j][i] == 1) DrawLineEx(StartP, EndP, 1.0f, B);
+                    else if(map[j][i] == 0) DrawLineEx(StartP, EndP, WallTh, R);
+                    else if(map[j][i] == -1) DrawLineEx(StartP, EndP, WallTh, BLACK);
+                    else DrawLineEx(StartP, EndP, WallTh, O);
+                }
+            }
+        }
+        for (i=0; i<nWalls; i++) {
+            if (Walls[i].level == 1) {
+                if (Walls[i].pixels == 0.0f) {
+                    if (Walls[i].HorV == 'H') {
+                        Walls[i].Start.y += (Walls[i].dir*Walls[i].n); Walls[i].End.y += (Walls[i].dir*Walls[i].n);
+                    } else {
+                        Walls[i].Start.x += (Walls[i].dir*Walls[i].n); Walls[i].End.x += (Walls[i].dir*Walls[i].n);
+                    }
+                    Walls[i].level++; Walls[i].pixels += (2*WallsPixels); Walls[i].dir *= -1; Walls[i].n = 0.0f;
+                } else {
+                    Walls[i].pixels-=MovePixels; Walls[i].n+=MovePixels;
+
+                    int y = (int)Walls[i].mapPos.y; int x = (int)Walls[i].mapPos.x;
+                    Vector2 S = Walls[i].Start; Vector2 E = Walls[i].End;
+                    if (Walls[i].HorV == 'H') { 
+                        S.y += (Walls[i].dir*Walls[i].n); E.y += (Walls[i].dir*Walls[i].n);
+                    } else {
+                        S.x += (Walls[i].dir*Walls[i].n); E.x += (Walls[i].dir*Walls[i].n);
+                    }
+
+                    if (map[y][x] == 1) DrawLineEx(S, E, 1.0f, B);
+                    else if(map[y][x] == 0) DrawLineEx(S, E, WallTh, R);
+                    else if(map[y][x] == -1) DrawLineEx(S, E, WallTh, BLACK);
+                    else DrawLineEx(S, E, WallTh, O);
+                }
+            } 
+            if (Walls[i].level == 2) {                
+                if (Walls[i].pixels == 0.0f) {
+                    if (Walls[i].HorV == 'H') {
+                        Walls[i].Start.y += (Walls[i].dir*Walls[i].n); Walls[i].End.y += (Walls[i].dir*Walls[i].n);
+                    } else {
+                        Walls[i].Start.x += (Walls[i].dir*Walls[i].n); Walls[i].End.x += (Walls[i].dir*Walls[i].n);
+                    }
+                    Walls[i].level++; Walls[i].pixels += WallsPixels; Walls[i].dir *= -1; Walls[i].n = 0.0f;
+                } else {
+                    Walls[i].pixels-=MovePixels; Walls[i].n+=MovePixels;
+
+                    int y = (int)Walls[i].mapPos.y; int x = (int)Walls[i].mapPos.x;
+                    Vector2 S = Walls[i].Start; Vector2 E = Walls[i].End;
+                    if (Walls[i].HorV == 'H') {
+                        S.y += (Walls[i].dir*Walls[i].n); E.y += (Walls[i].dir*Walls[i].n);
+                    } else {
+                        S.x += (Walls[i].dir*Walls[i].n); E.x += (Walls[i].dir*Walls[i].n);
+                    }
+
+                    if (map[y][x] == 1) DrawLineEx(S, E, 1.0f, B);
+                    else if(map[y][x] == 0) DrawLineEx(S, E, WallTh, R);
+                    else if(map[y][x] == -1) DrawLineEx(S, E, WallTh, BLACK);
+                    else DrawLineEx(S, E, WallTh, O);        
+                }
+            } 
+            if (Walls[i].level == 3) {
+                if (Walls[i].pixels == 0.0f) {
+                    int y = (int)Walls[i].mapPos.y; int x = (int)Walls[i].mapPos.x;
+                    EarthqMap[y][x] = 0; int temp = i;
+                    Add_Earthquake_Wall(Walls, &temp, StartPoint, m, n, EarthqMap, 0, WallsPixels, 2);
+                } else {
+                    Walls[i].pixels-=MovePixels; Walls[i].n+=MovePixels;
+
+                    int y = (int)Walls[i].mapPos.y; int x = (int)Walls[i].mapPos.x;
+                    Vector2 S = Walls[i].Start; Vector2 E = Walls[i].End;
+                    if (Walls[i].HorV == 'H') {
+                        S.y += (Walls[i].dir*Walls[i].n); E.y += (Walls[i].dir*Walls[i].n);
+                    } else {
+                        S.x += (Walls[i].dir*Walls[i].n); E.x += (Walls[i].dir*Walls[i].n);
+                    }
+
+                    if (map[y][x] == 1) DrawLineEx(S, E, 1.0f, B);
+                    else if(map[y][x] == 0) DrawLineEx(S, E, WallTh, R);
+                    else if(map[y][x] == -1) DrawLineEx(S, E, WallTh, BLACK);
+                    else DrawLineEx(S, E, WallTh, O);        
+                }
+            }
+        }   
+    }
+    
+    
+    int sw = -1; float pixels = 4; int frame = 0;
+    float Speed = 0.01f; float SIncrease = 0.006f;
+    for (i=0; i<nShadowCasters; i++) {
+        if (canShcsMove[i]>0) {
+            if (ShcsBeg[i] == 'U' || ShcsBeg[i] == 'D') ShadowCastersP[i].x += pixels;
+            else ShadowCastersP[i].y += pixels;
+        }
+    }
+    for (i=0; i<nExplorers; i++) {
+        if (Explorers[i].isAlive && canExsMove[i]) {
+            if (ExsDir[i] == 'D' || ExsDir[i] == 'S') ShadowCastersP[i].x += pixels;
+            else ShadowCastersP[i].y += pixels;
+        }
+    }
+    
+    for (i=0; i<nShadowCasters; i++) if (canShcsMove[i]==0) ShadowCastersP[i] = GET_Start_Elements_Position_for_Draw(StartPoint, ShadowCasters[i]);
+    //رفع باگ مسخره
+    
+    bool Done = false;
+    while (!Done) {
+        UpdateMusicStream(GameMusic);
+        BeginDrawing();
+        ClearBackground(BackColor);
+        Draw_Map(1, StartPoint, m, n, Round, nExplorers-1); 
+        EndDrawing(); 
+        for (i=0; i<nShadowCasters; i++) {
+            if (canShcsMove[i]>0) {
+                int re = Earthquak_ShadowCasters_Animation(ShcsBeg[i], &ShadowCastersP[i], ShcsWinDestin[i], Speed, sw, frame, pixels);
+                if (!re) canShcsMove[i] = 0;
+            }
+        }
+
+        for (i=0; i<nExplorers; i++) {
+            if (Explorers[i].isAlive && canExsMove[i]) {
+                int re = Earthquak_Explorers_Animation(ExsDir[i], &Explorers[i].winPos, ExsWinDestin[i], Speed, sw, frame, pixels);
+                if (!re) canExsMove[i] = 0;
+            }
+        }
+  
+        if (!Done) {
+            WallPro W;
+            Vector2 StartP, EndP;
+            for (j=0; j<2*m+1; j+=2) {
+                for (i=1; i<2*n+1; i+=2) {
+                    if (EarthqMap[j][i] == 0) {
+                        W.Position.x = (float)i; W.Position.y = (float)j; W.HorV = 'H';
+                        StartP = GET_Start_Walls_Position_for_Draw(StartPoint, W);
+                        EndP.x = StartP.x + Side; EndP.y = StartP.y;
+                        if (map[j][i] == 1) DrawLineEx(StartP, EndP, 1.0f, B);
+                        else if (map[j][i] == 0) DrawLineEx(StartP, EndP, WallTh, R);
+                        else if(map[j][i] == -1) DrawLineEx(StartP, EndP, WallTh, BLACK);
+                        else DrawLineEx(StartP, EndP, WallTh, O);
+                    }
+                }
+            }
+            for (i=0 ; i<2*n+1; i+=2) {
+                for (j=1 ; j<2*m+1; j+=2) {
+                    if (EarthqMap[j][i] == 0) {
+                        W.Position.x = (float)i; W.Position.y = (float)j; W.HorV = 'V';
+                        StartP = GET_Start_Walls_Position_for_Draw(StartPoint, W);
+                        EndP.x = StartP.x; EndP.y = StartP.y + Side;
+                        if (map[j][i] == 1) DrawLineEx(StartP, EndP, 1.0f, B);
+                        else if(map[j][i] == 0) DrawLineEx(StartP, EndP, WallTh, R);
+                        else if(map[j][i] == -1) DrawLineEx(StartP, EndP, WallTh, BLACK);
+                        else DrawLineEx(StartP, EndP, WallTh, O);
+                    }
+                }
+            }
+            for (i=0; i<nWalls; i++) {
+                if (Walls[i].level == 1) {
+                    if (Walls[i].pixels == 0.0f) {
+                        if (Walls[i].HorV == 'H') {
+                            Walls[i].Start.y += (Walls[i].dir*Walls[i].n); Walls[i].End.y += (Walls[i].dir*Walls[i].n);
+                        } else {
+                            Walls[i].Start.x += (Walls[i].dir*Walls[i].n); Walls[i].End.x += (Walls[i].dir*Walls[i].n);
+                        }
+                        Walls[i].level++; Walls[i].pixels += (2*WallsPixels); Walls[i].dir *= -1; Walls[i].n = 0.0f;
+                    } else {
+                        Walls[i].pixels-=MovePixels; Walls[i].n+=MovePixels;
+
+                        int y = (int)Walls[i].mapPos.y; int x = (int)Walls[i].mapPos.x;
+                        Vector2 S = Walls[i].Start; Vector2 E = Walls[i].End;
+                        if (Walls[i].HorV == 'H') {
+                            S.y += (Walls[i].dir*Walls[i].n); E.y += (Walls[i].dir*Walls[i].n);
+                        } else {
+                            S.x += (Walls[i].dir*Walls[i].n); E.x += (Walls[i].dir*Walls[i].n);
+                        }
+
+                        if (map[y][x] == 1) DrawLineEx(S, E, 1.0f, B);
+                        else if(map[y][x] == 0) DrawLineEx(S, E, WallTh, R);
+                        else if(map[y][x] == -1) DrawLineEx(S, E, WallTh, BLACK);
+                        else DrawLineEx(S, E, WallTh, O);
+                    }
+                } 
+                if (Walls[i].level == 2) {                
+                    if (Walls[i].pixels == 0.0f) {
+                        if (Walls[i].HorV == 'H') {
+                            Walls[i].Start.y += (Walls[i].dir*Walls[i].n); Walls[i].End.y += (Walls[i].dir*Walls[i].n);
+                        } else {
+                            Walls[i].Start.x += (Walls[i].dir*Walls[i].n); Walls[i].End.x += (Walls[i].dir*Walls[i].n);
+                        }
+                        Walls[i].level++; Walls[i].pixels += WallsPixels; Walls[i].dir *= -1; Walls[i].n = 0.0f;
+                    } else {
+                        Walls[i].pixels-=MovePixels; Walls[i].n+=MovePixels;
+
+                        int y = (int)Walls[i].mapPos.y; int x = (int)Walls[i].mapPos.x;
+                        Vector2 S = Walls[i].Start; Vector2 E = Walls[i].End;
+                        if (Walls[i].HorV == 'H') {
+                            S.y += (Walls[i].dir*Walls[i].n); E.y += (Walls[i].dir*Walls[i].n);
+                        } else {
+                            S.x += (Walls[i].dir*Walls[i].n); E.x += (Walls[i].dir*Walls[i].n);
+                        }
+
+                        if (map[y][x] == 1) DrawLineEx(S, E, 1.0f, B);
+                        else if(map[y][x] == 0) DrawLineEx(S, E, WallTh, R);
+                        else if(map[y][x] == -1) DrawLineEx(S, E, WallTh, BLACK);
+                        else DrawLineEx(S, E, WallTh, O);        
+                    }
+                } 
+                if (Walls[i].level == 3) {
+                    if (Walls[i].pixels == 0.0f) {
+                        int y = (int)Walls[i].mapPos.y; int x = (int)Walls[i].mapPos.x;
+                        EarthqMap[y][x] = 0; int temp = i;
+                        Add_Earthquake_Wall(Walls, &temp, StartPoint, m, n, EarthqMap, 0, WallsPixels, 2);
+                    } else {
+                        Walls[i].pixels-=MovePixels; Walls[i].n+=MovePixels;
+
+                        int y = (int)Walls[i].mapPos.y; int x = (int)Walls[i].mapPos.x;
+                        Vector2 S = Walls[i].Start; Vector2 E = Walls[i].End;
+                        if (Walls[i].HorV == 'H') {
+                            S.y += (Walls[i].dir*Walls[i].n); E.y += (Walls[i].dir*Walls[i].n);
+                        } else {
+                            S.x += (Walls[i].dir*Walls[i].n); E.x += (Walls[i].dir*Walls[i].n);
+                        }
+
+                        if (map[y][x] == 1) DrawLineEx(S, E, 1.0f, B);
+                        else if(map[y][x] == 0) DrawLineEx(S, E, WallTh, R);
+                        else if(map[y][x] == -1) DrawLineEx(S, E, WallTh, BLACK);
+                        else DrawLineEx(S, E, WallTh, O);        
+                    }
+                }
+            }    
+        }
+
+        int Exit = Exit_from_While(canShcsMove, canExsMove);
+        if (!Exit) Done = true;
+        
+        if (frame%6 == 0) sw *= -1; frame++;
+        Speed += SIncrease;   
+    }
+    Reset_Map_Blocks_for_Move_Elements(m, n);
+    
+    t0 = GetTime();
+    while (GetTime()-t0<1.0) {
+        UpdateMusicStream(GameMusic);
+        BeginDrawing();
+        ClearBackground(BackColor);
+        Draw_Map(1, StartPoint, m, n, Round, nExplorers-1); 
+        EndDrawing(); 
+
+        WallPro W;
+        Vector2 StartP, EndP;
+        for (j=0; j<2*m+1; j+=2) {
+            for (i=1; i<2*n+1; i+=2) {
+                if (EarthqMap[j][i] == 0) {
+                    W.Position.x = (float)i; W.Position.y = (float)j; W.HorV = 'H';
+                    StartP = GET_Start_Walls_Position_for_Draw(StartPoint, W);
+                    EndP.x = StartP.x + Side; EndP.y = StartP.y;
+                    if (map[j][i] == 1) DrawLineEx(StartP, EndP, 1.0f, B);
+                    else if (map[j][i] == 0) DrawLineEx(StartP, EndP, WallTh, R);
+                    else if(map[j][i] == -1) DrawLineEx(StartP, EndP, WallTh, BLACK);
+                    else DrawLineEx(StartP, EndP, WallTh, O);
+                }
+            }
+        }
+        for (i=0 ; i<2*n+1; i+=2) {
+            for (j=1 ; j<2*m+1; j+=2) {
+                if (EarthqMap[j][i] == 0) {
+                    W.Position.x = (float)i; W.Position.y = (float)j; W.HorV = 'V';
+                    StartP = GET_Start_Walls_Position_for_Draw(StartPoint, W);
+                    EndP.x = StartP.x; EndP.y = StartP.y + Side;
+                    if (map[j][i] == 1) DrawLineEx(StartP, EndP, 1.0f, B);
+                    else if(map[j][i] == 0) DrawLineEx(StartP, EndP, WallTh, R);
+                    else if(map[j][i] == -1) DrawLineEx(StartP, EndP, WallTh, BLACK);
+                    else DrawLineEx(StartP, EndP, WallTh, O);
+                }
+            }
+        }
+        for (i=0; i<nWalls; i++) {
+            if (Walls[i].level == 1) {
+                if (Walls[i].pixels == 0.0f) {
+                    if (Walls[i].HorV == 'H') {
+                        Walls[i].Start.y += (Walls[i].dir*Walls[i].n); Walls[i].End.y += (Walls[i].dir*Walls[i].n);
+                    } else {
+                        Walls[i].Start.x += (Walls[i].dir*Walls[i].n); Walls[i].End.x += (Walls[i].dir*Walls[i].n);
+                    }
+                    Walls[i].level++; Walls[i].pixels += (2*WallsPixels); Walls[i].dir *= -1; Walls[i].n = 0.0f;
+                } else {
+                    Walls[i].pixels-=MovePixels; Walls[i].n+=MovePixels;
+
+                    int y = (int)Walls[i].mapPos.y; int x = (int)Walls[i].mapPos.x;
+                    Vector2 S = Walls[i].Start; Vector2 E = Walls[i].End;
+                    if (Walls[i].HorV == 'H') {
+                        S.y += (Walls[i].dir*Walls[i].n); E.y += (Walls[i].dir*Walls[i].n);
+                    } else {
+                        S.x += (Walls[i].dir*Walls[i].n); E.x += (Walls[i].dir*Walls[i].n);
+                    }
+
+                    if (map[y][x] == 1) DrawLineEx(S, E, 1.0f, B);
+                    else if(map[y][x] == 0) DrawLineEx(S, E, WallTh, R);
+                    else if(map[y][x] == -1) DrawLineEx(S, E, WallTh, BLACK);
+                    else DrawLineEx(S, E, WallTh, O);
+                }
+            } 
+            if (Walls[i].level == 2) {                
+                if (Walls[i].pixels == 0.0f) {
+                    if (Walls[i].HorV == 'H') {
+                        Walls[i].Start.y += (Walls[i].dir*Walls[i].n); Walls[i].End.y += (Walls[i].dir*Walls[i].n);
+                    } else {
+                        Walls[i].Start.x += (Walls[i].dir*Walls[i].n); Walls[i].End.x += (Walls[i].dir*Walls[i].n);
+                    }
+                    Walls[i].level++; Walls[i].pixels += WallsPixels; Walls[i].dir *= -1; Walls[i].n = 0.0f;
+                } else {
+                    Walls[i].pixels-=MovePixels; Walls[i].n+=MovePixels;
+
+                    int y = (int)Walls[i].mapPos.y; int x = (int)Walls[i].mapPos.x;
+                    Vector2 S = Walls[i].Start; Vector2 E = Walls[i].End;
+                    if (Walls[i].HorV == 'H') {
+                        S.y += (Walls[i].dir*Walls[i].n); E.y += (Walls[i].dir*Walls[i].n);
+                    } else {
+                        S.x += (Walls[i].dir*Walls[i].n); E.x += (Walls[i].dir*Walls[i].n);
+                    }
+
+                    if (map[y][x] == 1) DrawLineEx(S, E, 1.0f, B);
+                    else if(map[y][x] == 0) DrawLineEx(S, E, WallTh, R);
+                    else if(map[y][x] == -1) DrawLineEx(S, E, WallTh, BLACK);
+                    else DrawLineEx(S, E, WallTh, O);        
+                }
+            } 
+            if (Walls[i].level == 3) {
+                if (Walls[i].pixels == 0.0f) {
+                    int y = (int)Walls[i].mapPos.y; int x = (int)Walls[i].mapPos.x;
+                    EarthqMap[y][x] = 0; int temp = i;
+                    Add_Earthquake_Wall(Walls, &temp, StartPoint, m, n, EarthqMap, 0, WallsPixels, 2);
+                } else {
+                    Walls[i].pixels-=MovePixels; Walls[i].n+=MovePixels;
+
+                    int y = (int)Walls[i].mapPos.y; int x = (int)Walls[i].mapPos.x;
+                    Vector2 S = Walls[i].Start; Vector2 E = Walls[i].End;
+                    if (Walls[i].HorV == 'H') {
+                        S.y += (Walls[i].dir*Walls[i].n); E.y += (Walls[i].dir*Walls[i].n);
+                    } else {
+                        S.x += (Walls[i].dir*Walls[i].n); E.x += (Walls[i].dir*Walls[i].n);
+                    }
+
+                    if (map[y][x] == 1) DrawLineEx(S, E, 1.0f, B);
+                    else if(map[y][x] == 0) DrawLineEx(S, E, WallTh, R);
+                    else if(map[y][x] == -1) DrawLineEx(S, E, WallTh, BLACK);
+                    else DrawLineEx(S, E, WallTh, O);        
+                }
+            }
+        }        
+    }
+
+    int sw1;
+    do {
+        sw1 = 0;
+        UpdateMusicStream(GameMusic);
+        BeginDrawing();
+        ClearBackground(BackColor);
+        Draw_Map(1, StartPoint, m, n, Round, nExplorers-1); 
+        EndDrawing(); 
+
+        WallPro W;
+        Vector2 StartP, EndP;
+        for (j=0; j<2*m+1; j+=2) {
+            for (i=1; i<2*n+1; i+=2) {
+                if (EarthqMap[j][i] == 0) {
+                    W.Position.x = (float)i; W.Position.y = (float)j; W.HorV = 'H';
+                    StartP = GET_Start_Walls_Position_for_Draw(StartPoint, W);
+                    EndP.x = StartP.x + Side; EndP.y = StartP.y;
+                    if (map[j][i] == 1) DrawLineEx(StartP, EndP, 1.0f, B);
+                    else if (map[j][i] == 0) DrawLineEx(StartP, EndP, WallTh, R);
+                    else if(map[j][i] == -1) DrawLineEx(StartP, EndP, WallTh, BLACK);
+                    else DrawLineEx(StartP, EndP, WallTh, O);
+                }
+            }
+        }
+        for (i=0 ; i<2*n+1; i+=2) {
+            for (j=1 ; j<2*m+1; j+=2) {
+                if (EarthqMap[j][i] == 0) {
+                    W.Position.x = (float)i; W.Position.y = (float)j; W.HorV = 'V';
+                    StartP = GET_Start_Walls_Position_for_Draw(StartPoint, W);
+                    EndP.x = StartP.x; EndP.y = StartP.y + Side;
+                    if (map[j][i] == 1) DrawLineEx(StartP, EndP, 1.0f, B);
+                    else if(map[j][i] == 0) DrawLineEx(StartP, EndP, WallTh, R);
+                    else if(map[j][i] == -1) DrawLineEx(StartP, EndP, WallTh, BLACK);
+                    else DrawLineEx(StartP, EndP, WallTh, O);
+                }
+            }
+        }
+        for (i=0; i<nWalls; i++) {
+            if (Walls[i].level == 1) {
+                if (Walls[i].pixels <= 0.0f) {
+                    if (Walls[i].HorV == 'H') {
+                        Walls[i].Start.y += (Walls[i].dir*Walls[i].n); Walls[i].End.y += (Walls[i].dir*Walls[i].n);
+                    } else {
+                        Walls[i].Start.x += (Walls[i].dir*Walls[i].n); Walls[i].End.x += (Walls[i].dir*Walls[i].n);
+                    }
+                    Walls[i].level++; Walls[i].pixels += (2*WallsPixels); Walls[i].dir *= -1; Walls[i].n = 0.0f;
+                } else {
+                    sw1 = 1;
+                    Walls[i].pixels-=MovePixels; Walls[i].n+=MovePixels;
+
+                    int y = (int)Walls[i].mapPos.y; int x = (int)Walls[i].mapPos.x;
+                    Vector2 S = Walls[i].Start; Vector2 E = Walls[i].End;
+                    if (Walls[i].HorV == 'H') {
+                        S.y += (Walls[i].dir*Walls[i].n); E.y += (Walls[i].dir*Walls[i].n);
+                    } else {
+                        S.x += (Walls[i].dir*Walls[i].n); E.x += (Walls[i].dir*Walls[i].n);
+                    }
+
+                    if (map[y][x] == 1) DrawLineEx(S, E, 1.0f, B);
+                    else if(map[y][x] == 0) DrawLineEx(S, E, WallTh, R);
+                    else if(map[y][x] == -1) DrawLineEx(S, E, WallTh, BLACK);
+                    else DrawLineEx(S, E, WallTh, O);
+                }
+            } 
+            if (Walls[i].level == 2) {                
+                if (Walls[i].pixels <= 0.0f) {
+                    if (Walls[i].HorV == 'H') {
+                        Walls[i].Start.y += (Walls[i].dir*Walls[i].n); Walls[i].End.y += (Walls[i].dir*Walls[i].n);
+                    } else {
+                        Walls[i].Start.x += (Walls[i].dir*Walls[i].n); Walls[i].End.x += (Walls[i].dir*Walls[i].n);
+                    }
+                    Walls[i].level++; Walls[i].pixels += WallsPixels; Walls[i].dir *= -1; Walls[i].n = 0.0f;
+                } else {
+                    sw1 = 1;
+                    Walls[i].pixels-=MovePixels; Walls[i].n+=MovePixels;
+
+                    int y = (int)Walls[i].mapPos.y; int x = (int)Walls[i].mapPos.x;
+                    Vector2 S = Walls[i].Start; Vector2 E = Walls[i].End;
+                    if (Walls[i].HorV == 'H') {
+                        S.y += (Walls[i].dir*Walls[i].n); E.y += (Walls[i].dir*Walls[i].n);
+                    } else {
+                        S.x += (Walls[i].dir*Walls[i].n); E.x += (Walls[i].dir*Walls[i].n);
+                    }
+
+                    if (map[y][x] == 1) DrawLineEx(S, E, 1.0f, B);
+                    else if(map[y][x] == 0) DrawLineEx(S, E, WallTh, R);
+                    else if(map[y][x] == -1) DrawLineEx(S, E, WallTh, BLACK);
+                    else DrawLineEx(S, E, WallTh, O);        
+                }
+            } 
+            if (Walls[i].level == 3) {
+                if (Walls[i].pixels <= 0.0f) {
+                    int y = (int)Walls[i].mapPos.y; int x = (int)Walls[i].mapPos.x;
+                    EarthqMap[y][x] = 0; 
+                    // int temp = i;
+                    // Add_Earthquake_Wall(Walls, &temp, StartPoint, m, n, EarthqMap, 0, WallsPixels, 2);
+                } else {
+                    sw1 = 1;
+                    Walls[i].pixels-=MovePixels; Walls[i].n+=MovePixels;
+
+                    int y = (int)Walls[i].mapPos.y; int x = (int)Walls[i].mapPos.x;
+                    Vector2 S = Walls[i].Start; Vector2 E = Walls[i].End;
+                    if (Walls[i].HorV == 'H') {
+                        S.y += (Walls[i].dir*Walls[i].n); E.y += (Walls[i].dir*Walls[i].n);
+                    } else {
+                        S.x += (Walls[i].dir*Walls[i].n); E.x += (Walls[i].dir*Walls[i].n);
+                    }
+
+                    if (map[y][x] == 1) DrawLineEx(S, E, 1.0f, B);
+                    else if(map[y][x] == 0) DrawLineEx(S, E, WallTh, R);
+                    else if(map[y][x] == -1) DrawLineEx(S, E, WallTh, BLACK);
+                    else DrawLineEx(S, E, WallTh, O);        
+                }
+            }
+        }        
+    } while (sw1);
+}
+
+int Exit_from_While(int canShcsMove[], int canExsMove[]) {
+    int i;
+    for (i=0; i<nShadowCasters; i++) {
+        if (canShcsMove[i]) return 1;
+    }
+    for (i=0; i<nExplorers; i++) {
+        if (Explorers[i].isAlive && canExsMove[i]) return 1;
+    }
+    return 0;
+}
+
+int Earthquak_ShadowCasters_Animation(const char beg, Vector2 *ShcP, const Vector2 EndP, float Speed, int sw, int frame, float pixels) {
+    if (beg == 'U' && (*ShcP).y>=EndP.y) {
+        (*ShcP) = EndP;
+        return 0;
+    }
+    if (beg == 'R' && (*ShcP).x<=EndP.x) {
+        (*ShcP) = EndP;
+        return 0;
+    }
+    if (beg == 'D' && (*ShcP).y<=EndP.y) {
+        (*ShcP) = EndP;
+        return 0;
+    }
+    if (beg == 'L' && (*ShcP).x>=EndP.x) {
+        (*ShcP) = EndP;
+        return 0;
+    }
+    
+
+    if (beg == 'U') {
+        (*ShcP).y += Speed;
+        if (frame%6 == 0) {
+            (*ShcP).x += (sw*(2*pixels));
+        }
+    }
+    else if (beg == 'R') {
+        (*ShcP).x -= Speed;
+        if (frame%6 == 0) {
+            (*ShcP).y += (sw*(2*pixels));   
+        }
+    }
+    else if (beg == 'D') {
+        (*ShcP).y -= Speed;
+        if (frame%6 == 0) {
+            (*ShcP).x += (sw*(2*pixels));
+        }
+    }
+    else if (beg == 'L') {
+        (*ShcP).x += Speed;
+        if (frame%6 == 0) {
+            (*ShcP).y += (sw*(2*pixels));
+        }
+    }
+    return 1;
+}
+
+int Earthquak_Explorers_Animation(const char dir, Vector2 *ExP, const Vector2 EndP, float Speed, int sw, int frame, float pixels) {
+    if (dir == 'S' && (*ExP).y>=EndP.y) {
+        (*ExP) = EndP;
+        return 0;
+    }
+    if (dir == 'A' && (*ExP).x<=EndP.x) {
+        (*ExP) = EndP;
+        return 0;
+    }
+    if (dir == 'W' && (*ExP).y<=EndP.y) {
+        (*ExP) = EndP;
+        return 0;
+    }
+    if (dir == 'D' && (*ExP).x>=EndP.x) {
+        (*ExP) = EndP;
+        return 0;
+    }
+    
+
+    if (dir == 'S') {
+        (*ExP).y += Speed;
+        if (frame%6 == 0) {
+            (*ExP).x += (sw*(2*pixels));
+        }
+    }
+    else if (dir == 'A') {
+        (*ExP).x -= Speed;
+        if (frame%6 == 0) {
+            (*ExP).y += (sw*(2*pixels));   
+        }
+    }
+    else if (dir == 'W') {
+        (*ExP).y -= Speed;
+        if (frame%6 == 0) {
+            (*ExP).x += (sw*(2*pixels));
+        }
+    }
+    else if (dir == 'D') {
+        (*ExP).x += Speed;
+        if (frame%6 == 0) {
+            (*ExP).y += (sw*(2*pixels));
+        }
+    }
+    return 1;
+}
+
+void Shcs_Animation_without_Change_Direction(const char beg, Vector2 *ShcP, const Vector2 EndP, float Speed,
+                                                const float SIncrease, Vector2 StartPoint, int m, int n, int i, int Round, Music music) {
+    while (1) {
+        UpdateMusicStream(music);
+        BeginDrawing();
+        ClearBackground(BackColor);
+        Draw_Map(0, StartPoint, m, n, Round, nExplorers-1); 
+        EndDrawing();                                        
+
+        if (beg == 'U') {
+            (*ShcP).y += Speed;
+            if ((*ShcP).y>EndP.y) break;
+        }
+        else if (beg == 'R') {
+            (*ShcP).x -= Speed;
+            if ((*ShcP).x<EndP.x) break;
+        }
+        else if (beg == 'D') {
+            (*ShcP).y -= Speed;
+            if ((*ShcP).y<EndP.y) break;
+        }
+        else if (beg == 'L') {
+            (*ShcP).x += Speed;
+            if ((*ShcP).x>EndP.x) break;
+        }
+        Speed += SIncrease;                                        
+    }
+    (*ShcP) = EndP;
+}
+
+void Show_Save_Notf(int sw) {
+    Color Red = {230, 41, 55, 255};
+    Color Gray = {130, 130, 130, 150};
+    BeginDrawing();
+    ClearBackground(BackColor);
+    DrawRectangle(300, 300, 500, 50, Gray);
+    if (sw) DrawText("Saved Succesfully!", 360, 305, 40, Red);
+    else DrawText("Can't save it!", 370, 305, 40, Red);
+    EndDrawing();
+}
+
+void Show_Load_Notf(int sw) {
+    Color Red = {230, 41, 55, 255};
+    Color Gray = {130, 130, 130, 150};
+    BeginDrawing();
+    ClearBackground(BackColor);
+    DrawRectangle(300, 300, 500, 50, Gray);
+    if (sw) DrawText("Loaded Succesfully!", 355, 305, 40, Red);
+    else DrawText("Can't Load it!", 370, 305, 40, Red);
+    EndDrawing();
+}
+
+int Save_Game(int Round, int ExRound, int m, int n, Vector2 StartPoint) {
+    double t0 = GetTime();
+    FILE *file;
+    file = fopen("save_status.txt", "wt");
+    int i=150;
+    if (!file) {
+        while (GetTime() - t0 < 1.5)
+            Show_Save_Notf(0);
+        return 0;
+    }
+    
+    fprintf(file, "%d\n", m);
+    fprintf(file, "%d\n", n);
+
+    fprintf(file, "%.0f\n", StartPoint.x);
+    fprintf(file, "%.0f\n", StartPoint.y);
+
+    for (int j=0; j<2*m+1; j++) {
+        for (int i=0; i<2*n+1; i++) 
+            fprintf(file, "%d ", map[j][i]);
+            fprintf(file, "\n");
+    }
+
+    fprintf(file, "%d\n", nExplorers);
+    for (int i=0; i<nExplorers; i++) {
+        fprintf(file, "%d\n", Explorers[i].isAlive);
+        fprintf(file, "%d\n", Explorers[i].age);
+        fprintf(file, "%0.f\n", Explorers[i].mapPos.x);
+        fprintf(file, "%0.f\n", Explorers[i].mapPos.y);
+        fprintf(file, "%0.f\n", Explorers[i].winPos.x);
+        fprintf(file, "%0.f\n", Explorers[i].winPos.y);
+        fprintf(file, "%d\n", Explorers[i].wallCount);
+        fprintf(file, "%d\n", Explorers[i].direction);
+    }
+    
+    fprintf(file, "%d\n", ExRound);
+    
+    fprintf(file, "%d\n", Round);
+    
+    fprintf(file, "%d\n", nShadowCasters);
+
+    for (int i=0; i<nShadowCasters; i++) {
+        fprintf(file, "%.0f\n", ShadowCasters[i].x);
+        fprintf(file, "%.0f\n", ShadowCasters[i].y);
+        fprintf(file, "%.0f\n", ShadowCastersP[i].x);
+        fprintf(file, "%.0f\n", ShadowCastersP[i].y);
+        fprintf(file, "%d\n", ShadowCastersDir[i]);
+    }
+
+    fprintf(file, "%.0f\n", Lightcore.x);
+    fprintf(file, "%.0f\n", Lightcore.y);
+
+    fprintf(file, "%d\n", nGifts);
+    for (int i=0; i<nGifts; i++) {
+        fprintf(file, "%d\n", Gifts[i].isGotten);
+        fprintf(file, "%.0f\n", Gifts[i].mapPos.x);
+        fprintf(file, "%.0f\n", Gifts[i].mapPos.y);
+        fprintf(file, "%d\n", Gifts[i].type);
+        fprintf(file, "%.0f\n", Gifts[i].winPos.x);
+        fprintf(file, "%.0f\n", Gifts[i].winPos.y);
+    } 
+
+    fclose(file);    
+    while (GetTime() - t0 < 1.5)
+        Show_Save_Notf(1);
+    return 1;
+}
+
+int Load_Game(int *m, int *n, int *ExRound, int *Round, Vector2 *StartPoint) {
+    printf("\n%d %d %d\n", ShadowCastersDir[0], ShadowCastersDir[1] , ShadowCastersDir[2]);
+    double t0 = GetTime();
+    FILE *file;
+    file = fopen("save_status.txt", "rt");
+    if (!file) {
+        while (GetTime() - t0 < 1.5)
+            Show_Load_Notf(0);
+        return 0;
+    }
+    int height, width, nPlayers, nEnemies;
+
+    fscanf(file, "%d", &height); (*m)=height;
+    fscanf(file, "%d", &width); (*n)=width;
+
+    float x, y;
+    fscanf(file, "%f", &x);
+    fscanf(file, "%f", &y);
+    *StartPoint = (Vector2) {x, y};
+    
+    for (int j=0; j<2*(*m)+1; j++) 
+        for (int i=0; i<2*(*n)+1; i++) 
+            fscanf(file, "%d", &map[j][i]);
+
+    fscanf(file, "%d", &nPlayers); nExplorers = nPlayers;
+    for (int i=0; i<nExplorers; i++) {
+        fscanf(file, "%d", &Explorers[i].isAlive);
+        fscanf(file, "%d", &Explorers[i].age);
+        fscanf(file, "%f", &Explorers[i].mapPos.x);
+        fscanf(file, "%f", &Explorers[i].mapPos.y);
+        fscanf(file, "%f", &Explorers[i].winPos.x);
+        fscanf(file, "%f", &Explorers[i].winPos.y);
+        fscanf(file, "%d", &Explorers[i].wallCount);    
+        fscanf(file, "%d", &Explorers[i].direction);
+    }
+    
+    fscanf(file, "%d", ExRound);
+
+    fscanf(file, "%d", Round);
+
+    fscanf(file, "%d", &nEnemies); nShadowCasters = nEnemies;
+
+    for (int i=0; i<nShadowCasters; i++) {
+        fscanf(file, "%f", &ShadowCasters[i].x);
+        fscanf(file, "%f", &ShadowCasters[i].y);
+        fscanf(file, "%f", &ShadowCastersP[i].x);
+        fscanf(file, "%f", &ShadowCastersP[i].y);
+        fscanf(file, "%d", &ShadowCastersDir[i]);
+    }
+
+    fscanf(file, "%f", &Lightcore.x);
+    fscanf(file, "%f", &Lightcore.y);
+
+    fscanf(file, "%d", &nGifts);
+    for (int i=0; i<nEnemies; i++) {
+        fscanf(file, "%d", &Gifts[i].isGotten);
+        fscanf(file, "%f", &Gifts[i].mapPos.x);
+        fscanf(file, "%f", &Gifts[i].mapPos.y);
+        fscanf(file, "%d", &Gifts[i].type);
+        fscanf(file, "%f", &Gifts[i].winPos.x);
+        fscanf(file, "%f", &Gifts[i].winPos.y);
+    }   
+
+    fclose(file);
+    while (GetTime() - t0 < 1.5)
+        Show_Load_Notf(1);
+    return 1;
+}

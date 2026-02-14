@@ -1,13 +1,3 @@
-// TODO:
-// 1 : Modify replay after EndScreen
-// 2: Modify GetWallCount
-// 3: UI of get gift (AF)
-// 4: ReplayGift function (AF)
-// 5: InWallIncrease function (AF)
-// 6: Draw gift texture in window (MSadegh)
-// 7: Earthquake function (MSadegh)
-// 8: ForceEnemy function (MSadegh) 
-
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -39,43 +29,47 @@ typedef enum {GET, MoveExs, MoveShs} Level;
 bool ShowTitleNote3 = false;    // Flag to show third title note after click, for input prompt.
 bool Win = false;   // Flag for player win, affects EndScreen.
 bool Init_FadeSh = true;
+Color BackColor = RAYWHITE;
 
 int main() {
 InitWindow(WindowWidth, WindowHeight, "The Tale of the Labyrinth");
 InitAudioDevice();
 srand(time(NULL));    // randomize choices
 // Load files
-Ex1Image = LoadTexture("source\\explorer1_bigimage.png");
-Ex2Image = LoadTexture("source\\explorer2_bigimage.png");
-Ex3Image = LoadTexture("source\\explorer3_bigimage.png");
-Sh1TextureRight = LoadTexture("source\\shadowcaster1_right_image.png");
-Sh2TextureRight = LoadTexture("source\\shadowcaster2_right_image.png");
-Sh3TextureRight = LoadTexture("source\\shadowcaster3_right_image.png");
-Sh1TextureLeft = LoadTexture("source\\shadowcaster1_left_image.png");
-Sh2TextureLeft = LoadTexture("source\\shadowcaster2_left_image.png");
-Sh3TextureLeft = LoadTexture("source\\shadowcaster3_left_image.png");
-Ex1TextureRight = LoadTexture("source\\explorer1_right_image.png");
-Ex2TextureRight = LoadTexture("source\\explorer2_right_image.png");
-Ex3TextureRight = LoadTexture("source\\explorer3_right_image.png");
-Ex1TextureLeft = LoadTexture("source\\explorer1_left_image.png");
-Ex2TextureLeft = LoadTexture("source\\explorer2_left_image.png");
-Ex3TextureLeft = LoadTexture("source\\explorer3_left_image.png");
-LiTexture = LoadTexture("source\\light_core_image.png");
-PresentTexture = LoadTexture("source\\present_image.png");
-Music music1 = LoadMusicStream("source\\music1.ogg");
-Music music2 = LoadMusicStream("source\\music2.ogg");
-Music music3 = LoadMusicStream("source\\music3.ogg");
-Music music4 = LoadMusicStream("source\\music4.ogg");
+Sh1TextureRight = LoadTexture("output\\source\\shadowcaster1_right_image.png");
+Sh2TextureRight = LoadTexture("output\\source\\shadowcaster2_right_image.png");
+Sh3TextureRight = LoadTexture("output\\source\\shadowcaster3_right_image.png");
+Sh1TextureLeft = LoadTexture("output\\source\\shadowcaster1_left_image.png");
+Sh2TextureLeft = LoadTexture("output\\source\\shadowcaster2_left_image.png");
+Sh3TextureLeft = LoadTexture("output\\source\\shadowcaster3_left_image.png");
+Ex1TextureRight = LoadTexture("output\\source\\explorer1_right_image.png");
+Ex2TextureRight = LoadTexture("output\\source\\explorer2_right_image.png");
+Ex3TextureRight = LoadTexture("output\\source\\explorer3_right_image.png");
+Ex1TextureLeft = LoadTexture("output\\source\\explorer1_left_image.png");
+Ex2TextureLeft = LoadTexture("output\\source\\explorer2_left_image.png");
+Ex3TextureLeft = LoadTexture("output\\source\\explorer3_left_image.png");
+LiTexture = LoadTexture("output\\source\\light_core_image.png");
+PresentTexture = LoadTexture("output\\source\\present_image.png");
+Music music1 = LoadMusicStream("output\\source\\music1.ogg");
+Music music2 = LoadMusicStream("output\\source\\music2.ogg");
+Music music3 = LoadMusicStream("output\\source\\music3.ogg");
+Music music4 = LoadMusicStream("output\\source\\music4.ogg");
 Music musics[4] = {music1, music2, music3, music4};
-Sound VictorySound = LoadSound("source\\victory_sound.wav");
-Sound DieSound = LoadSound("source\\game_over_sound.wav");
+Music EndGameMusic = LoadMusicStream("output\\source\\end_game.mp3");
+Sound VictorySound = LoadSound("output\\source\\victory_sound.mp3");
+Sound DieSound = LoadSound("output\\source\\die_sound.mp3");
+Sound GiveGiftSound = LoadSound("output\\source\\give_gift_sound.mp3");
+Sound MovingSound = LoadSound("output\\source\\force_sound.mp3");
+Sound ShadowSound = LoadSound("output\\source\\shadow_sound.mp3");
+Sound EarthquakeSound = LoadSound("output\\source\\earthquake.mp3");
+Sound ForceSound = LoadSound("output\\source\\moving_sound.mp3");
 
-Screen Current = GameScreen;   // Current screen, starts at TitleScreen.
+Screen Current = TitleScreen;   // Current screen, starts at TitleScreen.
 Level State = GET;   // Current level, starts at GET for inputs.
 
 Texture2D ExTextures[3][2] = {{Ex1TextureLeft, Ex1TextureRight}, 
-                                                  {Ex2TextureLeft, Ex2TextureRight},
-                                                  {Ex3TextureLeft, Ex3TextureRight}} ;
+                            {Ex2TextureLeft, Ex2TextureRight},
+                            {Ex3TextureLeft, Ex3TextureRight}} ;
 Music GameMusic = musics[rand()%4];
 PlayMusicStream(GameMusic);
 SetTargetFPS(FPS);
@@ -88,7 +82,7 @@ int l=0;
 int Round = 1;
 
 bool allAreDied = false;
-double timeEnding;
+double TimeEnding;
 
 while (!WindowShouldClose())
 {
@@ -99,14 +93,14 @@ switch(Current)
         // First phase, click on the screen to start the game
         Rectangle TitleRec = {(WindowWidth-450)/2, (WindowHeight- 180)/2, 450, 180};
         Color TitleColorNotes = { 112, 31, 126, 255};
+        Vector2 Mous = GetMousePosition();
         BeginDrawing();
-        ClearBackground(RAYWHITE);
+        ClearBackground(BackColor);
         DrawRectangleRoundedLinesEx(TitleRec, 0.4f, 25, 4, TitleColorNotes);
         int TitleNote1 = MeasureText("Click me to play", 40);
         int TitleNote2 = MeasureText("Explorer Game!", 50);
         DrawText("Click me to play", TitleRec.x+(TitleRec.width-TitleNote1)/2, TitleRec.y+40, 40, TitleColorNotes);
         DrawText("Explorer Game!", TitleRec.x+(TitleRec.width-TitleNote2)/2, TitleRec.y+40+50, 50, TitleColorNotes);
-        Vector2 Mous = GetMousePosition();
         if (CheckCollisionPointRec(Mous, TitleRec) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) ShowTitleNote3 = true;
         if (ShowTitleNote3)
         { 
@@ -115,6 +109,19 @@ switch(Current)
             DrawText("now input game details.", TitleRec.x+(TitleRec.width-TitleNote3)/2, TitleRec.y+40+50+100, 20, RED);
             FPScounter --;
             if(FPScounter<0) Current = GameScreen;
+        }
+
+        Rectangle LoadingRec = {(WindowWidth-225)/2, (WindowHeight-90)/2+TitleRec.height+10, 225, 90};
+        DrawRectangleRoundedLinesEx(LoadingRec, 0.4f, 25, 3, TitleColorNotes);
+        DrawText(" Load the\nlast save.", (WindowWidth-225)/2+40, (WindowHeight-90)/2+TitleRec.height+20, 30, TitleColorNotes);
+        if (CheckCollisionPointRec(Mous, LoadingRec) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            Current = GameScreen;
+            State = MoveExs;
+            Load_Game(&m, &n, &l, &Round, &StartPoint);
+            Draw_Map(0, StartPoint, m, n, Round, l);
+            Explorers[0].avatar[0] = Ex1TextureLeft; Explorers[0].avatar[1] = Ex1TextureRight;
+            Explorers[1].avatar[0] = Ex2TextureLeft; Explorers[1].avatar[1] = Ex2TextureRight;
+            Explorers[2].avatar[0] = Ex3TextureLeft; Explorers[2].avatar[1] = Ex3TextureRight;
         }
         EndDrawing();
         break;
@@ -131,7 +138,7 @@ switch(Current)
             while(!WindowShouldClose())
             {
                 BeginDrawing();
-                ClearBackground(RAYWHITE);
+                ClearBackground(BackColor);
                 Draw_Map_Infs();
                 if (n == -1) DrawText("Click width of map", 400, 170, 30, RED);
                 else DrawText("Click height of map", 390, 170, 30, RED);
@@ -162,18 +169,6 @@ switch(Current)
             for (int i=0; i<nExplorers; i++) 
                 Explorers[i] = (Explorer) {true, 1, (Vector2){0,0}, (Vector2){0,0}, MaxInterimWall, '\0', {ExTextures[i][0], ExTextures[i][1]}}; // initial explorers
             nShadowCasters = MaxPlayer;
-
-        // // Reads texture of every player.
-        //     for (int i=1; i<=MaxPlayer; i++)
-        //         while (!WindowShouldClose()) {
-        //             Choose_Players_Texture_UI(MaxPlayer, i);
-        //             Texture2D x = Choose_Players_Texture();
-        //             if (x) {
-        //                 printf("d  ");
-        //                 Explorers[i-1].picture =  
-        //                 break;
-        //             } 
-        //         }
 
         // Reads lightcore position. Accepts only coordinates in the range 0..n-1 (x) and 0..m-1 (y).
             Lightcore.x = (float) (rand()%n); Lightcore.y = (float) (rand()%m);
@@ -218,19 +213,38 @@ switch(Current)
                 Initializing_FadeSh();
                 Init_FadeSh = false;
             }
-            
-        char s[5];
-        int tempN;
-        while (!WindowShouldClose())
+        
+        // Get wall count:
+            char str[5];
+            int inp; 
+            int lenCounter=0;
+            while (!WindowShouldClose())
             {
+                inp = GetCharPressed();
+                while (inp > 0) {
+                    if (inp>='0' && inp<='9') {
+                        str[lenCounter] = (char) inp;
+                        lenCounter ++;
+                        str[lenCounter] = '\0';
+                    }
+                    inp = GetCharPressed();
+                }
+                if (IsKeyPressed(KEY_BACKSPACE) && lenCounter>0) {
+                    lenCounter --;
+                    str[lenCounter] = '\0';
+                }
                 BeginDrawing();
-                ClearBackground(RAYWHITE);
-                Draw_Walls_Infs(s, n, m);
-                char inp = GetKeyPressed();
-                if ((inp>='0' && inp<='9') || inp == 'r' || inp == 'R') {Print_Number_In_String(s, inp, strlen(s));}
-                tempN = StoI(s, strlen(s));
-                if (Submit_Button(n, m, s, strlen(s))) {nWalls = tempN; break;}
+                ClearBackground(BackColor);
+                Draw_Walls_Infs(str, n, m);
                 EndDrawing();
+                if (Submit_Button()) {
+                    int sum=0;
+                    for (int i=0; i<lenCounter; i++) {
+                        sum *= 10;
+                        sum += ((int) str[i] - '0');
+                    } 
+                    if (sum>=0 && sum<=((m-1)*(n-1))) {nWalls = sum; break;}
+                }
             }
 
         // Randomly places valid walls while preserving full map connectivity (BFS-validated)
@@ -272,12 +286,38 @@ switch(Current)
             }
             Reset_Map_Blocks_for_Move_Elements(m, n);   //بسیار مهم برای قسمت MoveShs
 
+            Number_Gifts(m, n); int i;
+            for (i=0; i<nGifts; i++) {
+                InputAgain = true;
+                do {
+                    int y, x;
+                    do {
+                        y = 2*(rand()%m) + 1; 
+                        x = 2*(rand()%n) + 1;
+                    } while(map[y][x] != 1);
+
+                    int checked[m*n][2]; checked[0][0] = y; checked[0][1] = x;
+                    Reset_Map_Blocks_for_Move_Elements(m, n); map[checked[0][0]][checked[0][1]] = 0;
+                    int re = BFS_Gift(checked, 0, 0, m, n, 0);
+                    
+                    if (re) {
+                        InputAgain = false;
+                        Gifts[i].isGotten = false; Gifts[i].mapPos.y = (float)y; Gifts[i].mapPos.x = (float)x;
+                        Gifts[i].winPos = GET_Start_Elements_Position_for_Draw(StartPoint, Gifts[i].mapPos);
+                        Gifts[i].type = rand()%4;
+                    }
+                } while (InputAgain);
+            }
+            Reset_Map_Blocks_for_Move_Elements(m, n); //بسیار مهم برای قسمت MoveShs
+            
+
+            
             State = MoveExs;
             break;
         }
 
         // Next phase. Move and drawing characters.         
-            case MoveExs: {
+            case MoveExs: { 
                 Check_Life_of_Interim_Walls();
                 bool notChoosed = true;
 
@@ -292,20 +332,29 @@ switch(Current)
                 double t0;
                 bool ShouldShowError = false;
                 bool ShouldMove = false;
-                
                 bool WitchRound = true;
-                // bool isPlayed = false;
                 int l=0;
+
                 if (!Are_All_Players_Dead())
                 while (!WindowShouldClose() && l<nExplorers) {
-                    // isPlayed = true;
-                    if (WitchRound) WitchRound = false;   // اگر با روال فشردن کلید بروم، فقط برای یک فریم اجرا می‌شود
-                   
+
+                    if (IsKeyPressed(KEY_O)) Force_Shc(StartPoint, m, n, GameMusic, Round, l, ForceSound);
+                    if (IsKeyPressed(KEY_P)) {Earthquake_Gift(m, n, StartPoint, Round, GameMusic, l, EarthquakeSound);}
+                               
                     if (notChoosed) {
                         if (!Explorers[l].isAlive) {l ++; continue;}
                         UpdateMusicStream(GameMusic);
                         BeginDrawing();
-
+                        DrawText("   To save: F1\n   To load: F2\n  Ch theme: F3", 915, 220, 20, (Color){205,50,0,255});
+                        if (IsKeyPressed(KEY_F1)) Save_Game(Round, l, m, n, StartPoint);
+                        if (IsKeyPressed(KEY_F2)) {
+                            BeginDrawing();
+                            Load_Game(&m, &n, &l, &Round, &StartPoint);
+                            ClearBackground(BackColor);
+                            Draw_Map(0, StartPoint, m, n, Round, l);
+                            EndDrawing();
+                        }
+                        if (IsKeyPressed(KEY_F3)) {if (BackColor.g == 245) BackColor = (Color){170, 175, 180, 255}; else BackColor = RAYWHITE;}
                         if (IsKeyPressed(KEY_E)) {
                             if (Explorers[l].wallCount == 0) {
                                 double t = GetTime();
@@ -351,11 +400,44 @@ switch(Current)
                             notChoosed = false;
                         }          
                         if (ShouldMove && Can_Ex_Move_for_Walls(Explorers[l].mapPos, ExMoveDir)) {
+                            PlaySound(MovingSound);
                             Explorers[l].mapPos = Move_Element(Explorers[l].mapPos, ExMoveDir);
                             Vector2 EndPosition = GET_Start_Elements_Position_for_Draw(StartPoint, Explorers[l].mapPos);       
                             float Speed = 2.0f;
                             Exs_Animation(ExMoveDir, ExTextureDir, &Explorers[l].winPos, EndPosition, Speed, 0.1f, StartPoint, m, n, l, Round, GameMusic);
                             WitchRound = true; l++; Move = false; notChoosed = true; ShouldMove = false;
+
+                            // Witch player is dead?
+                            Check_Witch_Player_is_Dead(Round, DieSound);
+                    
+                            UpdateMusicStream(GameMusic);
+                            ClearBackground(BackColor); // اگه خودش رفت تو سایه نگر، مردنش نمایش داده شه
+                            Draw_Map(0, StartPoint, m, n, Round, l);
+                            
+                            int WhichGift = Is_Present_Gotten();
+                            if (WhichGift) {
+                                PlaySound(GiveGiftSound);
+                                Gifts[WhichGift-1].isGotten = true;
+                                bool isShown = false;
+                                Show_Present_Rec(StartPoint, m, n, Round, l, GameMusic);
+                                do {
+                                    Show_Present(StartPoint, m, n, Round, l, Gifts[WhichGift-1].type, GameMusic);
+                                    if (IsKeyPressed(KEY_SPACE)) isShown = true;
+                                } while (!isShown); // Shows the present box while plyer do not click space.
+
+                                
+                                if (Gifts[WhichGift-1].type == Replay) {int *p; p = &(l); ReplayGift(p);}
+                                else if (Gifts[WhichGift-1].type == InWallIncrease) InWallIncreaseGift(l-1);
+                                else if (Gifts[WhichGift-1].type == ForceEnemy) {
+                                    Force_Shc(StartPoint, m, n, GameMusic, Round, l, ForceSound);
+                                    Check_Witch_Player_is_Dead(Round, DieSound);                                 
+                                    
+                                    UpdateMusicStream(GameMusic);
+                                    ClearBackground(BackColor);
+                                    Draw_Map(0, StartPoint, m, n, Round, l); //اگه هل داده شد توی سایه نگر، مردنش نمایش داده شه
+                                }
+                                else if (Gifts[WhichGift-1].type == Earthquake) Earthquake_Gift(m, n, StartPoint, Round, GameMusic, l, EarthquakeSound);
+                            }
                         }
                         else if (ShouldMove && !(Can_Ex_Move_for_Walls(Explorers[l].mapPos, ExMoveDir))) { 
                             ShouldShowError = true;
@@ -368,7 +450,9 @@ switch(Current)
                                 Show_Invalid_Move_Error(StartPoint, m, n, Round, l);
                             }
                             else {ShouldShowError = false; break;}
-                            if (IsKeyPressed(KEY_A) || IsKeyPressed(KEY_D) || IsKeyPressed(KEY_S) || IsKeyPressed(KEY_W)) {ShouldShowError = false;}
+                            if (IsKeyPressed(KEY_A) || IsKeyPressed(KEY_D) || IsKeyPressed(KEY_S) ||
+                            IsKeyPressed(KEY_W) || IsKeyPressed(KEY_Q) || IsKeyPressed(KEY_E))
+                                {ShouldShowError = false;}
                         }
                         if (IsKeyPressed(KEY_Q)) {
                             l++;
@@ -376,9 +460,9 @@ switch(Current)
                             WitchRound = true;
                         }
                         
-                        ClearBackground(RAYWHITE);
+                        ClearBackground(BackColor);
                         Pointer_To_Player(l, StartPoint);
-                        Draw_Map(StartPoint, m, n, Round, l);
+                        Draw_Map(0, StartPoint, m, n, Round, l);
                         EndDrawing();
                     
                         for (int i=0; i<nExplorers; i++)
@@ -389,8 +473,8 @@ switch(Current)
                     if (GWall) {
                         UpdateMusicStream(GameMusic);
                         BeginDrawing();
-                        ClearBackground(RAYWHITE);
-                        Draw_Map(StartPoint, m, n, Round, l);
+                        ClearBackground(BackColor);
+                        Draw_Map(0, StartPoint, m, n, Round, l);
                         Rectangle Recs[m][n];
                         int i, j;
                         for (j=1; j<2*m+1; j+=2) {
@@ -461,22 +545,13 @@ switch(Current)
                         EndDrawing();    //اگه این نمیبود، با فشردن Q هم از این بخش میرفت بیرون و هم از انتخاب کردن
                     }
                         
-                    //     if (!ShouldMove) {
-                    //         UpdateMusicStream(music);
-                    //         BeginDrawing();
-                    //         ClearBackground(RAYWHITE);
-                    //         Draw_Map(StartPoint, m, n);
-                    //         EndDrawing();
-                    //     }
-                    //     //اگه اینا نمیبودن، با فشردن Q هم از این بخش میرفت بیرون و هم از انتخاب کردن
-
                 }
                 if (Are_All_Players_Have_Won()) {Current = EndScreen; break;}  
-                // if (!isPlayed) l ++;    // If first player is dead, others can't play!
                 else {State = MoveShs; break;}
             }
             
             case MoveShs: {
+                
                 l = nExplorers-1;
                 Vector *BFSlistChecked;
                 int BFSListCounter;
@@ -494,6 +569,7 @@ switch(Current)
                 
                 int i;
                 for (i=0; i<nShadowCasters; i++) {
+                    PlaySound(ShadowSound);
                     do{
                         BFSlistChecked = malloc((m*n)*sizeof(Vector));
                     }while (!BFSlistChecked);
@@ -507,79 +583,74 @@ switch(Current)
                     if (WayShcCounter[i]) {
                         Reset_Map_Blocks_for_Move_Elements(m, n);
                         WayShcCounter[i] = Find_Way(WayShcArray[i], BFSListCounter, WayShcCounter[i], BFSlistChecked, WayShcArray[i]);
-                        if (WayShcCounter[i]<3) {                            
-                            float Speed = 0.2f;
-                            Vector2 End;
-                            Vector2 EndPosition;
-                            End.x = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).x;
-                            End.y = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).y;
-                            EndPosition = GET_Start_Elements_Position_for_Draw(StartPoint, End);
-                            int tempShDir = ShadowCastersDir[i];
-                            char Dir = (*(WayShcArray[i]+WayShcCounter[i]-1-1)).beg;
-                            Shcs_Animation(Dir, &ShadowCastersP[i], EndPosition, Speed, 0.2f, StartPoint, m, n, i, Round, GameMusic);   
-                            ShadowCastersDir[i] = tempShDir;
-                            ShadowCasters[i].y = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).y; // = *(*(WayShcArray+i)+WayShcCounter)
-                            ShadowCasters[i].x = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).x;
-                        } else {
-                            int tempx, tempy;
-                            tempx = (*(WayShcArray[i]+WayShcCounter[i]-1-1-1)).x;
-                            tempy = (*(WayShcArray[i]+WayShcCounter[i]-1-1-1)).y;
-                            if (map[tempy][tempx] != 1 && map[tempy][tempx] != 2) {
-                                tempx = (*(WayShcArray[i]+WayShcCounter[i]-1-1)).x;
-                                tempy = (*(WayShcArray[i]+WayShcCounter[i]-1-1)).y;
-                                if (map[tempy][tempx] == 1 || map[tempy][tempx] == 2) {
-                                    float Speed = 0.2f;
-                                    Vector2 End;
-                                    Vector2 EndPosition;
-                                    End.x = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).x;
-                                    End.y = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).y;
-                                    EndPosition = GET_Start_Elements_Position_for_Draw(StartPoint, End);
-                                    int tempShDir = ShadowCastersDir[i];
-                                    char Dir = (*(WayShcArray[i]+WayShcCounter[i]-1-1)).beg;
-                                    Shcs_Animation(Dir, &ShadowCastersP[i], EndPosition, Speed, 0.2f, StartPoint, m, n, i, Round, GameMusic);
-                                    ShadowCastersDir[i] = tempShDir;
-                                    ShadowCasters[i].y = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).y;
-                                    ShadowCasters[i].x = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).x; 
-                                }
+                        if (WayShcCounter[i]<3) {
+                            Vector2 w; w = Wall_Coordinate((WayShcArray[i]+WayShcCounter[i]-1-1));
+                            if (map[(int)w.y][(int)w.x] == 1) {
+                                float Speed = 0.2f;
+                                Vector2 End; Vector2 EndPosition;
+                                End.x = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).x; End.y = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).y;
+                                EndPosition = GET_Start_Elements_Position_for_Draw(StartPoint, End);
+
+                                int tempShDir = ShadowCastersDir[i];
+                                char Dir = (*(WayShcArray[i]+WayShcCounter[i]-1-1)).beg;
+                                Shcs_Animation(Dir, &ShadowCastersP[i], EndPosition, Speed, 0.2f, StartPoint, m, n, i, Round, GameMusic);   
+
+                                ShadowCastersDir[i] = tempShDir;
+                                ShadowCasters[i].y = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).y; // = *(*(WayShcArray+i)+WayShcCounter)
+                                ShadowCasters[i].x = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).x;
                             }
-                            else {
+                        } else {
+                            int tempx1, tempy1, tempx2, tempy2; Vector2 w1, w2;
+                            tempx1 = (*(WayShcArray[i]+WayShcCounter[i]-1-1)).x; tempy1 = (*(WayShcArray[i]+WayShcCounter[i]-1-1)).y;
+                            tempx2 = (*(WayShcArray[i]+WayShcCounter[i]-1-1-1)).x; tempy2 = (*(WayShcArray[i]+WayShcCounter[i]-1-1-1)).y;
+                            w1 = Wall_Coordinate((WayShcArray[i]+WayShcCounter[i]-1-1)); w2 = Wall_Coordinate((WayShcArray[i]+WayShcCounter[i]-1-1-1));
+                            if ((map[(int)w1.y][(int)w1.x] == 1 && map[(int)w2.y][(int)w2.x] == 1) && !(map[tempy2][tempx2] == 3)) {
                                 int j;
+                                int tempShDir = ShadowCastersDir[i];
                                 for (j=1; j<=2; j++) {
                                     float Speed = 0.2f;
-                                    Vector2 End;
-                                    Vector2 EndPosition;
-                                    End.x = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-j)).x;
-                                    End.y = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-j)).y;
+                                    Vector2 End; Vector2 EndPosition;
+                                    End.x = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-j)).x; End.y = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-j)).y;
                                     EndPosition = GET_Start_Elements_Position_for_Draw(StartPoint, End);
-                                    int tempShDir = ShadowCastersDir[i];
+
                                     char Dir = (*(WayShcArray[i]+WayShcCounter[i]-1-j)).beg;
                                     Shcs_Animation(Dir, &ShadowCastersP[i], EndPosition, Speed, 0.2f, StartPoint, m, n, i, Round, GameMusic);
+
                                     if (j==1) {
-                                        ShadowCasters[i].y = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).y;
-                                        ShadowCasters[i].x = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).x;
+                                        ShadowCasters[i].y = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).y; ShadowCasters[i].x = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).x;
                                     } else {
                                         ShadowCastersDir[i] = tempShDir;
-                                        ShadowCasters[i].y = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1-1)).y;
-                                        ShadowCasters[i].x = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1-1)).x;
+                                        ShadowCasters[i].y = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1-1)).y; ShadowCasters[i].x = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1-1)).x;
                                     }
                                     
                                 }                                
                             }
+                            else if (map[(int)w1.y][(int)w1.x] == 1 && !(map[tempy1][tempx1] == 3)) {
+                                float Speed = 0.2f;
+                                Vector2 End; Vector2 EndPosition;
+                                End.x = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).x; End.y = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).y;
+                                EndPosition = GET_Start_Elements_Position_for_Draw(StartPoint, End);
+
+                                int tempShDir = ShadowCastersDir[i];
+                                char Dir = (*(WayShcArray[i]+WayShcCounter[i]-1-1)).beg;
+                                Shcs_Animation(Dir, &ShadowCastersP[i], EndPosition, Speed, 0.2f, StartPoint, m, n, i, Round, GameMusic);
+
+                                ShadowCastersDir[i] = tempShDir;
+                                ShadowCasters[i].y = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).y; ShadowCasters[i].x = (float)(*(WayShcArray[i]+WayShcCounter[i]-1-1)).x;                                 
+                            }
                         }                      
                     }
+                    // Witch player is dead?
+                    Check_Witch_Player_is_Dead(Round, DieSound);
+                    UpdateMusicStream(GameMusic);
+                    BeginDrawing();
+                    ClearBackground(BackColor);
+                    Draw_Map(0, StartPoint, m, n, Round, l); // اگه سایه نگر کشتش، مردنش نمایش داده شه
+                    EndDrawing();
+
                     free(BFSlistChecked);
                 }
                 Reset_Map_Blocks_for_Move_Elements(m, n);
-                
-            // Witch player is dead?
-                for (int j=0; j<nExplorers; j++) for (int i=0; i<nShadowCasters; i++) {
-                    if (Explorers[j].isAlive)
-                        if ((int)Explorers[j].mapPos.y==(int)ShadowCasters[i].y && (int)Explorers[j].mapPos.x==(int)ShadowCasters[i].x) {
-                            if (j==0)        {Dead_Explorer(j , DieSound, Round);}
-                            else if (j==1)  {Dead_Explorer(j, DieSound, Round);}
-                            else if (j==2) {Dead_Explorer(j, DieSound, Round);}
-                    }
-                }
 
             // free mallocs
                 for (k=0; k<nShadowCasters; k++) {
@@ -590,7 +661,7 @@ switch(Current)
             // Are all players have died?
                 int x = 0;
                 for (int i=0; i<nExplorers; i++) {if (Explorers[i].isAlive) x ++;} 
-                if (x == 0) {Current = EndScreen; timeEnding = GetTime(); break;}
+                if (x == 0) {Current = EndScreen; TimeEnding = GetTime(); break;}
 
                 Round++;
                 State = MoveExs;
@@ -603,15 +674,24 @@ switch(Current)
 
     case EndScreen: 
     {
+        PlayMusicStream(EndGameMusic);
         bool showResult;
-        while (GetTime() - timeEnding <= 2.5) {
+        while (GetTime() - TimeEnding <= 2.5) {
             showResult = false;
         }
         showResult = true;
-        if (showResult) {
-            int x = Show_End_Screen();
-            if (x) {Current = GameScreen; State = GET; m=-1; n=-1;} // restart game
-        }  
+        if (showResult)
+            while (!WindowShouldClose()) {
+                UpdateMusicStream(EndGameMusic);
+                BeginDrawing();
+                ClearBackground(BackColor);
+                Show_End_Screen();
+                EndDrawing();
+            }
+
+
+
+
         break;
     }
 }
@@ -625,7 +705,8 @@ UnloadTexture(Sh1TextureLeft); UnloadTexture(Sh2TextureLeft); UnloadTexture(Sh3T
 UnloadTexture(Ex1TextureLeft); UnloadTexture(Ex2TextureLeft); UnloadTexture(Ex3TextureLeft);
 UnloadTexture(LiTexture); UnloadTexture (PresentTexture);
 UnloadMusicStream(GameMusic); UnloadMusicStream(music1); UnloadMusicStream(music2); UnloadMusicStream(music3);
-UnloadSound(DieSound); UnloadSound(VictorySound);
+UnloadSound(DieSound); UnloadSound(VictorySound); UnloadSound(MovingSound); UnloadSound(ShadowSound); 
+UnloadSound(GiveGiftSound); UnloadMusicStream(EndGameMusic);
 
 return 0;
 
