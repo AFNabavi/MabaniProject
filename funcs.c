@@ -712,7 +712,7 @@ void Draw_Walls_Infs(char s[], int n, int m)
     int nm = (n-1)*(m-1), i, j, k;
     char str1[5] = {'\0'};
     ItoS(str1, nm);
-    char str0[] = "Enter the number of walls\nyou want (between 0 and ";
+    char str0[] = " Enter the number of walls\nyou want (between 0 and ";
     char str2[] = "):\n";
     char str[70];
     for (i=0; str0[i]; i++) str[i] = str0[i]; 
@@ -723,10 +723,20 @@ void Draw_Walls_Infs(char s[], int n, int m)
     DrawRectangleRounded(OutRecLines, 0.3, 2.0, color);
     DrawRectangleRoundedLines(InpShower, 0.5, 4.0, GRAY);
     DrawRectangleRoundedLines(SubmitButton, 0.5, 4.0, GRAY);    
-    DrawText(str, OutRecLines.x+105, OutRecLines.y+50, 30, RED);
-    DrawText("(press backspace to remove your number.)", OutRecLines.x+140, OutRecLines.y+120, 20, RED);
+    DrawText(str, OutRecLines.x+123, OutRecLines.y+50, 30, RED);
+    DrawText("(press backspace to remove your number.)", OutRecLines.x+123, OutRecLines.y+120, 20, RED);
     DrawText(s, InpShower.x+25, InpShower.y+15, 20, BLACK);
     DrawText("SUBMIT", SubmitButton.x+8, SubmitButton.y+15, 19, DARKGRAY);
+}
+
+void Draw_Map_Infs_Error(double t0, Color BackColor, char *str, int n, int m) {
+    while (GetTime() - t0 <= 2) {
+        BeginDrawing();
+        ClearBackground(BackColor);
+        Draw_Walls_Infs(str, n, m);
+        DrawText("Pay attention to limits!", 420, 300, 20, RED);
+        EndDrawing();
+    }
 }
 
 int Submit_Button()
@@ -1327,7 +1337,7 @@ void Show_Present(Vector2 StartPoint, int m, int n, int Round, int ExRound, Gift
         {char str[30] = "FORCE ENEMY"; DrawText(str, rec.x+82, rec.y+rec.height/2-20, 30, GOLD);}
     else if (name == Earthquake) 
         {char str[30] = "EARTHQUAKE   "; DrawText(str, rec.x+84, rec.y+rec.height/2-20, 30, GOLD);}
-    DrawText("Press SPACE key to okay.", rec.x+89, rec.y+rec.height/2+20, 20, GOLD);
+    DrawText("Press SPACE key to okay.", rec.x+75, rec.y+rec.height/2+20, 20, GOLD);
     EndDrawing();
 }
 
