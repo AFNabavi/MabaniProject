@@ -26,6 +26,8 @@ InterimWalls InWalls[30];
 int nInWalls = 0; 
 Present Gifts[3];
 int nGifts;
+Present Gifts[3];
+int nGifts;
 
 int nShadowCasters;
 Vector2 ShadowCasters[3] = {0.0f};
@@ -232,6 +234,7 @@ else 0.
 }
 
 void Draw_Map(int Earthquake, Vector2 StartPoint, int m, int n, int Round, int ExRound)
+void Draw_Map(int Earthquake, Vector2 StartPoint, int m, int n, int Round, int ExRound)
 {
 /*
 Renders the entire game map including walls, lightcore, explorers, and shadow casters.
@@ -282,12 +285,46 @@ Wall color and thickness rules based on map[j][i] value:
                 else if(map[j][i] == -1) DrawLineEx(StartP, EndP, WallTh, BLACK);
                 else DrawLineEx(StartP, EndP, WallTh, O);
             }
+    if (!Earthquake) {
+        for (j=0; j<2*m+1; j+=2)
+        {
+            for (i=1; i<2*n+1; i+=2)
+            {
+                W.Position.x = (float)i; W.Position.y = (float)j; W.HorV = 'H';
+                StartP = GET_Start_Walls_Position_for_Draw(StartPoint, W);
+                EndP.x = StartP.x + Side; EndP.y = StartP.y;
+                if (map[j][i] == 1) DrawLineEx(StartP, EndP, 1.0f, B);
+                else if (map[j][i] == 0) DrawLineEx(StartP, EndP, WallTh, R);
+                else if(map[j][i] == -1) DrawLineEx(StartP, EndP, WallTh, BLACK);
+                else DrawLineEx(StartP, EndP, WallTh, O);
+            }
+        }
+    
+    // Draw vertical walls
+        for (i=0 ; i<2*n+1; i+=2)
+        {
+            for (j=1 ; j<2*m+1; j+=2)
+            {
+                W.Position.x = (float)i; W.Position.y = (float)j; W.HorV = 'V';
+                StartP = GET_Start_Walls_Position_for_Draw(StartPoint, W);
+                EndP.x = StartP.x; EndP.y = StartP.y + Side;
+                if (map[j][i] == 1) DrawLineEx(StartP, EndP, 1.0f, B);
+                else if(map[j][i] == 0) DrawLineEx(StartP, EndP, WallTh, R);
+                else if(map[j][i] == -1) DrawLineEx(StartP, EndP, WallTh, BLACK);
+                else DrawLineEx(StartP, EndP, WallTh, O);
+            }
         }
     }
 
 // Drawing lightcore
     Vector2 S = GET_Start_Elements_Position_for_Draw(StartPoint, Lightcore);
     DrawTexture(LiTexture, S.x, S.y, WHITE);
+
+// Drawing Gifts
+    for (i=0; i<nGifts; i++) {
+        if (Gifts[i].isGotten == false)
+            DrawTexture(PresentTexture, Gifts[i].winPos.x+4, Gifts[i].winPos.y+4, WHITE);
+    }
 
 // Drawing Gifts
     for (i=0; i<nGifts; i++) {
@@ -362,6 +399,14 @@ Wall color and thickness rules based on map[j][i] value:
     DrawText("Skip round: 'Q'\n", HintGame.x+11, HintGame.y+145, 20, MyRed);
     DrawText("-----------------", HintGame.x+1, HintGame.y+175, 20, MyRed);
     DrawRectangleRoundedLinesEx(HintGame, 0.1f, 20, 1.0f, MyRed);
+
+    DrawText("-----------------", 901, 290, 20, MyRed);
+    DrawText("Player 1: ", 905, 320, 20, MyRed);
+    DrawTexture(Explorers[0].avatar[0], 1000, 310, MyRed);
+    DrawText("Player 2: ", 905, 380, 20, MyRed);
+    DrawTexture(Explorers[1].avatar[0], 1000, 370, MyRed);
+    DrawText("Player 3: ", 905, 440, 20, MyRed);
+    DrawTexture(Explorers[2].avatar[0], 1000, 430, MyRed);
 
     DrawText("-----------------", 901, 290, 20, MyRed);
     DrawText("Player 1: ", 905, 320, 20, MyRed);
@@ -567,6 +612,7 @@ void Reset_Map_Blocks_for_Move_Elements(int m, int n) {
     for (i=0; i<nExplorers; i++) {
         if (Explorers[i].isAlive) {
             map[(int)Explorers[i].mapPos.y][(int)Explorers[i].mapPos.x] = 2;
+            map[(int)Explorers[i].mapPos.y][(int)Explorers[i].mapPos.x] = 2;
         }
     }
 }
@@ -716,6 +762,7 @@ void Draw_Walls_Infs(char s[], int n, int m)
     char str1[5] = {'\0'};
     ItoS(str1, nm);
     char str0[] = "  Enter the number of walls\nyou want (between 0 and ";
+    char str0[] = "  Enter the number of walls\nyou want (between 0 and ";
     char str2[] = "):\n";
     char str[70];
     for (i=0; str0[i]; i++) str[i] = str0[i]; 
@@ -728,14 +775,18 @@ void Draw_Walls_Infs(char s[], int n, int m)
     DrawRectangleRoundedLines(SubmitButton, 0.5, 4.0, GRAY);    
     DrawText(str, OutRecLines.x+105, OutRecLines.y+50, 30, RED);
     DrawText("(press backspace to remove your number.)", OutRecLines.x+140, OutRecLines.y+120, 20, RED);
+    DrawText("(press backspace to remove your number.)", OutRecLines.x+140, OutRecLines.y+120, 20, RED);
     DrawText(s, InpShower.x+25, InpShower.y+15, 20, BLACK);
     DrawText("SUBMIT", SubmitButton.x+8, SubmitButton.y+15, 19, DARKGRAY);
 }
 
 int Submit_Button()
+int Submit_Button()
 {   
     Rectangle SubmitButton = {550, 350, 85, 50};
     Vector2 MousePos = GetMousePosition();
+    if (CheckCollisionPointRec(MousePos, SubmitButton) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) 
+        return 1; 
     if (CheckCollisionPointRec(MousePos, SubmitButton) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) 
         return 1; 
     return 0;
@@ -994,6 +1045,7 @@ void Shcs_Animation(const char beg, Vector2 *ShcP, const Vector2 EndP, float Spe
 }
 
 void Exs_Animation (const char Mdir, const char Tdir, Vector2 *ExsP, const Vector2 EndP, float Speed,
+void Exs_Animation (const char Mdir, const char Tdir, Vector2 *ExsP, const Vector2 EndP, float Speed,
                                 const float SIncrease, Vector2 StartPoint, int m, int n, int i, int Round, Music music) {
 
     if (Mdir == 'A' || Mdir == 'D') {                              
@@ -1224,6 +1276,7 @@ void Win_Explorer(int l, Sound WinSound, int Round) {
         map[(int)Explorers[l].mapPos.y][(int)Explorers[l].mapPos.x] = 1;
         PlaySound(WinSound);
 }
+}
 
 int Are_All_Players_Have_Won() {
 /*
@@ -1246,6 +1299,7 @@ int Are_All_Players_Dead() {
     return 0;
 }
 
+void Show_End_Screen() {    
 void Show_End_Screen() {    
     int i, WinnerCount=0, LoserCount=0;
     DrawText("WINNERS:" , 200, 190, 40, RED);
