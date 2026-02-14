@@ -2439,8 +2439,8 @@ int Save_Game(int Round, int ExRound, int m, int n, Vector2 StartPoint) {
         fprintf(file, "%.0f\n", ShadowCastersP[i].x);
         fprintf(file, "%.0f\n", ShadowCastersP[i].y);
         fprintf(file, "%d\n", ShadowCastersDir[i]);
-        fprintf(file, "%d", FadeSh[i]);
-        fprintf(file, "%d", swF[i]);
+        fprintf(file, "%d\n", FadeSh[i]);
+        fprintf(file, "%d\n", swF[i]);
     }
 
     fprintf(file, "%.0f\n", Lightcore.x);
