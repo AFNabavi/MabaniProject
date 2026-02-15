@@ -304,7 +304,6 @@ int main(void) {
                     bool ShouldShowError = false;
                     bool ShouldMove = false;
                     bool WitchRound = true;
-                    int l=0;
                     
                     if (!Are_All_Players_Dead())
                         while (!WindowShouldClose() && l<nExplorers) {
@@ -628,6 +627,7 @@ int main(void) {
                         if (Are_All_Players_Dead()) {Current = EndScreen; TimeEnding = GetTime(); break;}
 
                         Round++;
+                        l = 0;
                         State = MoveExs;
                         break;
                     }

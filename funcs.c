@@ -2526,6 +2526,13 @@ such as <m> and <n> and <explorers> and <shadowcasters> information and <gifts> 
         fprintf(file, "%.0f\n", Gifts[i].winPos.y);
     } 
 
+    fprintf(file, "%d\n", nInWalls);
+    for (int i=0; i<nInWalls; i++) {
+        fprintf(file, "%d\n", InWalls[i].y);
+        fprintf(file, "%d\n", InWalls[i].x);
+        fprintf(file, "%d\n", InWalls[i].life);
+    }
+
     fclose(file);    
     while (GetTime() - t0 < 1.5)
         Show_Save_Notf(1);
@@ -2598,6 +2605,13 @@ Reads the data according to Save_Game func.
         fscanf(file, "%f", &Gifts[i].winPos.x);
         fscanf(file, "%f", &Gifts[i].winPos.y);
     }   
+
+    fscanf(file, "%d", &nInWalls);
+    for (int i=0; i<nInWalls; i++) {
+        fscanf(file, "%d", &InWalls[i].y);
+        fscanf(file, "%d", &InWalls[i].x);
+        fscanf(file, "%d", &InWalls[i].life);
+    }
 
     fclose(file);
     while (GetTime() - t0 < 1.5)
