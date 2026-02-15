@@ -1,6 +1,4 @@
 test.c
-source/music2.mp3
-source/music1.mp3
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/settings.json
@@ -8,4 +6,7 @@ source/music1.mp3
 The Tale of the Labyrinth.pdf
 opengl32.dll
 compile.bat
+save_status.txt
 output/main.exe
+output/main.exe
+save_status.txt
