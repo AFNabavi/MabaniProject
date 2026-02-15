@@ -513,8 +513,8 @@ int main(void) {
                             }
 
                         }
-                        if (Are_All_Players_Have_Won()) {Current = EndScreen; break;}  
-                        else {State = MoveShs; break;}
+                        State = MoveShs;
+                        break;
                     }
                 
                 // Third case: 
@@ -625,9 +625,7 @@ int main(void) {
                         free(WayShcArray);
 
                     // Are all players have died?
-                        int x = 0;
-                        for (int i=0; i<nExplorers; i++) {if (Explorers[i].isAlive) x ++;} 
-                        if (x == 0) {Current = EndScreen; TimeEnding = GetTime(); break;}
+                        if (Are_All_Players_Dead()) {Current = EndScreen; TimeEnding = GetTime(); break;}
 
                         Round++;
                         State = MoveExs;
