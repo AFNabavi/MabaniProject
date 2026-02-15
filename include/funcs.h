@@ -156,7 +156,6 @@ void Show_Ended_Walls_Error(Vector2 StartPoint, int m, int n, int Round, int ExR
 void Dead_Explorer(int l, Sound DieSound, int Round);
 void Check_Witch_Player_is_Dead(int Round, Sound DieSound);
 void Win_Explorer(int l, Sound WinSound, int Round);
-int Are_All_Players_Have_Won();
 int Are_All_Players_Dead();
 int Calculate_Max_Interim_Wall(int m, int n);
 void Show_End_Screen();

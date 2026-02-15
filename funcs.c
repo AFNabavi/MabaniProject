@@ -1115,7 +1115,9 @@ void Check_Life_of_Interim_Walls() {
 }
 
 void Pointer_To_Player(int index, Vector2 StartPoint) {
-    // Draws a triangle on the player texture that it is his round. 
+/*
+Draws a triangle on the player texture that it is his round. 
+*/
     double t = GetTime();
     float h = 1.5*sin(3*t) + 7.5;
     Color Blue = {50, 100, 255, 200};
@@ -1125,6 +1127,9 @@ void Pointer_To_Player(int index, Vector2 StartPoint) {
 }
 
 int Get_Explorer_Count_UI(int MaxPlayer) {
+/*
+UI of getting explorers number
+*/
     Color color1 = {170, 30, 240, 255};
     Color color2 = {100, 25, 180, 255};
     Rectangle rec = {275, 260, 150, 150};
@@ -1142,6 +1147,9 @@ int Get_Explorer_Count_UI(int MaxPlayer) {
 }
 
 int Get_Explorer_Count() {
+/*
+Logic of Get_Explorer_Count func. and returns the number of them.
+*/
     Rectangle rec = {275, 260, 150, 150};
     const int space = 50;
     Vector2 MousePos = GetMousePosition();
@@ -1158,6 +1166,9 @@ int Get_Explorer_Count() {
 }
 
 void Show_Invalid_Move_Error(Vector2 StartPoint, int m, int n, int Round, int ExRound) {
+/*
+Raise an error notfication when player wants to move from a wall.
+*/
     BeginDrawing();
     ClearBackground(BackColor);
     Draw_Map(0, StartPoint, m, n, Round, ExRound);      
@@ -1169,6 +1180,9 @@ void Show_Invalid_Move_Error(Vector2 StartPoint, int m, int n, int Round, int Ex
 }
 
 void Show_Ended_Walls_Error(Vector2 StartPoint, int m, int n, int Round, int ExRound) {
+/*
+Raise an error when player wants to place more than invalid interim walls he has it.
+*/
     BeginDrawing();
     ClearBackground(BackColor);
     Draw_Map(0, StartPoint, m, n, Round, ExRound);
@@ -1180,6 +1194,9 @@ void Show_Ended_Walls_Error(Vector2 StartPoint, int m, int n, int Round, int ExR
 }
 
 void Dead_Explorer(int l, Sound DieSound, int Round) {
+/*
+Submit the information of died player, his age and reset map array. Then play a sound.
+*/
     Explorers[l].isAlive = false;
     Explorers[l].age = Round;
     map[(int)Explorers[l].mapPos.y][(int)Explorers[l].mapPos.x] = 1;
@@ -1187,38 +1204,33 @@ void Dead_Explorer(int l, Sound DieSound, int Round) {
 }
 
 void Check_Witch_Player_is_Dead(int Round, Sound DieSound) {
+/*
+Check every coordinate of every character.
+*/
     for (int j=0; j<nExplorers; j++) {
         for (int i=0; i<nShadowCasters; i++) {
             if (Explorers[j].isAlive)
             if ((int)Explorers[j].mapPos.y==(int)ShadowCasters[i].y && (int)Explorers[j].mapPos.x==(int)ShadowCasters[i].x)
             Dead_Explorer(j , DieSound, Round);
-            
         }     
     }
 }
 
 void Win_Explorer(int l, Sound WinSound, int Round) {
+/*
+Submit the information of winner player, his age and reset map array. Then play a sound.
+*/
         Explorers[l].isAlive = false;
         Explorers[l].age = Round;
         map[(int)Explorers[l].mapPos.y][(int)Explorers[l].mapPos.x] = 1;
         PlaySound(WinSound);
 }
 
-int Are_All_Players_Have_Won() {
-/*
-result = 
-0 : nobody won. 
-1: all players won.
-*/
-    int x = 0;
-    for (int i=0; i<nExplorers; i++) 
-        if (Explorers[i].mapPos.x==Lightcore.x && Explorers[i].mapPos.y==Lightcore.y) 
-            x ++;
-    if (x == nExplorers) return 1; 
-    else return 0;
-}
-
 int Are_All_Players_Dead() {
+/*
+To control EndScreen case.
+winner and loser are the same 💔!
+*/
     int x=0;
     for (int i=0; i<nExplorers; i++) if (Explorers[i].isAlive) x ++;
     if (x == 0) return 1;
@@ -1226,6 +1238,9 @@ int Are_All_Players_Dead() {
 }
 
 void Show_End_Screen() {    
+/*
+Show winners and losers. 
+*/
     int i, WinnerCount=0, LoserCount=0;
     DrawText("WINNERS:" , 200, 190, 40, RED);
     DrawText("LOSERS:", 700, 190, 40, RED);
@@ -1239,8 +1254,7 @@ void Show_End_Screen() {
             DrawText(":", 348, 210+40*(WinnerCount+1), 30, RED);
             DrawText(ExAge, 355, 210+40*(WinnerCount+1), 30, RED);
             WinnerCount ++;
-        }
-        else {
+        } else {
             ItoS(who, i+1);
             ItoS(ExAge, Explorers[i].age);
             DrawText("Player", 720, 210+40*(LoserCount+1), 30, RED);
@@ -1253,19 +1267,26 @@ void Show_End_Screen() {
 }
 
 int Is_Present_Gotten() {
+/*
+Check for every explorer is given any gift?
+Returns gift's index+1 and 0 as not gotten.
+*/
     for (int i=0; i<nGifts; i++)
         if (Gifts[i].isGotten == false) {
-            if ((int) Gifts[i].mapPos.x == (int) Explorers[0].mapPos.x && (int) Gifts[i].mapPos.y == (int) Explorers[0].mapPos.y)
+            if ((int) Gifts[i].mapPos.x == (int) Explorers[0].mapPos.x && (int) Gifts[i].mapPos.y == (int) Explorers[0].mapPos.y && Explorers[0].isAlive)
                 return i+1;  
-            if ((int) Gifts[i].mapPos.x == (int) Explorers[1].mapPos.x && (int) Gifts[i].mapPos.y == (int) Explorers[1].mapPos.y)
+            if ((int) Gifts[i].mapPos.x == (int) Explorers[1].mapPos.x && (int) Gifts[i].mapPos.y == (int) Explorers[1].mapPos.y && Explorers[1].isAlive)
                 return i+1;  
-            if ((int) Gifts[i].mapPos.x == (int) Explorers[2].mapPos.x && (int) Gifts[i].mapPos.y == (int) Explorers[2].mapPos.y)
+            if ((int) Gifts[i].mapPos.x == (int) Explorers[2].mapPos.x && (int) Gifts[i].mapPos.y == (int) Explorers[2].mapPos.y && Explorers[2].isAlive)
                 return i+1; 
         }
     return 0;
 }
 
 void Show_Present_Rec(Vector2 StartPoint, int m, int n, int Round, int ExRound, Music music) {
+/*
+UI of getting present. Shows a moving rectangle. 
+*/
     float width = 10;
     float height = 6;
     Rectangle rec = {StartPoint.x+(Side*n)/2-5, WindowHeight-20, width, height};
@@ -1290,10 +1311,11 @@ void Show_Present_Rec(Vector2 StartPoint, int m, int n, int Round, int ExRound, 
 }
 
 void Show_Present(Vector2 StartPoint, int m, int n, int Round, int ExRound, Gift name, Music music) {
-    // r=59 g=63 b=72 a=157 from Show_Present_UI (backColor at last)
-    // x=255 y=250 w=390 h=234 from Show_Present_UI (rec at last)
-    Color color = {59, 63, 72, 157};
-    Rectangle rec = {255, 250, 390, 234};
+/*
+UI of getting present. Shows its text.
+*/    
+    Color color = {59, 63, 72, 157}; // r=59 g=63 b=72 a=157 from Show_Present_UI (backColor at last)
+    Rectangle rec = {255, 250, 390, 234}; // x=255 y=250 w=390 h=234 from Show_Present_UI (rec at last)
 
     UpdateMusicStream(music);
     BeginDrawing();
@@ -1309,15 +1331,30 @@ void Show_Present(Vector2 StartPoint, int m, int n, int Round, int ExRound, Gift
         {char str[30] = "FORCE ENEMY"; DrawText(str, rec.x+82, rec.y+rec.height/2-20, 30, GOLD);}
     else if (name == Earthquake) 
         {char str[30] = "EARTHQUAKE   "; DrawText(str, rec.x+84, rec.y+rec.height/2-20, 30, GOLD);}
-    DrawText("Press SPACE key to okay.", rec.x+75, rec.y+rec.height/2+20, 20, GOLD);
+    DrawText("Press SPACE key to okay.", rec.x+62, rec.y+rec.height/2+20, 20, GOLD);
     EndDrawing();
 }
 
-void ReplayGift(int *l) {(*l) --;}
+void ReplayGift(int *l) {
+/*
+Which player got it, can play again. 
+*/
+    (*l) --;
+}
 
-void InWallIncreaseGift(int l) {Explorers[l].wallCount += 2;}
+void InWallIncreaseGift(int l) {
+/*
+Which player got it, his walls add 2.
+*/
+    Explorers[l].wallCount += 2;
+}
 
-void Number_Gifts(int m, int n) {nGifts = nShadowCasters;}
+void Number_Gifts(int m, int n) {
+/*
+The num of gifts = num of shadowcasters.
+*/
+    nGifts = nShadowCasters;
+}
 
 int BFS_Gift(int checked[][2], int start, int end, int m, int n, int len) {
     /*
@@ -1630,7 +1667,6 @@ void Coordinate_Around_for_Earthquake(int Case, Vector2 mapP, Vector2 Around[], 
         }
     }
 }
-
 
 void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusic, int ExIndex, Sound EarthquakeSound) {
     /*
@@ -2395,6 +2431,9 @@ void Shcs_Animation_without_Change_Direction(const char beg, Vector2 *ShcP, cons
 }
 
 void Show_Save_Notf(int sw) {
+/*
+Shows a text. if it is saved, Draws "Saved Succesfully", else "Can't save it"
+*/
     Color Red = {230, 41, 55, 255};
     Color Gray = {130, 130, 130, 150};
     BeginDrawing();
@@ -2406,6 +2445,9 @@ void Show_Save_Notf(int sw) {
 }
 
 void Show_Load_Notf(int sw) {
+/*
+Shows a text. if it is loaded, Draws "Load Succesfully", else "Can't load it"
+*/
     Color Red = {230, 41, 55, 255};
     Color Gray = {130, 130, 130, 150};
     BeginDrawing();
@@ -2417,6 +2459,10 @@ void Show_Load_Notf(int sw) {
 }
 
 int Save_Game(int Round, int ExRound, int m, int n, Vector2 StartPoint) {
+/*
+Prints important information in a file, 
+such as <m> and <n> and <explorers> and <shadowcasters> information and <gifts> and <map> array and etc.
+*/
     double t0 = GetTime();
     FILE *file;
     file = fopen("save_status.txt", "wt");
@@ -2487,6 +2533,9 @@ int Save_Game(int Round, int ExRound, int m, int n, Vector2 StartPoint) {
 }
 
 int Load_Game(int *m, int *n, int *ExRound, int *Round, Vector2 *StartPoint) {
+/*
+Reads the data according to Save_Game func.
+*/
     double t0 = GetTime();
     FILE *file;
     file = fopen("save_status.txt", "rt");
