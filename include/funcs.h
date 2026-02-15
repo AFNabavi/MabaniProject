@@ -141,7 +141,6 @@ void Reset_Map_Blocks_for_Move_Elements(int m, int n);
 int BFS_Way(Vector *start, Vector *end, int *ACount, int *resCount, Vector *result);
 int Find_Way(Vector *end, const int ACount, int resCount, Vector *Alist, Vector *result);
 Vector2 Wall_Coordinate(Vector *nextShcStep);
-void Draw_Way(Vector *Way, Vector2 StartPoint, const int resCount);
 void Rec_for_Choose(float x, float y, SidesAR A, Rectangle R[]);
 SidesAR CheckSides(int j, int i);
 void Shcs_Animation(const char beg, Vector2 *ShcP, const Vector2 EndP, float Speed, const float SIncrease, Vector2 StartPoint, int m, int n, int i, int Round, Music music);

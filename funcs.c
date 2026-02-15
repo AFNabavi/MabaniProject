@@ -556,14 +556,18 @@ int Can_Ex_Move_for_Walls(Vector2 E, char Dir) {
 Check if is there a wall front of a player.
 */
     int x = E.x, y = E.y;
-    if (Dir == 'W') 
+    if (Dir == 'W') {
         if (map[y-1][x] == 1) return 1;
-    else if (Dir == 'S')
+    }
+    else if (Dir == 'S') {
         if (map[y+1][x] == 1) return 1;
-    else if (Dir == 'A')
+    }
+    else if (Dir == 'A') {
         if (map[y][x-1] == 1) return 1;
-    else if (Dir == 'D') 
+    }
+    else if (Dir == 'D') {
         if (map[y][x+1] == 1) return 1;
+    }
 
     return  0;
 }
@@ -694,6 +698,11 @@ Logic of Draw_Walls_Infs func. and return 1 if player submit a valid input.
 }
 
 int BFS_Way(Vector *start, Vector *end, int *ACount, int *resCount, Vector *result) {    
+    /*
+    Find the way in the map that is closest with the least steps. if Shc is deadlocked with somw walls,
+    he waits to his way to open.
+    The specification of positions that checked with BFS_Way, save in array with *ACount number.  
+    */
     Vector *startcpy;
     Vector *endcpy;
     startcpy = start;
@@ -779,6 +788,10 @@ int BFS_Way(Vector *start, Vector *end, int *ACount, int *resCount, Vector *resu
 }
 
 int Find_Way(Vector *end, const int ACount, int resCount, Vector *Alist, Vector *result) {
+    /*
+    After the BFS_Way func are done. if it reaches to Explores certain number in map array,
+    this func is called to find all coordinates of steps. then Shc can move in his path.
+    */
     if ((*end).beg == '\0') return resCount;
     Vector temp;
     if ((*end).beg == 'U') {
@@ -812,6 +825,10 @@ int Find_Way(Vector *end, const int ACount, int resCount, Vector *Alist, Vector 
 }
 
 Vector2 Wall_Coordinate(Vector *nextShcStep) {
+    /*
+    To see is the way between two coordinates open or close.
+    This func help to see if Shc can move to his next step or it is interim wall in his path. 
+    */
     char c = (*nextShcStep).beg;
     Vector2 res;
     if (c == 'U') {
@@ -833,28 +850,10 @@ Vector2 Wall_Coordinate(Vector *nextShcStep) {
     return res;
 }
 
-void Draw_Way(Vector *Way, Vector2 StartPoint, const int resCount) {
-    Vector *A;
-    Vector2 S, E, temp1, temp2;
-    Color Magneta = { 255, 0, 255, (0.7f)*255 };
-    Color MagnetaFade = { 255, 0, 255, (0.3f)*255 };
-    for (A=Way; A<Way+resCount-1; A++) {
-        temp1.x = (float)(*A).x; temp1.y = (float)(*A).y;
-        temp2.x = (float)(*(A+1)).x; temp2.y = (float)(*(A+1)).y;  
-        S = GET_Start_Elements_Position_for_Draw(StartPoint, temp1); 
-        E = GET_Start_Elements_Position_for_Draw(StartPoint, temp2);
-        S.x += (Side/2); S.y += (Side/2);
-        E.x += (Side/2); E.y += (Side/2);
-        if ((*A).x != (*(Way+resCount-1)).x && (*A).y != (*(Way+resCount-1)).y) {
-            DrawLineEx(S, E, 2.0f, Magneta);
-        } else {
-            DrawLineEx(S, E, 2.0f, MagnetaFade);
-        }
-    }
-}// not used
-
 int Calculate_Max_Interim_Wall(int m, int n) {
-    // result = max(min(m, n)/3 , 1)
+    /*
+    Find Max number of interim walls based on map dimensions. 
+    */
     int temp; 
     if (m>n) temp = n;
     else temp = m;
@@ -864,6 +863,10 @@ int Calculate_Max_Interim_Wall(int m, int n) {
 }
 
 SidesAR CheckSides(int j, int i) {
+    /*
+    To see which walls coordinate in map around the selected position is open and save all result in the array. 
+    Result of this func will be used by Rec_for_Choose func.
+    */
     SidesAR A = {'\0'};
     if (map[j-1][i] == 1) {
         A.U = 'O';
@@ -881,6 +884,10 @@ SidesAR CheckSides(int j, int i) {
 }
 
 void Rec_for_Choose(float x, float y, SidesAR A, Rectangle R[]) {
+    /*
+    Set positions of rectangles that output of CheckSides func says which walls coordinate in map array is open.
+    Result of this func will be useed by Show_Allowable_Walls func. 
+    */
     float RSpace = 0;
     int coef = 0;
     float RSide = 30;
@@ -913,6 +920,10 @@ void Rec_for_Choose(float x, float y, SidesAR A, Rectangle R[]) {
 void Shcs_Animation(const char beg, Vector2 *ShcP, const Vector2 EndP, float Speed,
                                   const float SIncrease, Vector2 StartPoint, int m, int n, int i, int Round, Music music) {
 
+    /*
+    Get the current and destination window position and direction of move.
+    Then add some pixels(Speed) to x or y coordinate depends on direction of move.
+    */
     if (beg == 'R' || beg == 'L') {
         if (beg == 'R') ShadowCastersDir[i] = -2; //-2 ~ left
         else ShadowCastersDir[i] = -3; //-3 ~ right
@@ -948,6 +959,10 @@ void Shcs_Animation(const char beg, Vector2 *ShcP, const Vector2 EndP, float Spe
 void Exs_Animation (const char Mdir, const char Tdir, Vector2 *ExsP, const Vector2 EndP, float Speed,
                                 const float SIncrease, Vector2 StartPoint, int m, int n, int i, int Round, Music music) {
 
+    /*
+    Get the current and destination window position and direction of move.
+    Then add some pixels(Speed) to x or y coordinate depends on direction of move.
+    */
     if (Mdir == 'A' || Mdir == 'D') {                              
         Explorers[i].direction = Tdir;
     }
@@ -981,6 +996,10 @@ void Exs_Animation (const char Mdir, const char Tdir, Vector2 *ExsP, const Vecto
 }
 
 int Lock_in_Rectangle(Rectangle R, Rectangle RBack, Rectangle RecsforCh[], int j, int i, int Exindex, Vector2 Mous) {
+    /*
+    Show open walls around position that player clicked on the square related to it.
+    Then this func check whether any square clicked or not and save that specification in InWalls array. 
+    */
     Color Magneta = {180, 20, 200, 150};
     Color Yellow = {253, 249, 0, 150};
     Color Green = {0, 117, 44, 150};
@@ -1038,6 +1057,11 @@ int Lock_in_Rectangle(Rectangle R, Rectangle RBack, Rectangle RecsforCh[], int j
 }
 
 int Show_Allowable_Walls(Rectangle R, Rectangle BackR, Rectangle Recs[], Vector2 Mouse) {
+    /*
+    Show open walls around position that the mouse is there.
+    This func use the information of Rec_for_Choose & CheckSides funcs.
+    If player click on a square in map, the informations will be locked on that for player to choose(in Lock_in_Rectangle func).
+    */
     Color Yellow = {253, 249, 0, 150};
     Color Red = {230, 41, 55, 150};    
     Color RedText = {205, 50, 0, 255};
@@ -1070,7 +1094,10 @@ int Show_Allowable_Walls(Rectangle R, Rectangle BackR, Rectangle Recs[], Vector2
 
 }
 
-void Check_Life_of_Interim_Walls() {
+void Check_Life_of_Interim_Walls() {    
+    /*
+    Remove interim walls when their lifes ended.
+    */
     int i;
     for (i=0; i<nInWalls; i++) {
         if (InWalls[i].life==1) {
@@ -1293,6 +1320,9 @@ void InWallIncreaseGift(int l) {Explorers[l].wallCount += 2;}
 void Number_Gifts(int m, int n) {nGifts = nShadowCasters;}
 
 int BFS_Gift(int checked[][2], int start, int end, int m, int n, int len) {
+    /*
+    Find a coordinate in map that has at least three steps distance with all explorers with BFS algorithm.
+    */
     int i; len++; int k=0;
     for (i=start; i<=end; i++) {
         if (map[checked[i][0]-1][checked[i][1]] == 1 && (map[checked[i][0]-2][checked[i][1]] == 1 || map[checked[i][0]-2][checked[i][1]] == 2)) {
@@ -1343,6 +1373,11 @@ int BFS_Gift(int checked[][2], int start, int end, int m, int n, int len) {
 }
 
 int Rectangles_Around_Shc(Vector2 RecsMapP[][4], Rectangle RecsAround[][4], Vector2 Shc, int Index, Vector2 StartPoint) {
+    /*
+    Get a coordinate of Shc in map array then look for the coordinates around that are available to go,
+    then save this coordinates and rectangle related to it in two-dimensional array.
+    Force_Gift func will use that array.
+    */
     int nRectangles = 0;
     if (map[(int)Shc.y-1][(int)Shc.x] == 1 && !(map[(int)Shc.y-2][(int)Shc.x] == 3)) {
         Vector2 coordinate; coordinate.y = Shc.y-2; coordinate.x = Shc.x;
@@ -1380,6 +1415,10 @@ int Rectangles_Around_Shc(Vector2 RecsMapP[][4], Rectangle RecsAround[][4], Vect
 }
 
 void Force_Shc(Vector2 StartPoint, int m, int n, Music GameMusic, int Round, int ExRound, Sound ForceSound) {
+    /*
+    Find all coordinates that are available to move around all Shcs and wait to player that recieve gift to choose one,
+    then it use the Shcs_Animation_without_Change_Direction func to move that selected Shc.
+    */
     Rectangle ShcsR[nShadowCasters]; int nRecsA[nShadowCasters];
     Rectangle RecsAround[nShadowCasters][4]; Vector2 RecsMapP[nShadowCasters][4];
     int i;
@@ -1455,6 +1494,9 @@ void Force_Shc(Vector2 StartPoint, int m, int n, Music GameMusic, int Round, int
 }
 
 void Add_Earthquake_Wall(EarthqWall Walls[], int *nWalls, Vector2 StartPoint, int m, int n, int EarthqMap[][2*n+1], int N, float pixels, int Case) {
+    /*
+    This func add a random wall in Walls Structural array of walls when the animation of previous wall ended(its level-3 animation ended). 
+    */
     if (Case == 1) {
         int i;
         for (i=0; i<N; i++) {
@@ -1538,6 +1580,10 @@ void Add_Earthquake_Wall(EarthqWall Walls[], int *nWalls, Vector2 StartPoint, in
 }
 
 void Coordinate_Around_for_Earthquake(int Case, Vector2 mapP, Vector2 Around[], int *nAround) {
+    /*
+    Find all open coordinate around Shc or Exp(case -1 or other) to randomly select one of them in Earthquake_Gift func.
+    Save open coordinates in Vector2 array.  
+    */
     if (Case == -1) {
         (*nAround) = 0;
         if (map[(int)mapP.y-1][(int)mapP.x] == 1 && (map[(int)mapP.y-2][(int)mapP.x] == 1 || map[(int)mapP.y-2][(int)mapP.x] == -1)) {
@@ -1587,6 +1633,11 @@ void Coordinate_Around_for_Earthquake(int Case, Vector2 mapP, Vector2 Around[], 
 
 
 void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusic, int ExIndex, Sound EarthquakeSound) {
+    /*
+    First, call the Add_Earthquake_Wall func to choose randomly N number Walls in map to running the animation on them.
+    Choose random coordinates from result of Coordinate_Around_for_Earthquake func for all elements then call Earthquak_Explorers_Animation or
+    Earthquak_ShadowCasters_Animation func.
+    */
     PlaySound(EarthquakeSound);
     int N ;
     if (m*n < 42) N = 15;
@@ -2193,6 +2244,9 @@ void Earthquake_Gift(int m, int n, Vector2 StartPoint, int Round, Music GameMusi
 }
 
 int Exit_from_While(int canShcsMove[], int canExsMove[]) {
+    /*
+    This func will be used in main while loop of Earthquake_Gift func to end loop.
+    */
     int i;
     for (i=0; i<nShadowCasters; i++) {
         if (canShcsMove[i]) return 1;
@@ -2204,6 +2258,12 @@ int Exit_from_While(int canShcsMove[], int canExsMove[]) {
 }
 
 int Earthquak_ShadowCasters_Animation(const char beg, Vector2 *ShcP, const Vector2 EndP, float Speed, int sw, int frame, float pixels) {
+    /*
+    Specifically for Earthquake_Gift func that has some differences from regular func:
+        it is called repeatedly in Earthquake_Gift func(while loop remove from this func and transferred to Earthquake_Gift).
+        it has additionall animated(vibrate).
+        the direction off element not change in this func.
+    */
     if (beg == 'U' && (*ShcP).y>=EndP.y) {
         (*ShcP) = EndP;
         return 0;
@@ -2250,6 +2310,12 @@ int Earthquak_ShadowCasters_Animation(const char beg, Vector2 *ShcP, const Vecto
 }
 
 int Earthquak_Explorers_Animation(const char dir, Vector2 *ExP, const Vector2 EndP, float Speed, int sw, int frame, float pixels) {
+    /*
+    Specifically for Earthquake_Gift func that has some differences from regular func:
+        it is called repeatedly in Earthquake_Gift func(while loop remove from this func and transferred to Earthquake_Gift).
+        it has additionall animated(vibrate).
+        the direction off element not change in this func.
+    */
     if (dir == 'S' && (*ExP).y>=EndP.y) {
         (*ExP) = EndP;
         return 0;
@@ -2297,6 +2363,9 @@ int Earthquak_Explorers_Animation(const char dir, Vector2 *ExP, const Vector2 En
 
 void Shcs_Animation_without_Change_Direction(const char beg, Vector2 *ShcP, const Vector2 EndP, float Speed,
                                                 const float SIncrease, Vector2 StartPoint, int m, int n, int i, int Round, Music music) {
+    /*
+    For Force_Gift func.
+    */
     while (1) {
         UpdateMusicStream(music);
         BeginDrawing();
@@ -2488,6 +2557,10 @@ int Load_Game(int *m, int *n, int *ExRound, int *Round, Vector2 *StartPoint) {
 }
 
 void Change_Direction_of_ShadowCaster_Who_Killed() {
+    /*
+    Change num ShadowCasterP off killer Shc into -1 to find the nearest Explorer in next frame and change its direction 
+    towards it by Draw_Map func.
+    */
     int i, j;
     for (i=0; i<nShadowCasters; i++)
         for (j=0; j<nExplorers; j++) {

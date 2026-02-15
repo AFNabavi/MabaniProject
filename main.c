@@ -461,7 +461,7 @@ int main(void) {
 
                                 for (j=0; j<m; j++) {
                                     for (i=0; i<n; i++) {
-                                        Rectangle Dis;
+                                        Rectangle Dis; //description
 
                                         if (j == 0) {
                                             Rectangle temp = {Recs[j][i].x-70, Recs[j][i].y+50, 140+Side, 50};
