@@ -95,9 +95,6 @@ extern int ShadowCastersDir[3];
 extern int FadeSh[3];
 extern int swF[3];
 
-extern Texture2D Ex1Image;
-extern Texture2D Ex2Image;
-extern Texture2D Ex3Image;
 extern Texture2D Sh1TextureRight;
 extern Texture2D Sh2TextureRight;
 extern Texture2D Sh3TextureRight;
@@ -135,10 +132,12 @@ int Can_Ex_Move_for_Walls(Vector2 E, char Dir);
 int Win_or_Lose(Vector2 E, Vector2 Sh[], int nSh, Vector2 L);
 int Get_Map_Infs();
 void Draw_Map_Infs();
+void Draw_Map_Infs_Error(double t0, Color BackColor, char *str, int n, int m);
 void Draw_Walls_Infs(char s[], int n, int m);
 void ItoS(char *str, int n);
 int Submit_Button();
 void Reset_Map_Blocks_for_Move_Elements(int m, int n); 
+
 int BFS_Way(Vector *start, Vector *end, int *ACount, int *resCount, Vector *result);
 int Find_Way(Vector *end, const int ACount, int resCount, Vector *Alist, Vector *result);
 Vector2 Wall_Coordinate(Vector *nextShcStep);
