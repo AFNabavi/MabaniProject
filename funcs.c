@@ -166,22 +166,27 @@ else -1 (left). Nearest by Manhattan distance.
     int MinDistance = 500, NearExplorer;
     for (int i=0; i<nExplorers; i++)
     {
-        if (ShadowCaster.x>Explorers[i].mapPos.x)
-        {
-            if (ShadowCaster.y>Explorers[i].mapPos.y) Distance = (ShadowCaster.x - Explorers[i].mapPos.x) + (ShadowCaster.y - Explorers[i].mapPos.y);
-            else Distance = (ShadowCaster.x - Explorers[i].mapPos.x) + (Explorers[i].mapPos.y - ShadowCaster.y);
-        }
-        else 
-        {
-            if (ShadowCaster.y>Explorers[i].mapPos.y) Distance = (Explorers[i].mapPos.x - ShadowCaster.x) + (ShadowCaster.y - Explorers[i].mapPos.y);
-            else Distance = (Explorers[i].mapPos.x - ShadowCaster.x) + (Explorers[i].mapPos.y - ShadowCaster.y);
-        }
-        if (Distance<MinDistance) 
-        {
-            MinDistance = Distance;
-            NearExplorer = i;
+        if (Explorers[i].isAlive) {
+            if (ShadowCaster.x>Explorers[i].mapPos.x)
+            {
+                if (ShadowCaster.y>Explorers[i].mapPos.y) Distance = (ShadowCaster.x - Explorers[i].mapPos.x) + (ShadowCaster.y - Explorers[i].mapPos.y);
+                else Distance = (ShadowCaster.x - Explorers[i].mapPos.x) + (Explorers[i].mapPos.y - ShadowCaster.y);
+            }
+            else 
+            {
+                if (ShadowCaster.y>Explorers[i].mapPos.y) Distance = (Explorers[i].mapPos.x - ShadowCaster.x) + (ShadowCaster.y - Explorers[i].mapPos.y);
+                else Distance = (Explorers[i].mapPos.x - ShadowCaster.x) + (Explorers[i].mapPos.y - ShadowCaster.y);
+            }
+            if (Distance<MinDistance) 
+            {
+                MinDistance = Distance;
+                NearExplorer = i;
+            }
         }
     }
+    if (MinDistance == 500) 
+        if (Lightcore.x-ShadowCaster.x>=0) return 1;
+        else return -1;
     if (Explorers[NearExplorer].mapPos.x>=ShadowCaster.x) return 1;
     else return -1;
 }
@@ -2540,4 +2545,14 @@ int Load_Game(int *m, int *n, int *ExRound, int *Round, Vector2 *StartPoint) {
     while (GetTime() - t0 < 1.5)
         Show_Load_Notf(1);
     return 1;
+}
+
+void Change_Direction_of_ShadowCaster_Who_Killed() {
+    int i, j;
+    for (i=0; i<nShadowCasters; i++)
+        for (j=0; j<nExplorers; j++) {
+            bool are_coordinates_equal = (Explorers[j].isAlive) && (ShadowCasters[i].x == Explorers[j].mapPos.x && ShadowCasters[i].y == Explorers[j].mapPos.y);
+            if (are_coordinates_equal)
+                ShadowCastersDir[i] = -1;
+        }
 }

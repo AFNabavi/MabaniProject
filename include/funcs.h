@@ -181,5 +181,6 @@ void Show_Save_Notf(int sw);
 void Show_Load_Notf(int sw);
 int Save_Game(int Round, int ExRound, int m, int n, Vector2 StartPoint);
 int Load_Game(int *m, int *n, int *ExRound, int *Round, Vector2 *StartPoint);
+void Change_Direction_of_ShadowCaster_Who_Killed();
 
 #endif

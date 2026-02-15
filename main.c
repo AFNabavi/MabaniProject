@@ -605,6 +605,9 @@ int main(void) {
                                 }
                             }                      
                             }
+                        // Set direction of the killer Shc -1 to him look the nearest explorer in following frame. 
+                        Change_Direction_of_ShadowCaster_Who_Killed();
+
                         // Witch player is dead?
                             Check_Witch_Player_is_Dead(Round, DieSound);
                             UpdateMusicStream(GameMusic);
@@ -617,7 +620,7 @@ int main(void) {
                         }
                         Reset_Map_Blocks_for_Move_Elements(m, n);
 
-                     // free mallocs
+                    // free mallocs
                         for (k=0; k<nShadowCasters; k++) free(WayShcArray[k]);
                         free(WayShcArray);
 
